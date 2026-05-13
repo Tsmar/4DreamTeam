@@ -68,6 +68,8 @@ When changing workspace bootstrap behavior, update the related templates.
 
 When renaming the skill, check metadata, documentation, references, templates, asset paths, and prompts.
 
+Before creating a commit, update the skill version when the change affects skill behavior, metadata, templates, references, or user-facing documentation.
+
 ## Safety
 
 Do not run destructive commands without explicit user approval.

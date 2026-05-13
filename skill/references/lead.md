@@ -77,7 +77,7 @@ Route requests as follows:
 - workspace status, "what is next", "continue", summarize current work -> status/continuation workflow;
 - validate workspace, check workspace structure, find inconsistent task/report/doc state -> workspace validation workflow;
 - update this workspace to the current 4DreamTeam skill version, refresh workspace rules, self-update workspace -> self-update workflow;
-- improve the `4DreamTeam` skill itself from a workspace with an approved skill source -> self-improvement workflow, normally product -> analytic -> developer -> quality;
+- improve the `4DreamTeam` skill itself from a workspace with an approved skill source -> self-improvement workflow: product -> developer -> wiki -> product acceptance;
 - new project task -> analytic, then after approval developer -> quality;
 - raw business request, product idea, roadmap, product development, or feature decomposition -> product, then after approval analytic;
 - continue pending/in-progress/rejected task -> the role matching the lifecycle state;
@@ -90,6 +90,27 @@ Route requests as follows:
 - deepen an existing knowledge base based on current implementation -> wiki deepening;
 - press release, launch announcement, product marketing copy, README positioning, value proposition, audience-facing materials, competitive/product narrative, case study, market-facing analysis -> marketing;
 - infrastructure, servers, SSH, deploys, logs, systemd, Docker, nginx/reverse proxy, databases, migrations, diagnostics, incident/deploy/runbook documentation -> devops.
+
+## Project Questions
+
+Use this read-only workflow when the user asks a direct question about an existing project and does not request a task, implementation, wiki update, audit, or validation.
+
+Start with the smallest relevant part of the project documentation:
+
+1. `docs/index.md` only if the project wiki must be identified.
+2. The specific `docs/<project-name>/` pages that are likely to answer the question.
+3. `docs/<project-name>/sources.md` only if source boundaries may be needed.
+
+Do not perform a broad documentation audit or inspect approved sources by default.
+
+Inspect approved source paths only if:
+
+1. the relevant documentation is missing, incomplete, contradictory, or stale;
+2. the question requires implementation-level confirmation;
+3. the answer depends on behavior that documentation marks as `unknown` or `requires source access`;
+4. the user explicitly asks to verify the answer from sources.
+
+If source inspection is needed but the approved source boundary is missing or insufficient, stop and ask for access to the exact path needed.
 
 ## Status And Continuation
 
@@ -173,7 +194,7 @@ Use this workflow when the user wants the current 4DreamTeam workspace to adopt 
 This is not the same as self-improvement:
 
 - self-update updates only the current workspace rules file;
-- self-improvement changes the skill source repository through the normal lifecycle.
+- self-improvement changes the skill source repository through the simplified self-improvement lifecycle.
 
 Preflight:
 
@@ -223,21 +244,22 @@ The skill repository is not a normal project workspace. It is the source for:
 5. `README.md`
 6. repository `AGENTS.md`
 
-Self-improvement still follows the controlled lifecycle:
+Self-improvement follows a simplified lifecycle:
 
 ```txt
-product -> analytic -> developer -> quality
+product -> developer -> wiki -> product acceptance
 ```
 
 Rules:
 
-1. Use `product` to define the improvement goal, audience, scope, and product acceptance criteria.
-2. Use `analytic` to create an implementation task with affected source files and checkable criteria.
-3. Use `developer` to edit only approved source files within task scope.
-4. Use `quality` to verify every acceptance criterion, including documentation-quality criteria when the change is documentation-only.
-5. Preserve source repository language policy. Markdown documentation and templates in the skill repository must remain in English unless repository rules change explicitly.
-6. Do not weaken workspace preflight, source boundaries, controlled-mode gates, independent quality, wiki post-acceptance gates, DevOps risk gates, or secret-handling rules.
-7. Update the workspace wiki only after accepted quality, using the appropriate wiki mode.
+1. Use `product` to define the improvement goal, audience, scope, product acceptance criteria, and the exact developer task scope.
+2. Stop after `product` and ask the human to approve what goes into the `developer` task.
+3. Use `developer` to edit only approved skill source files within the approved task scope.
+4. Use `wiki` after `developer` only if workspace knowledge base documentation needs to reflect the accepted skill behavior.
+5. Use `product` after `developer` and optional `wiki` to confirm that the resulting skill behavior matches what the product role wanted to see.
+6. Do not require a separate `analytic` task or independent `quality` report for self-improvement; product acceptance is the final approval gate for this mode.
+7. Preserve source repository language policy. Markdown documentation and templates in the skill repository must remain in English unless repository rules change explicitly.
+8. Do not weaken workspace preflight, source boundaries, controlled-mode gates, ordinary task quality gates, wiki gates, DevOps risk gates, or secret-handling rules.
 
 After receiving a high-level user task:
 

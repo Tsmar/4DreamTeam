@@ -73,7 +73,7 @@ It is especially useful when the work matters enough that you want decisions, as
 - create, audit, sync, and deepen project documentation;
 - summarize and validate a workspace;
 - update workspace rules after a skill upgrade;
-- improve 4DreamTeam itself through the same controlled lifecycle;
+- improve 4DreamTeam itself through a simplified self-improvement lifecycle;
 - prepare press releases, README positioning, product messaging, and market-facing analytical materials;
 - document servers, deployments, SSH access, diagnostics, migrations, and runbooks with DevOps safety gates.
 
@@ -379,11 +379,13 @@ Approved source:
 ../codex/4DreamTeam
 ```
 
-Self-improvement follows the normal controlled lifecycle:
+Self-improvement follows a simplified controlled lifecycle:
 
 ```txt
-product -> analytic -> developer -> quality
+product -> developer -> wiki -> product acceptance
 ```
+
+The only required human-in-the-loop approval point is between `product` and `developer`: the human decides exactly what goes into the developer task.
 
 The source repository is the approved source boundary. Typical write targets are `skill/SKILL.md`, `skill/references/`, `skill/assets/templates/`, `skill/agents/openai.yaml`, `README.md`, and repository `AGENTS.md`.
 
