@@ -1,0 +1,22 @@
+.DS_Store
+
+# Local environment and secrets
+.env
+.env.*
+*.pem
+*.key
+id_rsa
+id_ed25519
+keys/
+
+# Local runtime artifacts
+node_modules/
+dist/
+build/
+coverage/
+.turbo/
+.cache/
+
+# Editor and OS metadata
+.idea/
+.vscode/
