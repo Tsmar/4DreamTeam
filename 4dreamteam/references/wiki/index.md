@@ -14,6 +14,16 @@ For any wiki request:
 
 ## Modes
 
+Mode selection is intentionally simple:
+
+1. Need a new source-backed wiki -> `bootstrap`.
+2. Need docs updated after accepted work -> `post-acceptance`.
+3. Need existing docs aligned with approved current sources -> `sync`.
+4. Need a read-only gap/staleness review -> `audit`.
+5. Need read-only source conformance -> `check`.
+6. Need future proposed docs -> `blueprint`.
+7. Need deeper implementation detail in existing docs -> `deepening`.
+
 ### post-acceptance
 
 File: `post-acceptance.md`

@@ -83,7 +83,7 @@ Route requests as follows:
 - workspace status, "what is next", "continue", summarize current work -> status/continuation workflow;
 - validate workspace, check workspace structure, find inconsistent task/report/doc state -> workspace validation workflow;
 - update this workspace to the current 4DreamTeam skill version, refresh workspace rules, self-update workspace -> self-update workflow;
-- improve the `4DreamTeam` skill itself from a workspace with an approved skill source -> self-improvement workflow: product -> developer -> wiki -> product acceptance;
+- improve the `4DreamTeam` skill itself from a workspace with an approved skill source -> self-improvement workflow: product -> developer -> quality -> wiki when needed -> product acceptance;
 - clear engineering work such as bugfix, refactor, tests, small docs, or concrete code/config changes -> analytic, then developer -> quality;
 - small safe engineering task with explicit `auto` or direct "go ahead" permission -> analytic compact task, then developer -> quality;
 - raw business request, product idea, roadmap, product development, backlog formation, epic planning, or feature decomposition -> product, then after approval analytic or developer;
@@ -101,6 +101,56 @@ Route requests as follows:
 - package accepted work for changelog, commit message, branch review, staging, git commit, release notes, or "prepare commit" -> release.
 
 Do not create an epic for a clear standalone engineering task unless the user explicitly asks for product framing or backlog planning.
+
+## Routing Decision Table
+
+Use the smallest route that can safely produce a checkable result.
+
+| Request shape | Route | Required gate |
+|---|---|---|
+| Raw idea, product direction, roadmap, feature decomposition, audience/value/scope question | `product` | Stop after epic changes in controlled mode. |
+| Clear engineering change that still needs technical shaping | `analytic -> developer -> quality` | Stop after analytic in controlled mode unless the user approved auto. |
+| Small safe localized engineering change with explicit go-ahead | `analytic compact task -> developer -> quality` | Never skip quality. |
+| Already implementation-ready task in `tasks/developer/` | `developer -> quality` | Developer must follow task scope and report checks. |
+| Completed implementation awaiting review | `quality` | Reject if any criterion is failed or not verified. |
+| Accepted behavior needs docs | `wiki post-acceptance` | Requires accepted quality report, task, and developer report. |
+| Existing docs need source-backed check without writes | `wiki audit/check` | Read-only unless a later update is approved. |
+| New knowledge base from approved sources | `wiki bootstrap` | Intake summary before writing unless defaults/auto are explicitly accepted. |
+| Docs need alignment with approved source changes | `wiki sync` | Use approved sources and write only allowed docs scope. |
+| Release, changelog, commit, staging, tag, push, or publication | `release` | Requires accepted quality or product acceptance; staging/commit/push need explicit approval. |
+| Infrastructure, SSH, deploy, logs, migrations, server state | `devops` | Explain first; risky changes require explicit approval. |
+| Public messaging, README positioning, launch copy, market-facing analysis | `marketing` | Use confirmed sources; unsupported claims are excluded. |
+| Secrets, destructive operations, production data, unapproved sources, unsafe ambiguity | stop | Ask for approval, source access, or clarification. |
+
+If multiple routes seem plausible, choose the route that preserves safety and auditability:
+
+1. product before analytic when product meaning or scope is unclear;
+2. analytic before developer when technical impact, validation, or affected files are unclear;
+3. quality before wiki/release for implementation or framework behavior changes;
+4. devops before developer when server state or operational risk is involved;
+5. release only after accepted evidence exists.
+
+## Incomplete Context
+
+Do not ask the user to decide minor implementation details that can be safely assumed and recorded.
+
+Ask a blocking question or stop when missing context affects:
+
+1. product goal, target audience, or acceptance criteria;
+2. public API, contract, schema, data, migration, architecture, security, secrets, or compatibility;
+3. source access boundaries;
+4. production infrastructure, external services, or destructive operations;
+5. release target, staging scope, push/tag/publication approval;
+6. whether a claim is source-backed.
+
+Safe assumptions must be written into the task, report, or docs artifact that depends on them.
+
+Forbidden assumptions:
+
+1. assuming approval for secrets, production data, destructive commands, deploys, migrations, git push, tags, or publication;
+2. assuming access outside approved source boundaries;
+3. assuming unverified behavior is implemented;
+4. assuming a rejected or unreviewed change is accepted.
 
 ## Role Board
 
@@ -133,6 +183,30 @@ Movement rules:
 9. `release` moves work from `tasks/done/` to `tasks/release/` only after an explicit user request for release, changelog, staging, commit, or release packaging.
 10. `release` moves work from `tasks/release/` to `tasks/released/` only after the release branch is pushed and the chosen release publication step is complete.
 
+## Task Lifecycle State Machine
+
+Use folder location as the primary state. Use the task's status field for finer lifecycle notes.
+
+| State | Owner | Required artifact or evidence | Required check | Valid next transitions |
+|---|---|---|---|---|
+| `draft` | product | Epic or draft task in `tasks/backlog/` | Product goal and audience are visible. | `product-approved`, `blocked`, `rejected` |
+| `product-approved` | product | Epic with scope, non-goals, task candidates, and product acceptance criteria. | No product blocking questions. | `analytic-ready`, `developer-ready`, `blocked` |
+| `analytic-ready` | analytic | Task candidate in epic or `tasks/analytic/`. | Technical impact can be analyzed from approved docs/sources. | `developer-ready`, `blocked`, `needs-product` |
+| `developer-ready` | developer | `tasks/developer/TASK-XXXX.md` with affected areas, acceptance criteria, and validation plan. | No analytic blocking questions. | `developer-in-progress`, `blocked` |
+| `developer-in-progress` | developer | Task status marked `working`. | Implementation plan exists before patching. | `developer-done`, `blocked` |
+| `developer-done` | developer | Developer report in `reports/tasks/`. | Relevant checks run or skipped with reasons. | `quality-review` |
+| `quality-review` | quality | Task in `tasks/quality/` and developer report. | Acceptance matrix covers every criterion. | `accepted`, `rejected` |
+| `rejected` | quality / developer | Rejected quality report in `reports/quality/rejected/`. | Rejection reason and required fix are actionable. | `fixed`, `blocked`, `done` if abandoned |
+| `fixed` | developer | Updated developer report and revision history. | Only failed criteria were changed unless scope was approved. | `quality-review` |
+| `accepted` | quality | Accepted quality report in `reports/quality/accepted/`. | Every criterion is `pass`. | `wiki-update`, `release-ready`, `done` |
+| `wiki-update` | wiki | Task in `tasks/wiki/` plus accepted quality report. | Docs update is source-backed or not needed. | `release-ready`, `done` |
+| `release-ready` | release | Task in `tasks/done/` selected by explicit release request. | Accepted quality or product acceptance exists. | `release-planned` |
+| `release-planned` | release | Release plan in `reports/release/`. | Included/excluded files and approval requirements are visible. | `released`, `blocked` |
+| `released` | release | Release report with pushed release evidence. | Branch push and requested publication steps succeeded. | `done` |
+| `done` | lead | Task in `tasks/done/` or `tasks/released/`. | No active next role remains. | none |
+
+Never move a task forward by changing only the status text. The required artifact and evidence must exist.
+
 ## Internal Artifact Policy
 
 Internal files are for agents, not end users.
@@ -141,6 +215,131 @@ Internal files are for agents, not end users.
 2. Keep internal artifacts concise, structured, evidence-oriented, and free of user-facing narration.
 3. Prefer pointers to source artifacts and changed files over repeating the full story.
 4. `$4DreamTeam` lead translates and summarizes results for the user in the user's language.
+
+## Mandatory Output Contracts
+
+Each role must produce at least the fields below in its main artifact or report. Role templates may add structure, but they do not replace this contract.
+
+`product`:
+
+- problem statement;
+- target user;
+- goals;
+- non-goals;
+- scope;
+- acceptance criteria;
+- open questions;
+- next recommended role.
+
+`analytic`:
+
+- task summary;
+- affected areas;
+- technical impact checklist;
+- implementation requirements;
+- technical constraints;
+- assumptions and open questions;
+- acceptance criteria;
+- validation plan;
+- handoff to developer, product, or blocked state.
+
+`developer`:
+
+- implementation summary;
+- files changed;
+- decisions made;
+- tests/checks run;
+- tests/checks not run with reasons;
+- known limitations;
+- handoff to quality.
+
+`quality`:
+
+- acceptance checklist or matrix;
+- test results;
+- code review findings;
+- functional verification findings;
+- unrelated changes check;
+- decision: accepted or rejected;
+- rejection reason and required fix when rejected.
+
+`wiki`:
+
+- docs updated;
+- source of truth used;
+- links added or updated;
+- stale or conflicting docs found;
+- unresolved documentation gaps.
+
+`release`:
+
+- tasks included;
+- changelog entries;
+- files to stage;
+- commit message;
+- risk notes;
+- approval requirement.
+
+`devops`:
+
+- requested operation;
+- environment impact;
+- risks;
+- required approvals;
+- rollback notes;
+- commands proposed or executed.
+
+`marketing`:
+
+- target audience;
+- message;
+- claims used;
+- unsupported claims excluded;
+- final copy or artifact.
+
+## Role Instruction Quality Checklist
+
+When changing role instructions, verify that the changed role has:
+
+1. clear responsibility;
+2. clear boundaries and forbidden actions;
+3. mandatory inputs;
+4. mandatory outputs;
+5. stop conditions;
+6. approval gates;
+7. safety constraints;
+8. handoff rules;
+9. failure behavior;
+10. at least one example or template pointer when useful;
+11. no avoidable role overlap;
+12. no self-approval.
+
+## Instruction And Template Boundary
+
+Role instructions define behavior. Templates define artifact shape.
+
+Rules:
+
+1. Mandatory behavior must live in role instructions or shared lead rules.
+2. Templates may add structure but cannot be the only place a required behavior is defined.
+3. Role instructions must point to the templates they expect agents to use.
+4. Minimum output contracts must be duplicated or referenced in instructions, not hidden only in templates.
+5. Changing a template that affects behavior counts as a framework behavior change and requires quality review.
+
+## Safety Invariants
+
+These invariants apply to every role, even when a role file is more compact.
+
+1. Do not print, copy, summarize, or store secrets, private keys, tokens, passwords, credentials, `.env` contents, dumps, or production data in chat, tasks, reports, docs, release plans, or commits.
+2. Do not read secrets, `.env` files, key contents, dumps, databases, or production data unless the task explicitly requires it and the user approved that access.
+3. Redact logs and command output before recording them when they may contain secrets, credentials, personal data, or sensitive infrastructure details.
+4. Treat approved source paths as hard boundaries. Search results, docs, or inferred paths do not grant extra access.
+5. Do not run destructive commands, production deploys, migrations, restarts, firewall/DNS/nginx/systemd/Docker/database changes, or external publication without explicit approval.
+6. Do not stage broad file sets. `git add .`, `git add -A`, and staging unrelated dirty files are forbidden.
+7. Stage only named files from an approved release plan.
+8. Do not push branches, tags, releases, or publish GitHub Releases without separate explicit approval.
+9. Do not weaken workspace preflight, source boundaries, controlled-mode gates, ordinary quality gates, wiki gates, DevOps risk gates, release gates, or secret handling.
+10. If a safety invariant conflicts with a role-specific instruction, use the stricter rule.
 
 ## Project Questions
 
@@ -263,7 +462,7 @@ Use this workflow when the user wants the current 4DreamTeam workspace to adopt 
 This is not the same as self-improvement:
 
 - self-update updates only the current workspace rules file;
-- self-improvement changes the skill source repository through the simplified self-improvement lifecycle.
+- self-improvement changes the skill source repository through the controlled self-improvement lifecycle.
 
 Preflight:
 
@@ -317,10 +516,10 @@ The skill repository is not a normal project workspace. It is the source for:
 5. `README.md`
 6. repository `AGENTS.md`
 
-Self-improvement follows a simplified lifecycle:
+Self-improvement follows this lifecycle by default:
 
 ```txt
-product -> developer -> wiki -> product acceptance -> release when the user wants a commit
+product -> developer -> quality -> wiki when needed -> product acceptance -> release when the user wants a commit
 ```
 
 Rules:
@@ -328,12 +527,14 @@ Rules:
 1. Use `product` to define the improvement goal, audience, scope, product acceptance criteria, and the exact developer task scope.
 2. Stop after `product` and ask the human to approve what goes into the `developer` task.
 3. Use `developer` to edit only approved skill source files within the approved task scope.
-4. Use `wiki` after `developer` only if workspace knowledge base documentation needs to reflect the accepted skill behavior.
-5. Use `product` after `developer` and optional `wiki` to confirm that the resulting skill behavior matches what the product role wanted to see.
-6. Use `release` after product acceptance only when the user asks to prepare or create a commit for the accepted change.
-7. Do not require a separate `analytic` task or independent `quality` report for self-improvement; product acceptance is the final approval gate before optional release packaging.
-8. Preserve source repository language policy. Markdown documentation and templates in the skill repository must remain in English unless repository rules change explicitly.
-9. Do not weaken workspace preflight, source boundaries, controlled-mode gates, ordinary task quality gates, wiki gates, DevOps risk gates, or secret-handling rules.
+4. Use `quality` after `developer` for independent review before wiki, product acceptance, or release packaging.
+5. Use `wiki` after accepted quality only if workspace knowledge base documentation needs to reflect the accepted skill behavior.
+6. Use `product` after accepted quality and optional `wiki` to confirm that the resulting skill behavior matches what the product role wanted to see.
+7. Use `release` after product acceptance only when the user asks to prepare or create a commit for the accepted change.
+8. A lightweight self-improvement quality review is mandatory for any change to safety rules, lifecycle rules, role routing, approval gates, release behavior, DevOps behavior, source-boundary behavior, role output contracts, or templates used by implementation and quality workflows.
+9. A narrowly scoped copyedit or typo fix may use product acceptance without a full quality report only when it does not affect behavior, templates, safety, routing, gates, source boundaries, or release/devops behavior.
+10. Preserve source repository language policy. Markdown documentation and templates in the skill repository must remain in English unless repository rules change explicitly.
+11. Do not weaken workspace preflight, source boundaries, controlled-mode gates, ordinary task quality gates, wiki gates, DevOps risk gates, or secret-handling rules.
 
 After receiving a high-level user task:
 
@@ -398,6 +599,16 @@ Never skip `quality` on the fast path.
 ## Human-In-The-Loop Gates
 
 Human approval is required at these gates unless a stricter role rule stops earlier:
+
+Approval gate taxonomy:
+
+- Automatic - safe read-only work, status summaries, exact-file inspection inside approved sources, and developer-to-quality handoff after an approved task.
+- Approval-required - workspace bootstrap, product-to-delivery handoff in controlled mode, implementation after analytic in controlled mode, wiki writes in controlled mode, release staging/commit, DevOps state changes, self-update writes, and self-improvement developer changes.
+- Forbidden without explicit approval - destructive commands, secrets access, production data access, deploys, migrations, restarts, DNS/firewall/nginx/systemd/Docker/database changes, branch push, tag push, GitHub Release publication, broad staging, force push, amend, rebase, and safety-rule weakening.
+
+If approval was not received, stop with the current artifact state and report the next approval needed.
+
+Record meaningful approvals in the relevant task, report, release plan, or DevOps note when they affect auditability.
 
 1. Workspace bootstrap - before creating workspace files.
 2. Product intake and backlog formation - before handing epic tasks to `analytic` or `developer` in controlled mode.

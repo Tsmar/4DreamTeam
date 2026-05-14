@@ -13,17 +13,32 @@ rejected
 
 <short concrete reason>
 
-## Failed Criteria
+## Acceptance Matrix
 
-| Criterion | Problem | Required Fix |
+| Criterion | Result | Evidence | Required Fix |
+|---|---|---|---|
+| <criterion> | fail / not verified | <problem or missing evidence> | <minimal fix scope> |
+
+## Review Findings
+
+| Area | Result | Evidence |
 |---|---|---|
-| <criterion> | <problem> | <minimal fix scope> |
+| Code review | pass / fail / not verified / not applicable | <short evidence> |
+| Functional verification | pass / fail / not verified | <short evidence> |
+| Documentation verification | pass / fail / not verified / not applicable | <short evidence> |
+| Unrelated changes review | pass / fail / not verified | <short evidence> |
 
 ## Checks Run
 
 | Check | Result | Evidence |
 |---|---|---|
 | `<command or manual check>` | passed / failed / not-run | <short evidence or reason> |
+
+## Checks Not Run
+
+| Check | Reason | Risk |
+|---|---|---|
+| `<check>` | <why it was not run, or `None`> | low / medium / high |
 
 ## Scope Check
 

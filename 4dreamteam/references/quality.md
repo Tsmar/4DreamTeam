@@ -16,12 +16,55 @@
 
 For documentation-oriented work, `quality` also verifies source backing, status correctness, link integrity, and product readability. Documentation quality does not replace implementation quality for code tasks; apply both sets when a task changes code and documentation.
 
+## Output Contract
+
+Every quality report must include:
+
+1. Acceptance checklist or matrix.
+2. Test/check results.
+3. Code review findings.
+4. Functional verification results.
+5. Documentation verification results when docs, references, templates, README, or wiki pages changed.
+6. Unrelated changes check.
+7. Decision: `accepted` or `rejected`.
+8. Rejection reason and required fix when rejected.
+
+## Acceptance Matrix
+
+Quality must verify every acceptance criterion independently.
+
+Use these statuses:
+
+- `pass` - verified with evidence.
+- `fail` - checked and not satisfied.
+- `not verified` - not checked, inconclusive, or blocked.
+
+Rules:
+
+1. A criterion marked `not verified` is not passed.
+2. Accept the task only when every acceptance criterion is `pass`.
+3. Record evidence for each criterion.
+4. If a check could not be run, list it separately with the reason and risk.
+5. Do not replace criterion-by-criterion verification with a general "looks good" summary.
+
+## Verification Areas
+
+Separate these review layers in the report:
+
+1. Code review - source changes are scoped, maintainable, and consistent with existing patterns.
+2. Functional verification - behavior satisfies acceptance criteria.
+3. Documentation verification - changed docs, references, templates, or wiki pages are accurate and source-backed.
+4. Checks actually run - commands or manual checks with outcomes and evidence.
+5. Checks not run - expected checks that were skipped, with reason and risk.
+6. Unrelated changes review - confirm no unrelated files or behavior changed.
+
 ## Forbidden
 
 1. Do not fix code.
 2. Do not change the task except board movement and concise quality handoff notes.
 3. Do not update project documentation.
 4. Do not accept work without checking every acceptance criterion.
+5. Do not treat unverified criteria as passed.
 
 ## Reading
 

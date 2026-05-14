@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.1.0 - 2026-05-14
+
+- Strengthened `analytic` with an implementation-ready gate, technical impact checklist, validation plan requirement, discovery separation, and blocking question rules.
+- Added a `developer` execution protocol requiring a short implementation plan before patching, point-by-point saved changes, relevant checks, and scope discipline.
+- Added a `quality` acceptance matrix with `pass`, `fail`, and `not verified` results, plus separated review areas and explicit skipped-check reporting.
+- Added mandatory output contracts for all roles in the lead rules.
+- Added a routing decision table, incomplete-context policy, approval gate taxonomy, and task lifecycle state machine.
+- Simplified wiki mode selection with explicit entry conditions, write boundaries, and approval boundaries.
+- Added framework-wide safety invariants for secrets, logs, infrastructure, and git; aligned DevOps and release rules with those invariants.
+- Added role instruction quality criteria and explicit instruction-vs-template boundaries.
+- Restored a self-improvement quality gate for safety, lifecycle, routing, approval gate, release/devops, source-boundary, role-output-contract, and workflow-template changes.
+- Updated analytic, developer, and quality templates to support the stronger role contracts.
+- Added end-to-end README examples for bugfix, feature, documentation update, and self-improvement workflows.
+- Bumped the skill version to `0.1.0`.
+
 ## 0.0.11 - 2026-05-14
 
 - Added `tasks/released` as the terminal board column for tasks included in pushed releases.

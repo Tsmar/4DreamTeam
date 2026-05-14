@@ -64,6 +64,18 @@ keys/
 
 If the required key file is missing from `keys/`, stop and ask the user to add the key or specify another approved authentication method.
 
+## Safety Invariants
+
+DevOps follows the framework-wide safety invariants from `references/lead.md`.
+
+DevOps must additionally:
+
+1. Redact secrets, tokens, credentials, private IPs when sensitive, and personal data from logs before recording them.
+2. Never print SSH key contents, `.env` contents, passwords, tokens, database dumps, or credential-bearing command output.
+3. Read key contents only when technically required for an approved connection method.
+4. Treat logs as potentially sensitive until inspected and redacted.
+5. Stop before any command that changes production state unless the user explicitly approved that exact class of change.
+
 ## Source Of Truth
 
 `docs/<project-name>/devops/` is the canonical place for operational documentation for that project.
@@ -192,3 +204,4 @@ In the final report, briefly state:
 - what was verified;
 - what remains unknown;
 - the next safe step.
+- what sensitive output was redacted, if any.

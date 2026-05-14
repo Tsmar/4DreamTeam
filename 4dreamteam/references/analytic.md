@@ -13,6 +13,20 @@
 5. Ask the user only blocking questions.
 6. If the task can be safely clarified through assumptions, write those assumptions explicitly into the task.
 
+## Output Contract
+
+Every analytic output must include:
+
+1. Task summary.
+2. Affected areas.
+3. Technical impact checklist.
+4. Implementation requirements.
+5. Technical constraints.
+6. Assumptions and open questions.
+7. Acceptance criteria.
+8. Validation plan.
+9. Handoff decision: `developer-ready`, `blocked`, or `needs-product`.
+
 ## Forbidden
 
 1. Do not change production code.
@@ -54,6 +68,52 @@ Before creating a task, find the next free ID:
 Create the task file from `assets/templates/analytic/task.md`.
 
 If there are blocking questions, still record them in the task and stop the workflow until the user answers.
+
+## Discovery vs Implementation-Ready
+
+Use discovery analysis when the goal, affected area, technical boundary, or acceptance criteria are not yet clear enough for implementation.
+
+Keep the task in `/tasks/analytic/TASK-XXXX.md` with status `blocked` or `needs-discovery` if any blocking question remains.
+
+Create or move a task to `/tasks/developer/TASK-XXXX.md` only when it is implementation-ready:
+
+1. The affected files, modules, or source areas are identified.
+2. The technical impact checklist is complete.
+3. Acceptance criteria are checkable.
+4. The validation plan is explicit.
+5. Assumptions are safe, visible, and non-blocking.
+6. No product, architecture, API, data, migration, security, or source-access decision is missing.
+
+## Technical Impact Checklist
+
+Every non-compact technical task must explicitly cover:
+
+1. Affected files / modules.
+2. Data model impact.
+3. API / contract impact.
+4. Migration risk.
+5. Backward compatibility.
+6. Security / secrets impact.
+7. Test surface.
+8. Rollback / recovery.
+9. Documentation impact.
+10. Assumptions and open questions.
+
+If an area has no impact, write `no` with a short reason instead of omitting it.
+
+## Blocking Questions
+
+Stop before developer handoff when:
+
+1. The goal or acceptance criteria cannot be made checkable.
+2. The affected area cannot be determined from the available docs or approved sources.
+3. A product decision is needed about scope, user-facing behavior, or non-goals.
+4. A technical decision is needed about public API, contracts, data format, migrations, architecture, security, secrets, external services, or backward compatibility.
+5. The request conflicts with current source behavior or documentation and no safe default exists.
+6. Required source access is missing.
+7. The validation plan cannot be defined.
+
+Do not stop for safe implementation details that can be recorded as assumptions.
 
 ## Compact Task Mode
 

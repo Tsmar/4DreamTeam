@@ -36,6 +36,30 @@ Main routes:
 - `deepening` - deepen an existing wiki based on current implementation.
 - source map and local index work - maintain `docs/<project-name>/source-map.md` and generated `.index/*` files when the selected mode changes source navigation.
 
+## Wiki Mode Entry Conditions
+
+Use the smallest mode that matches the request:
+
+| Mode | Entry condition | Writes allowed | Approval boundary |
+|---|---|---|---|
+| `bootstrap` | New managed wiki from explicitly approved source paths. | New `docs/<project-name>/` plus `docs/index.md`. | Intake summary before writing unless defaults/auto are accepted. |
+| `post-acceptance` | Accepted quality report plus related task and developer report. | Docs that reflect accepted behavior. | Controlled mode stops before writing unless already approved. |
+| `sync` | Existing managed wiki must align with accepted changes or explicitly approved source changes. | Existing project wiki pages and source map. | Requires approved sources and write scope. |
+| `audit` | User asks for gaps, stale docs, missing sources, or update plan. | None. | Read-only. |
+| `check` | User asks whether wiki matches sources. | None. | Read-only. |
+| `blueprint` | Future documentation or future project structure without source-backed facts. | Proposed docs only. | Must label unimplemented behavior as proposed. |
+| `deepening` | Existing wiki needs more implementation detail from current approved sources. | Existing project wiki pages and source map. | Requires approved sources and controlled write approval. |
+
+## Write And Approval Boundaries
+
+1. `audit` and `check` are read-only.
+2. `bootstrap`, `blueprint`, and `deepening` require a visible write plan or intake summary before writing unless the user explicitly approved auto/defaults.
+3. `post-acceptance` requires an accepted quality report before it can document implemented behavior as actual.
+4. `sync` must identify whether it is syncing from accepted reports or explicitly approved source changes.
+5. Wiki may update `source-map.md` when source navigation changes, but generated `.index/*` files must be rebuilt, not edited by hand.
+6. Wiki must report stale, conflicting, or unresolved docs instead of silently inventing missing facts.
+7. Source-of-truth claims must point back to approved sources, accepted reports, or explicit blueprint assumptions.
+
 ## Hard Guarantees
 
 1. Do not document rejected or unconfirmed changes as facts.

@@ -441,11 +441,13 @@ Approved source:
 ../codex/4DreamTeam
 ```
 
-Self-improvement следует обычному контролируемому жизненному циклу:
+Self-improvement следует контролируемому жизненному циклу:
 
 ```txt
-product -> analytic -> developer -> quality
+product -> developer -> quality -> wiki when needed -> product acceptance
 ```
+
+Точка подтверждения между `product` и `developer` определяет точный scope developer-задачи. Рискованные изменения framework требуют независимой проверки `quality` перед wiki, product acceptance или release packaging.
 
 Исходный repository является одобренной границей источников. Типичные цели для записи: `skill/SKILL.md`, `skill/references/`, `skill/assets/templates/`, `skill/agents/openai.yaml`, `README.md` и репозиторный `AGENTS.md`.
 

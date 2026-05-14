@@ -109,6 +109,16 @@ Forbidden without separate explicit approval:
 6. amending commits
 7. rebasing or branch deletion
 
+Release follows the framework-wide safety invariants from `references/lead.md`.
+
+Additional release rules:
+
+1. Use minimal staging: stage only named files from the approved release plan.
+2. Never use `git add .`, `git add -A`, shell globs, or broad path staging for release commits.
+3. If unrelated dirty files exist, list them as excluded and leave them untouched.
+4. Do not include secrets, `.env` files, keys, dumps, generated caches, or unrelated local artifacts in release plans.
+5. Do not push a branch, tag, or GitHub Release without a separate approval after the commit plan.
+
 ## Writing
 
 Write release plans in English for agents. Keep them concise, evidence-oriented, and focused on approval boundaries; `$4DreamTeam` lead handles user-facing explanation and localization.

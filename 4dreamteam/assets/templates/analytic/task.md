@@ -28,6 +28,25 @@ Out:
 
 - `<path>` - <why it matters>
 
+## Affected Areas
+
+- `<file/module/source area>` - <expected impact>
+
+## Technical Impact Checklist
+
+| Area | Impact | Notes |
+|---|---|---|
+| Affected files / modules | yes / no | <short note> |
+| Data model impact | yes / no | <short note> |
+| API / contract impact | yes / no | <short note> |
+| Migration risk | yes / no | <short note> |
+| Backward compatibility | yes / no | <short note> |
+| Security / secrets impact | yes / no | <short note> |
+| Test surface | yes / no | <short note> |
+| Rollback / recovery | yes / no | <short note> |
+| Documentation impact | yes / no | <short note> |
+| Assumptions and open questions | yes / no | <short note> |
+
 ## Requirements
 
 1. <implementation requirement>
@@ -41,6 +60,10 @@ Out:
 ## Required Checks
 
 - `<command or manual check>` - <expected evidence>
+
+## Validation Plan
+
+- `<check or review>` - <what this proves>
 
 ## Constraints
 

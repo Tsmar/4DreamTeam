@@ -74,7 +74,7 @@ It is especially useful when the work matters enough that you want decisions, as
 - maintain structured source maps and local wiki indexes for faster source navigation;
 - summarize and validate a workspace;
 - update workspace rules after a skill upgrade;
-- improve 4DreamTeam itself through a simplified self-improvement lifecycle;
+- improve 4DreamTeam itself through a controlled self-improvement lifecycle;
 - package accepted work into changelogs, commit plans, and git commits after explicit approval;
 - prepare press releases, README positioning, product messaging, and market-facing analytical materials;
 - document servers, deployments, SSH access, diagnostics, migrations, and runbooks with DevOps safety gates.
@@ -116,6 +116,73 @@ The owner takes reservations manually and loses track of changes.
 6. release packaging with changelog entries and a commit plan when the work should be committed.
 
 In controlled mode, 4DreamTeam stops at important gates so the user can approve the next step.
+
+## End-To-End Examples
+
+These examples show the shape of the workflow. Real artifacts stay in `tasks/`, `reports/`, and `docs/`.
+
+### Bugfix Example
+
+User request:
+
+```txt
+$4DreamTeam fix the booking form validation bug. The email field accepts invalid values.
+```
+
+Expected lifecycle:
+
+1. `analytic` creates `TASK-XXXX` with affected files, technical impact checklist, acceptance criteria, and validation plan.
+2. `developer` inspects the existing validation pattern, writes a short implementation plan, applies a minimal patch, runs relevant checks, and creates a developer report.
+3. `quality` verifies each acceptance criterion with an acceptance matrix: `pass`, `fail`, or `not verified`.
+4. `wiki` updates docs only if the accepted fix changes documented behavior.
+5. `release` prepares changelog and commit plan only after explicit release request.
+
+### Feature Example
+
+User request:
+
+```txt
+$4DreamTeam plan and implement waitlist support for class bookings.
+```
+
+Expected lifecycle:
+
+1. `product` writes an epic with problem statement, target users, goals, non-goals, scope, and product acceptance criteria.
+2. `analytic` turns approved task candidates into implementation-ready tasks.
+3. `developer -> quality` implements and independently verifies each task.
+4. `wiki` syncs product and technical docs after accepted quality.
+5. `release` packages accepted tasks into one visible release plan.
+
+### Documentation Update Example
+
+User request:
+
+```txt
+$4DreamTeam update the project knowledge base from the current source.
+```
+
+Expected lifecycle:
+
+1. `wiki` selects `sync`, `check`, `audit`, or `deepening` based on whether the request is read-only or write-oriented.
+2. `wiki` reads only approved source boundaries and reports stale or conflicting docs instead of inventing facts.
+3. `quality` is used when documentation work is attached to an implementation task or needs independent acceptance.
+
+### Self-Improvement Example
+
+User request:
+
+```txt
+$4DreamTeam improve 4DreamTeam itself from ../codex/4DreamTeam
+```
+
+Expected lifecycle:
+
+1. `product` defines the improvement goal, audience, scope, and product acceptance criteria.
+2. `developer` changes only approved skill source files.
+3. `quality` independently reviews risky framework changes before wiki, product acceptance, or release.
+4. `wiki` updates the workspace knowledge base when accepted behavior changes.
+5. `product` accepts whether the resulting skill behavior matches the intended improvement.
+6. `release` prepares staging, commit, tag, and publication plans only after explicit approval.
 
 ## Why Files Matter
 
@@ -441,13 +508,13 @@ Approved source:
 ../codex/4DreamTeam
 ```
 
-Self-improvement follows a simplified controlled lifecycle:
+Self-improvement follows a controlled lifecycle:
 
 ```txt
-product -> developer -> wiki -> product acceptance
+product -> developer -> quality -> wiki when needed -> product acceptance
 ```
 
-The only required human-in-the-loop approval point is between `product` and `developer`: the human decides exactly what goes into the developer task.
+The human approval point between `product` and `developer` decides exactly what goes into the developer task. Risky framework changes then require independent quality before wiki, product acceptance, or release packaging.
 
 The source repository is the approved source boundary. Typical write targets are `skill/SKILL.md`, `skill/references/`, `skill/assets/templates/`, `skill/agents/openai.yaml`, `README.md`, and repository `AGENTS.md`.
 
