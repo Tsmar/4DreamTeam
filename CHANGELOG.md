@@ -1,5 +1,21 @@
 # Changelog
 
+## 0.0.11 - 2026-05-14
+
+- Added `tasks/released` as the terminal board column for tasks included in pushed releases.
+- Defined the release flow as `done -> release -> released`, with `tasks/release` as the active release queue.
+- Expanded release rules and templates to cover branch push, tag push, and optional GitHub Release creation or publication with separate approval gates.
+- Required released tasks to have release reports with pushed release evidence.
+- Bumped the skill version to `0.0.11`.
+
+## 0.0.10 - 2026-05-14
+
+- Replaced the `tasks/product` board column with `tasks/backlog` for epics and backlog planning.
+- Made `EPIC-XXXX` and `TASK-XXXX` the only board entities: epics contain task rows, and executable work is represented only by tasks.
+- Added explicit epic statuses for shaping, handoff readiness, delivery, blocked, done, and rejected states.
+- Replaced the product brief template with an epic template and updated product, analytic, lead, marketing, release, workspace, and README references.
+- Bumped the skill version to `0.0.10`.
+
 ## 0.0.9 - 2026-05-14
 
 - Removed all legacy task column references for `tasks/pending` and `tasks/in-progress` from skill rules, workspace templates, and README documentation.

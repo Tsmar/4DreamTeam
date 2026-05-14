@@ -4,7 +4,7 @@
 
 4DreamTeam - это навык для Codex, созданный для людей, у которых есть идеи и которым нужна помощь, чтобы превратить их в понятную, проверяемую и доведенную до результата работу.
 
-Вместо того чтобы просить одного AI-агента сделать все в одном длинном диалоге, 4DreamTeam дает Codex небольшую команду ролей: product, analytic, developer, quality, wiki, marketing, devops и release. В результате идеи превращаются в продуктовые описания, описания - в задачи, задачи - в проверенную работу, принятая работа - в аккуратную историю проекта, а важные знания остаются в файлах, а не теряются в истории чата.
+Вместо того чтобы просить одного AI-агента сделать все в одном длинном диалоге, 4DreamTeam дает Codex небольшую команду ролей: product, analytic, developer, quality, wiki, marketing, devops и release. В результате идеи превращаются в epics, epics - в tasks, tasks - в проверенную работу, принятая работа - в аккуратную историю проекта, а важные знания остаются в файлах, а не теряются в истории чата.
 
 ## Зачем он нужен
 
@@ -36,7 +36,7 @@
 4DreamTeam превращает идею в прослеживаемый рабочий процесс:
 
 ```txt
-idea -> product brief -> technical task -> implementation -> quality review -> documentation -> release
+idea -> epic -> task -> implementation -> quality review -> documentation -> release
 ```
 
 Он также помогает с базами знаний проектов, инфраструктурными заметками, позиционированием README, пресс-релизами, публичными материалами и продолжением работы между сессиями.
@@ -84,7 +84,7 @@ idea -> product brief -> technical task -> implementation -> quality review -> d
 | Роль | Что делает |
 |---|---|
 | `product` | Уточняет, что нужно построить, для кого, зачем, что входит в объем работ и как принять результат с продуктовой точки зрения. |
-| `analytic` | Превращает продуктовые описания или прямые запросы в технические задачи с затронутыми областями, требованиями, рисками и проверяемыми критериями приемки. |
+| `analytic` | Превращает задачи из epic или прямые запросы в технические задачи с затронутыми областями, требованиями, рисками и проверяемыми критериями приемки. |
 | `developer` | Реализует одобренные задачи, обновляет тесты при необходимости, запускает проверки и пишет отчеты о реализации. |
 | `quality` | Независимо проверяет реализацию и документацию по критериям приемки. |
 | `wiki` | Создает и поддерживает проектные базы знаний, основанные на подтвержденных источниках. |
@@ -129,7 +129,7 @@ docs/
 
 Это дает:
 
-- продуктовые описания, которые можно проверить до реализации;
+- epics, которые можно проверить до реализации;
 - технические задачи, к которым можно вернуться позже;
 - отчеты разработчика отдельно от отчетов качества;
 - отклоненную работу с понятными путями исправления;
@@ -213,12 +213,13 @@ bun skill/tools/wiki.ts search docs/<project-name> "release changelog"
 AGENTS.md
 docs/index.md
 tasks/
-  product/
+  backlog/
   analytic/
   developer/
   quality/
   wiki/
   release/
+  released/
   done/
   rejected/
 reports/
@@ -228,7 +229,7 @@ reports/
   release/
 ```
 
-`tasks/` - это role-based virtual Kanban board. Файл задачи лежит в папке роли, которая владеет следующим действием.
+`tasks/` - это role-based virtual Kanban board. Epics находятся в `tasks/backlog/`; исполняемая работа всегда представлена файлами `TASK-XXXX` в колонке роли, которая владеет следующим действием. `tasks/release/` - активная release queue, а `tasks/released/` содержит tasks, которые вошли в pushed releases.
 
 Документация проекта находится здесь:
 
@@ -265,7 +266,7 @@ Context:
 <what is known about users, the problem, and constraints>
 
 Expected result:
-Product brief, then task specification, implementation, quality review, and docs update if needed.
+Epic, then task specification, implementation, quality review, and docs update if needed.
 ```
 
 В `controlled` mode 4DreamTeam останавливается для подтверждения после этапов product и analytic.
@@ -331,7 +332,7 @@ Use the accepted task/report for <change>.
 Run $4DreamTeam status.
 ```
 
-Проверка статуса суммирует предварительную проверку workspace, role board (`product`, `analytic`, `developer`, `quality`, `wiki`, `release`, `done`, `rejected`), отчеты разработчика, отчеты качества, известные wiki проектов, отсутствующие `sources.md`, блокеры и рекомендуемое следующее действие.
+Проверка статуса суммирует предварительную проверку workspace, role board (`backlog`, `analytic`, `developer`, `quality`, `wiki`, `release`, `released`, `done`, `rejected`), отчеты разработчика, отчеты качества, известные wiki проектов, отсутствующие `sources.md`, блокеры и рекомендуемое следующее действие.
 
 Статус по умолчанию не меняет файлы.
 

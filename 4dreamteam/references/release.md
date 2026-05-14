@@ -2,7 +2,7 @@
 
 ## Purpose
 
-`release` packages accepted work into changelog entries, a visible commit plan, and a git commit after explicit user approval.
+`release` packages accepted work into changelog entries, a visible commit plan, a git commit, an optional GitHub Release, and final pushed release evidence after explicit user approval.
 
 `release` is intentionally separate from `developer`, `quality`, and `wiki`:
 
@@ -25,17 +25,19 @@ If accepted evidence is missing, stop and explain which acceptance artifact is r
 
 ## Responsibilities
 
-1. Identify the accepted task, product brief, developer report, quality report, wiki updates, and source changes that belong to the release.
+1. Identify the accepted task, epic, developer report, quality report, wiki updates, and source changes that belong to the release.
 2. Inspect the current git branch and working tree in the relevant repository.
 3. Separate included files from unrelated dirty files.
 4. Update or create `docs/<project-name>/CHANGELOG.md` for the workspace project change.
 5. Update approved source `CHANGELOG.md` when it already exists and the accepted change belongs in source history.
 6. For `skill-development` projects, require approved source `CHANGELOG.md` updates when accepted changes affect skill behavior, metadata, templates, references, or user-facing documentation.
-7. Prepare a release plan with branch, files, changelog entries, proposed commit message, and excluded dirty files.
-8. Ask for explicit user approval before staging or committing.
-9. After approval, stage only the approved files and create the commit.
-10. Ask for separate explicit approval before pushing.
-11. Use `tasks/release/` only as a role-board queue for accepted work after the user explicitly asks for release packaging.
+7. Move selected accepted tasks from `tasks/done/` to `tasks/release/` when release packaging begins.
+8. Prepare a release plan with branch, files, changelog entries, proposed commit message, tag/release plan, and excluded dirty files.
+9. Ask for explicit user approval before staging or committing.
+10. After approval, stage only the approved files and create the commit.
+11. Ask for separate explicit approval before pushing the branch.
+12. Ask for explicit approval before creating or pushing a release tag and before publishing a GitHub Release.
+13. After the branch push and chosen release publication step succeed, move included tasks from `tasks/release/` to `tasks/released/`.
 
 ## Source Changelog Policy
 
@@ -74,7 +76,8 @@ Before staging, show a release plan that includes:
 7. workspace changelog entry;
 8. source changelog entry when applicable;
 9. proposed commit message;
-10. commands that will run after approval.
+10. tag and GitHub Release plan: none, tag only, draft GitHub Release, or published GitHub Release;
+11. commands that will run after approval.
 
 Stop after the plan unless the user already gave direct permission to continue without confirmation for the full lifecycle.
 
@@ -85,6 +88,15 @@ Allowed after approval:
 ```txt
 git add <specific-files>
 git commit -m "<message>"
+```
+
+Allowed only after separate explicit approval:
+
+```txt
+git push origin <branch>
+git tag <tag>
+git push origin <tag>
+gh release create <tag> --generate-notes
 ```
 
 Forbidden without separate explicit approval:
@@ -105,7 +117,7 @@ Write release plans in English for agents. Keep them concise, evidence-oriented,
 - approved source `CHANGELOG.md` when allowed by the source changelog policy
 - `reports/release/<id>-release.md`
 - `tasks/release/` when queuing an accepted task for release packaging
-- `tasks/done/` after release work is complete and no active next role remains
+- `tasks/released/` after branch push and the chosen release publication step succeed
 
 ## Forbidden
 
@@ -114,7 +126,27 @@ Write release plans in English for agents. Keep them concise, evidence-oriented,
 3. Do not create accepted or rejected quality reports.
 4. Do not update wiki pages other than the allowed changelog files.
 5. Do not treat unaccepted work as releasable.
-6. Do not push without separate explicit approval.
+6. Do not push branch or tags without separate explicit approval.
+7. Do not create or publish a GitHub Release without separate explicit approval.
+
+## Release Completion
+
+Release completion levels:
+
+1. `planned` - release plan exists, no commit yet.
+2. `committed` - approved commit exists, but branch push is not complete.
+3. `pushed` - branch push is complete, but no tag or GitHub Release was requested.
+4. `tagged` - branch and tag are pushed.
+5. `published` - GitHub Release is created or published.
+6. `blocked` - release cannot continue.
+
+Move tasks to `tasks/released/` only when:
+
+1. the branch push succeeded; and
+2. if a tag was part of the approved plan, the tag push succeeded; and
+3. if a GitHub Release was part of the approved plan, it was created as draft or published according to the approved plan.
+
+If commit exists but push or publication is incomplete, keep tasks in `tasks/release/` and record `committed` or `blocked` in the release report.
 
 ## Required Artifact
 

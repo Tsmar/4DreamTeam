@@ -4,7 +4,7 @@ description: Coordinate the 4DreamTeam file-based agent framework for Codex. Use
 license: MIT
 metadata:
   author: Tsmar
-  version: 0.0.9
+  version: 0.0.11
   repository: https://github.com/Tsmar/4DreamTeam
 ---
 
@@ -35,7 +35,7 @@ Use this skill as the main entrypoint for the 4DreamTeam framework. The user sho
 Use bundled templates from `assets/templates/`:
 
 - `assets/templates/analytic/task.md`
-- `assets/templates/product/brief.md`
+- `assets/templates/product/epic.md`
 - `assets/templates/product/report.md`
 - `assets/templates/product/review-accepted.md`
 - `assets/templates/product/review-rejected.md`

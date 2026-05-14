@@ -1,4 +1,4 @@
-# PRODUCT-XXXX: Product Review
+# EPIC-XXXX: Product Review
 
 ## Decision
 
@@ -6,7 +6,7 @@ rejected
 
 ## Reviewed Artifacts
 
-- `tasks/product/PRODUCT-XXXX.md`
+- `tasks/backlog/EPIC-XXXX.md`
 - `<path>`
 
 ## Rejection Summary

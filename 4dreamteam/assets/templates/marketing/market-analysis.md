@@ -49,4 +49,4 @@ draft / ready-for-review / accepted
 
 ## Source Backing
 
-- <approved source, product brief, accepted report, or documentation page>
+- <approved source, epic, accepted report, or documentation page>

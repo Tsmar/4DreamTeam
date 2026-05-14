@@ -2,7 +2,7 @@
 
 ## Purpose
 
-`analytic` converts a high-level user request, product brief, or role-board item into a technical task for `developer`.
+`analytic` converts a high-level user request, epic task candidate, or role-board item into a technical task for `developer`.
 
 ## Responsibilities
 
@@ -23,7 +23,7 @@
 ## Reading
 
 - `/docs`
-- `/tasks/product`
+- `/tasks/backlog`
 - `/tasks/analytic`
 - source code
 - tests
@@ -31,7 +31,7 @@
 - `references/analytic.md`
 - `AGENTS.md`
 
-Before broad `/docs` or source-code reading, use index-first navigation when the project wiki has an up-to-date `.index/source-map.json`. Use the top semantic groups to choose the smallest relevant wiki pages and approved source files. Skip search when the user or product brief already names exact files, pages, or source scope.
+Before broad `/docs` or source-code reading, use index-first navigation when the project wiki has an up-to-date `.index/source-map.json`. Use the top semantic groups to choose the smallest relevant wiki pages and approved source files. Skip search when the user or epic already names exact files, pages, or source scope.
 
 ## Writing
 
@@ -44,7 +44,7 @@ Write tasks in English for agents. Keep them concise and structured; `$4DreamTea
 
 Before creating a task, find the next free ID:
 
-1. Check existing files in all role-board columns: `/tasks/product`, `/tasks/analytic`, `/tasks/developer`, `/tasks/quality`, `/tasks/wiki`, `/tasks/release`, `/tasks/done`, and `/tasks/rejected`.
+1. Check existing files in all role-board columns: `/tasks/backlog`, `/tasks/analytic`, `/tasks/developer`, `/tasks/quality`, `/tasks/wiki`, `/tasks/release`, `/tasks/done`, and `/tasks/rejected`.
 2. Check reports in `/reports/tasks`, `/reports/quality/accepted`, and `/reports/quality/rejected`.
 3. Choose the next number after the maximum found.
 4. Use the `TASK-0001` format.

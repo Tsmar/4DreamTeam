@@ -2,7 +2,7 @@
 
 ## Status
 
-planned / approved / committed / blocked
+planned / approved / committed / pushed / tagged / published / blocked
 
 ## Accepted Basis
 
@@ -37,6 +37,12 @@ planned / approved / committed / blocked
 <type>(<scope>): <summary>
 ```
 
+## Tag And GitHub Release
+
+- Tag: `<tag>` / not requested
+- GitHub Release: none / draft / published
+- Release notes: manual / generated / from file
+
 ## Commands After Approval
 
 ```bash
@@ -47,9 +53,15 @@ git commit -m "<message>"
 ## Approval State
 
 - Stage/commit approval: pending / approved
-- Push approval: not requested / pending / approved
+- Branch push approval: not requested / pending / approved
+- Tag approval: not requested / pending / approved
+- GitHub Release approval: not requested / pending / approved
 
 ## Result
 
 - Commit: `<hash>` / not created
+- Branch pushed: yes / no
+- Tag pushed: `<tag>` / no
+- GitHub Release: `<url>` / draft / not created
+- Released tasks moved to `tasks/released`: yes / no
 - Notes: <blocked reason or `None`>

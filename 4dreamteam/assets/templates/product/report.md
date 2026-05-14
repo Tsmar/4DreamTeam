@@ -1,4 +1,4 @@
-# PRODUCT-XXXX: Product Report
+# EPIC-XXXX: Product Report
 
 ## Status
 
@@ -6,7 +6,7 @@ completed / blocked
 
 ## Basis
 
-- Product brief: `tasks/product/PRODUCT-XXXX.md`
+- Epic: `tasks/backlog/EPIC-XXXX.md`
 
 ## Findings
 
@@ -30,6 +30,6 @@ completed / blocked
 
 - <question, or `None`>
 
-## Recommended Next Owner
+## Recommended Next Action
 
-product / analytic / developer
+keep shaping / send tasks to analytic / send tasks to developer / close epic

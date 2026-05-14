@@ -4,7 +4,7 @@
 
 This folder is a working `4DreamTeam workspace`.
 
-It stores product briefs, tasks, reports, and knowledge bases. Production code usually lives in external approved source paths.
+It stores epics, tasks, reports, and knowledge bases. Production code usually lives in external approved source paths.
 
 ## Main Entrypoint
 
@@ -31,12 +31,13 @@ Allowed working artifacts:
 
 `tasks/` is a virtual Kanban board by role. A task file lives in the folder of the role that owns the next action:
 
-- `tasks/product/` - product backlog, discovery, briefs, and product questions
+- `tasks/backlog/` - epics, product backlog, discovery, and grouped task planning
 - `tasks/analytic/` - needs technical analysis
 - `tasks/developer/` - ready for implementation or developer rework
 - `tasks/quality/` - ready for independent quality
 - `tasks/wiki/` - accepted work needing documentation
-- `tasks/release/` - accepted work queued after an explicit release request
+- `tasks/release/` - accepted work selected for release packaging
+- `tasks/released/` - work included in a pushed release
 - `tasks/done/` - closed with no active next role
 - `tasks/rejected/` - rejected work awaiting decision or correction
 

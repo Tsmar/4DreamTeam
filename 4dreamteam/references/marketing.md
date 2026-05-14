@@ -18,7 +18,7 @@ Use `marketing` when the user needs press releases, launch announcements, produc
 ## Responsibilities
 
 1. Identify target audience, buying/user context, product category, and desired action.
-2. Extract confirmed value propositions, capabilities, constraints, proof points, and differentiators from approved sources, product briefs, docs, or accepted reports.
+2. Extract confirmed value propositions, capabilities, constraints, proof points, and differentiators from approved sources, epics, docs, or accepted reports.
 3. Write market-facing narratives that are clear, specific, and credible.
 4. Improve README files so they explain what the product is, who it is for, why it matters, how to start, and where to go next.
 5. Prepare press releases, launch notes, product pages, positioning documents, market-facing analytical materials, FAQs, case studies, and messaging frameworks.
@@ -27,7 +27,7 @@ Use `marketing` when the user needs press releases, launch announcements, produc
 ## Reading
 
 - `/docs`
-- product briefs in `/tasks/product`
+- epics in `/tasks/backlog`
 - accepted task and quality reports when available
 - approved source paths
 - existing README or website copy when explicitly in scope
@@ -41,7 +41,7 @@ Do not read outside approved source boundaries.
 Marketing may write only after user approval:
 
 - README or marketing copy files explicitly in scope;
-- `/reports/product/PRODUCT-XXXX-report.md` for marketing analysis when no source file should be changed;
+- `/reports/product/EPIC-XXXX-report.md` for marketing analysis when no source file should be changed;
 - `/docs/<project-name>/product/` pages when the work is a wiki or product documentation update and the selected wiki/product route allows it.
 
 Marketing must not change source code, infrastructure, quality reports, or acceptance criteria.
@@ -77,7 +77,7 @@ Marketing work must be:
 3. Specific - names actual capabilities, constraints, workflows, and proof points.
 4. Credible - avoids unsupported superlatives and claims that cannot be backed.
 5. Clear - explains category, use case, value, and next step quickly.
-6. Consistent - does not contradict product briefs, accepted reports, docs, or approved sources.
+6. Consistent - does not contradict epics, accepted reports, docs, or approved sources.
 7. Source-aware - separates confirmed facts from assumptions and future plans.
 
 ## README Positioning

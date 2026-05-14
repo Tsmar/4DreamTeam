@@ -36,7 +36,7 @@ That makes 4DreamTeam useful for a founder, product thinker, operator, developer
 4DreamTeam turns an idea into a traceable workflow:
 
 ```txt
-idea -> product brief -> technical task -> implementation -> quality review -> documentation -> release
+idea -> epic -> task -> implementation -> quality review -> documentation -> release
 ```
 
 It can also help with project knowledge bases, infrastructure notes, README positioning, press releases, market-facing materials, and continuing work across sessions.
@@ -66,8 +66,8 @@ It is especially useful when the work matters enough that you want decisions, as
 
 4DreamTeam helps Codex:
 
-- turn a raw idea or business request into a product brief;
-- decompose a feature into an implementation-ready task;
+- turn a raw idea or business request into an epic with task candidates;
+- decompose an epic into implementation-ready tasks;
 - implement scoped changes through a developer workflow;
 - run an independent quality check before work is accepted;
 - create, audit, sync, and deepen project documentation;
@@ -84,7 +84,7 @@ It is especially useful when the work matters enough that you want decisions, as
 | Role | What it does |
 |---|---|
 | `product` | Clarifies what should be built, for whom, why it matters, what is in scope, and how to accept it from a product standpoint. |
-| `analytic` | Converts product briefs or direct requests into technical tasks with affected areas, requirements, risks, and checkable acceptance criteria. |
+| `analytic` | Converts epic task candidates or direct requests into technical tasks with affected areas, requirements, risks, and checkable acceptance criteria. |
 | `developer` | Implements approved tasks, updates tests when needed, runs checks, and writes implementation reports. |
 | `quality` | Independently verifies implementation and documentation work against acceptance criteria. |
 | `wiki` | Creates and maintains source-backed project knowledge bases. |
@@ -108,8 +108,8 @@ The owner takes reservations manually and loses track of changes.
 
 4DreamTeam can turn that into:
 
-1. a product brief with users, scope, scenarios, and acceptance criteria;
-2. a technical task with implementation requirements;
+1. an epic with goal, scope, task candidates, and product acceptance criteria;
+2. technical tasks with implementation requirements;
 3. code changes and a developer report;
 4. an independent quality report;
 5. documentation updates if the accepted behavior changes the project;
@@ -129,7 +129,7 @@ docs/
 
 This gives you:
 
-- product briefs you can review before implementation;
+- epics you can review before implementation;
 - technical tasks that can be resumed later;
 - developer reports separate from quality reports;
 - rejected work with clear correction paths;
@@ -213,12 +213,13 @@ A normal 4DreamTeam workspace does not contain the `skill/` directory. After ini
 AGENTS.md
 docs/index.md
 tasks/
-  product/
+  backlog/
   analytic/
   developer/
   quality/
   wiki/
   release/
+  released/
   done/
   rejected/
 reports/
@@ -228,7 +229,7 @@ reports/
   release/
 ```
 
-`tasks/` is a role-based virtual Kanban board. A task file lives in the folder of the role that owns the next action.
+`tasks/` is a role-based virtual Kanban board. Epics live in `tasks/backlog/`; executable work is always represented as `TASK-XXXX` files in the role column that owns the next action. `tasks/release/` is the active release queue, and `tasks/released/` contains tasks included in pushed releases.
 
 Project documentation lives under:
 
@@ -265,7 +266,7 @@ Context:
 <what is known about users, the problem, and constraints>
 
 Expected result:
-Product brief, then task specification, implementation, quality review, and docs update if needed.
+Epic, then task specification, implementation, quality review, and docs update if needed.
 ```
 
 In `controlled` mode, 4DreamTeam stops for approval after product and analytic stages.
@@ -331,7 +332,7 @@ Use this when returning to a workspace or deciding what should happen next:
 Run $4DreamTeam status.
 ```
 
-The status workflow summarizes workspace preflight, the role board (`product`, `analytic`, `developer`, `quality`, `wiki`, `release`, `done`, `rejected`), developer reports, quality reports, known project wikis, missing `sources.md`, blockers, and the recommended next action.
+The status workflow summarizes workspace preflight, the role board (`backlog`, `analytic`, `developer`, `quality`, `wiki`, `release`, `released`, `done`, `rejected`), developer reports, quality reports, known project wikis, missing `sources.md`, blockers, and the recommended next action.
 
 Status does not change files by default.
 

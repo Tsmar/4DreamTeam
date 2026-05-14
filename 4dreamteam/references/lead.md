@@ -35,12 +35,13 @@ Minimum structure that may be created in an empty folder after explicit user con
 ```txt
 AGENTS.md
 docs/index.md
-tasks/product/.gitkeep
+tasks/backlog/.gitkeep
 tasks/analytic/.gitkeep
 tasks/developer/.gitkeep
 tasks/quality/.gitkeep
 tasks/wiki/.gitkeep
 tasks/release/.gitkeep
+tasks/released/.gitkeep
 tasks/done/.gitkeep
 tasks/rejected/.gitkeep
 reports/product/.gitkeep
@@ -85,10 +86,10 @@ Route requests as follows:
 - improve the `4DreamTeam` skill itself from a workspace with an approved skill source -> self-improvement workflow: product -> developer -> wiki -> product acceptance;
 - clear engineering work such as bugfix, refactor, tests, small docs, or concrete code/config changes -> analytic, then developer -> quality;
 - small safe engineering task with explicit `auto` or direct "go ahead" permission -> analytic compact task, then developer -> quality;
-- raw business request, product idea, roadmap, product development, or feature decomposition -> product, then after approval analytic;
-- product backlog, discovery, product questions, or feature ideas -> product;
-- continue an existing task -> the role matching the task's board column;
-- continue product brief or product review -> product;
+- raw business request, product idea, roadmap, product development, backlog formation, epic planning, or feature decomposition -> product, then after approval analytic or developer;
+- product backlog, epic shaping, discovery, product questions, or feature ideas -> product;
+- continue an existing task or epic -> the role matching the artifact's board column;
+- continue epic or product review -> product;
 - verify a completed task -> quality;
 - create a knowledge base for an existing project -> wiki bootstrap;
 - check a knowledge base -> wiki audit/check;
@@ -99,7 +100,7 @@ Route requests as follows:
 - infrastructure, servers, SSH, deploys, logs, systemd, Docker, nginx/reverse proxy, databases, migrations, diagnostics, incident/deploy/runbook documentation -> devops.
 - package accepted work for changelog, commit message, branch review, staging, git commit, release notes, or "prepare commit" -> release.
 
-Do not create a product brief for a clear engineering task unless the user explicitly asks for product framing.
+Do not create an epic for a clear standalone engineering task unless the user explicitly asks for product framing or backlog planning.
 
 ## Role Board
 
@@ -108,25 +109,29 @@ The `tasks/` directory is a virtual Kanban board. A task file lives in the folde
 Board columns:
 
 ```txt
-tasks/product/      # product backlog, discovery, briefs, product questions
+tasks/backlog/      # epics, product backlog, discovery, grouped task planning
 tasks/analytic/     # needs technical analysis before implementation
 tasks/developer/    # ready for implementation or developer rework
 tasks/quality/      # implementation complete, ready for independent quality
 tasks/wiki/         # accepted work that needs wiki documentation
-tasks/release/      # accepted work queued only after an explicit release request
+tasks/release/      # accepted work selected for release packaging
+tasks/released/     # work included in a pushed release
 tasks/done/         # closed, no active next role
 tasks/rejected/     # rejected work awaiting a decision or correction
 ```
 
 Movement rules:
 
-1. `product` may keep backlog items in `tasks/product/`, hand them to `tasks/analytic/`, or hand clear delivery work directly to `tasks/developer/`.
-2. `analytic` creates or moves implementation-ready task specs to `tasks/developer/`.
-3. `developer` moves completed implementation work to `tasks/quality/` and creates a developer report.
-4. `quality` moves accepted work to `tasks/wiki/` when docs are needed, otherwise to `tasks/done/`.
-5. `quality` moves rejected work to `tasks/rejected/`.
-6. Rework moves from `tasks/rejected/` to `tasks/developer/`, then back to `tasks/quality/`.
-7. `release` moves or queues work in `tasks/release/` only after an explicit user request for release, changelog, staging, commit, or release packaging.
+1. `product` creates and shapes epics in `tasks/backlog/`.
+2. Every epic contains only tasks as child work items. Do not create Product or Item entities.
+3. `product` may keep an epic in `tasks/backlog/`, hand its tasks to `tasks/analytic/`, or hand clear delivery tasks directly to `tasks/developer/`.
+4. `analytic` creates or moves implementation-ready task specs to `tasks/developer/`.
+5. `developer` moves completed implementation work to `tasks/quality/` and creates a developer report.
+6. `quality` moves accepted work to `tasks/wiki/` when docs are needed, otherwise to `tasks/done/`.
+7. `quality` moves rejected work to `tasks/rejected/`.
+8. Rework moves from `tasks/rejected/` to `tasks/developer/`, then back to `tasks/quality/`.
+9. `release` moves work from `tasks/done/` to `tasks/release/` only after an explicit user request for release, changelog, staging, commit, or release packaging.
+10. `release` moves work from `tasks/release/` to `tasks/released/` only after the release branch is pushed and the chosen release publication step is complete.
 
 ## Internal Artifact Policy
 
@@ -170,27 +175,28 @@ Read only the current 4DreamTeam workspace:
 1. `AGENTS.md`
 2. `docs/index.md`
 3. `docs/<project-name>/sources.md` files if present
-4. `tasks/product/`
+4. `tasks/backlog/`
 5. `tasks/analytic/`
 6. `tasks/developer/`
 7. `tasks/quality/`
 8. `tasks/wiki/`
 9. `tasks/release/`
-10. `tasks/done/`
-11. `tasks/rejected/`
-12. `reports/product/`
-13. `reports/tasks/`
-14. `reports/quality/accepted/`
-15. `reports/quality/rejected/`
-16. `reports/release/`
+10. `tasks/released/`
+11. `tasks/done/`
+12. `tasks/rejected/`
+13. `reports/product/`
+14. `reports/tasks/`
+15. `reports/quality/accepted/`
+16. `reports/quality/rejected/`
+17. `reports/release/`
 
 Do not use project source-map search for plain workspace status unless a project-specific deep dive is needed.
 
 Report:
 
 1. workspace preflight result;
-2. role board summary: product, analytic, developer, quality, wiki, release, done, and rejected;
-3. product briefs and tasks grouped by current owner role;
+2. role board summary: backlog, analytic, developer, quality, wiki, release, released, done, and rejected;
+3. epics and tasks grouped by current owner role;
 4. developer reports, quality reports, and release plans;
 5. rejected, blocked, or incomplete work;
 6. known project wikis and missing `sources.md`;
@@ -205,7 +211,7 @@ If the next action is obvious:
 3. `tasks/quality/` -> run quality if the user approves or execution mode allows it;
 4. `tasks/wiki/` -> ask for approval before wiki in controlled mode;
 5. `tasks/release/` -> prepare release plan if the user approves;
-6. product brief ready for analysis -> ask for approval to hand off to analytic;
+6. epic ready for analysis -> ask for approval to hand its tasks off to analytic or developer;
 7. no active work -> suggest product intake, direct task intake, wiki bootstrap, devops, or release based on the user's goal.
 
 ## Workspace Validation
@@ -217,12 +223,13 @@ Check:
 1. required workspace files and directories exist:
    - `AGENTS.md`
    - `docs/index.md`
-   - `tasks/product/`
+   - `tasks/backlog/`
    - `tasks/analytic/`
    - `tasks/developer/`
    - `tasks/quality/`
    - `tasks/wiki/`
    - `tasks/release/`
+   - `tasks/released/`
    - `tasks/done/`
    - `tasks/rejected/`
    - `reports/product/`
@@ -231,10 +238,11 @@ Check:
    - `reports/quality/rejected/`
    - `reports/release/`
 2. task/report consistency:
-   - tasks in `tasks/quality/`, `tasks/wiki/`, `tasks/release/`, and `tasks/done/` have developer reports unless the task is documentation-only and explicitly explains why;
-   - tasks in `tasks/wiki/`, `tasks/release/`, and `tasks/done/` have accepted quality reports when quality has run;
+   - tasks in `tasks/quality/`, `tasks/wiki/`, `tasks/release/`, `tasks/released/`, and `tasks/done/` have developer reports unless the task is documentation-only and explicitly explains why;
+   - tasks in `tasks/wiki/`, `tasks/release/`, `tasks/released/`, and `tasks/done/` have accepted quality reports when quality has run;
+   - tasks in `tasks/released/` have a release report with pushed release evidence;
    - rejected tasks have rejected quality reports with actionable reasons;
-   - reports are not orphaned from tasks or product briefs;
+   - reports are not orphaned from tasks or epics;
 3. wiki consistency:
    - each `docs/<project-name>/` has `sources.md`;
    - managed wiki pages include status and expected `wiki-meta` where required by wiki rules;
@@ -242,7 +250,7 @@ Check:
 4. lifecycle risks:
    - tasks stuck in a role column without a next action;
    - rejected work without a next action;
-   - product briefs with blocking questions;
+   - epics with blocking questions;
    - accepted work queued for release without explicit user request;
    - docs that appear to require post-acceptance updates before accepted quality exists.
 
@@ -334,8 +342,8 @@ After receiving a high-level user task:
 3. Determine the route from `Routing`.
 4. If this is a product workflow, run the `product` role.
 5. If `product` created blocking questions, stop and ask the user.
-6. In `controlled` mode, stop after the product brief is created and ask the user to approve whether it goes to `analytic`, `developer`, or remains in product backlog.
-7. If this is a task workflow or the product brief is approved for technical analysis, run `analytic`.
+6. In `controlled` mode, stop after the epic is created or updated and ask the user to approve whether its tasks go to `analytic`, `developer`, or remain in backlog.
+7. If this is a task workflow or the epic tasks are approved for technical analysis, run `analytic`.
 8. If `analytic` created blocking questions, stop and ask the user.
 9. In `controlled` mode, stop after the task is created unless the user explicitly allowed the small safe task fast path or approved the task in advance.
 10. If the task is approved, run `developer -> quality` without stopping between the roles.
@@ -355,7 +363,7 @@ Default mode is `controlled`.
 
 In `controlled` mode, the orchestrator stops:
 
-1. After `product` if a product brief was created.
+1. After `product` if an epic was created or materially changed.
 2. After `analytic`.
 3. After the `developer -> quality` pair.
 4. Before `wiki` if documentation should be updated.
@@ -392,14 +400,14 @@ Never skip `quality` on the fast path.
 Human approval is required at these gates unless a stricter role rule stops earlier:
 
 1. Workspace bootstrap - before creating workspace files.
-2. Product intake - before handing a product brief to `analytic` or `developer` in controlled mode.
+2. Product intake and backlog formation - before handing epic tasks to `analytic` or `developer` in controlled mode.
 3. Analytic - before implementation in controlled mode, except approved small safe fast path.
 4. Developer -> Quality - no human gate between these roles.
 5. Quality rejection - controlled mode stops; auto mode allows at most one safe retry.
 6. Wiki bootstrap, blueprint, and deepening - before writing docs unless the user explicitly accepts defaults or auto.
 7. Wiki post-acceptance - before docs updates in controlled mode.
 8. DevOps - before server state changes, deploys, restarts, migrations, firewall/DNS/nginx/systemd/Docker/env/database changes, or secret use.
-9. Release - before staging or committing; pushing requires separate explicit approval.
+9. Release - before staging or committing; branch push, tag push, and GitHub Release publication each require explicit approval.
 10. Workspace self-update - after diff or summary, before replacing root `AGENTS.md`.
 11. Self-improvement - after product scope, before developer changes; product acceptance before optional release.
 12. Destructive commands, secrets, production data, external access, or irreversible actions - always require explicit approval.
@@ -408,17 +416,18 @@ Human approval is required at these gates unless a stricter role rule stops earl
 
 Roles pass state only through files:
 
-- `/tasks/product/PRODUCT-XXXX.md`
+- `/tasks/backlog/EPIC-XXXX.md`
 - `/tasks/analytic/TASK-XXXX.md`
 - `/tasks/developer/TASK-XXXX.md`
 - `/tasks/quality/TASK-XXXX.md`
 - `/tasks/wiki/TASK-XXXX.md`
 - `/tasks/release/TASK-XXXX.md`
+- `/tasks/released/TASK-XXXX.md`
 - `/tasks/done/TASK-XXXX.md`
 - `/tasks/rejected/TASK-XXXX.md`
-- `/reports/product/PRODUCT-XXXX-report.md`
-- `/reports/product/accepted/PRODUCT-XXXX-review.md`
-- `/reports/product/rejected/PRODUCT-XXXX-review.md`
+- `/reports/product/EPIC-XXXX-report.md`
+- `/reports/product/accepted/EPIC-XXXX-review.md`
+- `/reports/product/rejected/EPIC-XXXX-review.md`
 - `/reports/tasks/TASK-XXXX-report.md`
 - `/reports/quality/accepted/TASK-XXXX-quality.md`
 - `/reports/quality/rejected/TASK-XXXX-quality.md`
