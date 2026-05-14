@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.0.4 - 2026-05-14
+
+- Added a structured source map standard for managed wikis with source roots, areas, semantic groups, primary/supporting files, related wiki pages, and update triggers.
+- Added Bun/TypeScript wiki tooling at `skill/tools/wiki.ts` for local `index build`, `index check`, and `search` commands.
+- Added generated `.index/source-map.json` and `.index/manifest.json` rules as derived artifacts from `source-map.md`.
+- Updated wiki bootstrap, deepening, sync, and check rules to maintain source maps and local indexes.
+- Updated the source map template to represent semantic navigation instead of source boundary policy.
+- Bumped the skill version to `0.0.4`.
+
 ## 0.0.3 - 2026-05-14
 
 - Added the `release` role for packaging accepted work into changelog entries, commit plans, and approved git commits.

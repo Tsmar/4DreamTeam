@@ -71,6 +71,7 @@ It is especially useful when the work matters enough that you want decisions, as
 - implement scoped changes through a developer workflow;
 - run an independent quality check before work is accepted;
 - create, audit, sync, and deepen project documentation;
+- maintain structured source maps and local wiki indexes for faster source navigation;
 - summarize and validate a workspace;
 - update workspace rules after a skill upgrade;
 - improve 4DreamTeam itself through a simplified self-improvement lifecycle;
@@ -168,6 +169,7 @@ $4DreamTeam continue
 $4DreamTeam validate workspace
 $4DreamTeam self-update workspace
 $4DreamTeam check docs for <project-name>
+$4DreamTeam search docs for <project-name> <query>
 $4DreamTeam prepare release for <project-name>
 $4DreamTeam write a press release for <project-name>
 $4DreamTeam improve README positioning for <project-name>
@@ -180,6 +182,26 @@ $4DreamTeam improve 4DreamTeam itself from ../codex/4DreamTeam
 `prepare release` runs the `release` role. It is available only for accepted work. It updates `docs/<project-name>/CHANGELOG.md`, updates an approved source `CHANGELOG.md` when the source changelog policy applies, prepares a commit plan, and stages or commits only after explicit approval. It never pushes without a separate explicit approval.
 
 `self-update workspace` replaces only the workspace root `AGENTS.md` from the installed skill template and then asks the user to restart Codex.
+
+## Local Wiki Index
+
+Project wikis can include a structured source map:
+
+```txt
+docs/<project-name>/source-map.md
+```
+
+`source-map.md` is the editable source of truth for semantic navigation across approved sources. Generated `.index` files are derived from it and should not be edited by hand.
+
+The repository includes a dependency-free Bun/TypeScript CLI:
+
+```bash
+bun skill/tools/wiki.ts index build docs/<project-name>
+bun skill/tools/wiki.ts index check docs/<project-name>
+bun skill/tools/wiki.ts search docs/<project-name> "release changelog"
+```
+
+The index is intentionally lightweight. It searches source roots, semantic groups, file descriptions, keywords, and related wiki pages before an agent reads larger source files.
 
 ## Workspace Shape
 

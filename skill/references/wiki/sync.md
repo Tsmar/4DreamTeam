@@ -27,6 +27,7 @@ Bring an existing wiki into alignment with the current confirmed state.
 5. Find stale, missing, and incorrect pages.
 6. Before writing, show a sync plan unless the user gave auto permission.
 7. Update only pages that actually changed according to approved sources.
+8. If source ownership or navigation changed, update `source-map.md` and rebuild the generated `.index` files when Bun wiki tooling is available.
 
 ## Write Scope
 

@@ -182,6 +182,75 @@ Technical pages should link back to product capability or workflow if the relati
 
 If the relationship is unknown, do not invent it. Mark it as `requires source access`.
 
+## Source Map
+
+Managed wikis may include a semantic source map:
+
+```txt
+docs/<project-name>/source-map.md
+```
+
+`source-map.md` is a navigation layer over approved sources, not a raw file manifest. It answers:
+
+```txt
+Where is the source of truth for this behavior, contract, workflow, role, schema, integration, or release artifact?
+```
+
+Keep `sources.md` and `source-map.md` separate:
+
+1. `sources.md` records approved source boundaries, denied paths, requested sources, and ignore policy.
+2. `source-map.md` groups files by semantic purpose and points agents to the right source files and related wiki pages.
+
+Use this hierarchy:
+
+```txt
+approved source root
+-> source area
+-> semantic group
+-> primary/supporting files
+-> related wiki pages
+-> update triggers
+```
+
+Each source map must support multiple approved source roots and project shapes such as `frontend`, `backend`, `fullstack`, `skill-development`, `docs`, `infra`, `library`, `mixed`, or `unknown`.
+
+Do not mirror the full file tree. Include only files that help an agent answer a meaningful question or locate a source of truth.
+
+## Local Wiki Index
+
+Generated index files may live under:
+
+```txt
+docs/<project-name>/.index/
+  source-map.json
+  manifest.json
+```
+
+Rules:
+
+1. `source-map.md` is the editable source of truth.
+2. `.index/source-map.json` and `.index/manifest.json` are generated artifacts.
+3. Agents must not edit `.index/*` manually.
+4. Rebuild the index after source map changes with:
+
+```bash
+bun skill/tools/wiki.ts index build <docs-project-path>
+```
+
+5. Check the index with:
+
+```bash
+bun skill/tools/wiki.ts index check <docs-project-path>
+```
+
+6. Search the index with:
+
+```bash
+bun skill/tools/wiki.ts search <docs-project-path> "<query>"
+```
+
+If the tooling is unavailable in the current workspace, keep `source-map.md` updated and report that local index generation was not run.
+
 ## Page Status Policy
 
 Do not add status to ordinary wiki filenames.

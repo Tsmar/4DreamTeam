@@ -1,0 +1,8 @@
+{
+  "name": "4dreamteam-skill",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "wiki": "bun skill/tools/wiki.ts"
+  }
+}

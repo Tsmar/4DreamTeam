@@ -71,6 +71,7 @@ idea -> product brief -> technical task -> implementation -> quality review -> d
 - выполнять ограниченные изменения через процесс разработки;
 - запускать независимую проверку качества до приемки;
 - создавать, проверять, синхронизировать и углублять документацию проекта;
+- поддерживать structured source maps и local wiki indexes для быстрой навигации по источникам;
 - суммировать и проверять workspace;
 - обновлять правила workspace после обновления навыка;
 - улучшать сам 4DreamTeam через тот же контролируемый жизненный цикл;
@@ -168,6 +169,7 @@ $4DreamTeam continue
 $4DreamTeam validate workspace
 $4DreamTeam self-update workspace
 $4DreamTeam check docs for <project-name>
+$4DreamTeam search docs for <project-name> <query>
 $4DreamTeam prepare release for <project-name>
 $4DreamTeam write a press release for <project-name>
 $4DreamTeam improve README positioning for <project-name>
@@ -180,6 +182,26 @@ $4DreamTeam improve 4DreamTeam itself from ../codex/4DreamTeam
 `prepare release` запускает роль `release`. Она доступна только для принятой работы, обновляет `docs/<project-name>/CHANGELOG.md`, обновляет approved source `CHANGELOG.md`, когда это требуется политикой source changelog, готовит commit plan и выполняет staging/commit только после явного подтверждения. Push не выполняется без отдельного явного подтверждения.
 
 `self-update workspace` заменяет только корневой `AGENTS.md` workspace из шаблона установленного навыка, а затем просит пользователя перезапустить Codex.
+
+## Local Wiki Index
+
+Project wiki может включать structured source map:
+
+```txt
+docs/<project-name>/source-map.md
+```
+
+`source-map.md` - редактируемый источник правды для смысловой навигации по approved sources. Generated `.index` files являются производными и не должны редактироваться вручную.
+
+В репозитории есть dependency-free Bun/TypeScript CLI:
+
+```bash
+bun skill/tools/wiki.ts index build docs/<project-name>
+bun skill/tools/wiki.ts index check docs/<project-name>
+bun skill/tools/wiki.ts search docs/<project-name> "release changelog"
+```
+
+Индекс специально остается легким. Он ищет по source roots, semantic groups, descriptions, keywords и related wiki pages до того, как агент читает большие source files.
 
 ## Структура workspace
 

@@ -72,6 +72,7 @@ Allowed deepening targets:
 8. `integrations/` - external systems, protocols, adapters, error handling.
 9. `entities/` - stable entities, lifecycle, relationships.
 10. `product/workflows/` - drilldown links to implementation details.
+11. `source-map.md` - semantic navigation across approved source roots, areas, groups, and source-of-truth files.
 
 Create only pages backed by approved sources. If a useful page cannot be backed, list it under `requires source access` instead of creating unsupported detail.
 
@@ -92,6 +93,16 @@ Depth 3 pages should answer:
 4. What constraints should future developers preserve?
 
 Do not document line-by-line implementation. Deepening is an architectural map, not a code mirror.
+
+## Source Map Deepening
+
+When deepening adds or clarifies architecture areas, roles, endpoints, schemas, templates, integrations, infrastructure units, or release-relevant artifacts:
+
+1. Update `docs/<project-name>/source-map.md` with semantic groups and update triggers.
+2. Rebuild `.index/source-map.json` and `.index/manifest.json` with Bun wiki tooling when available.
+3. Run `bun skill/tools/wiki.ts index check <docs-project-path>` when available.
+
+Do not add every file. Add only source files that help agents locate the source of truth.
 
 ## Status
 

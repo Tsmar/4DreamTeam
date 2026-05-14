@@ -1,7 +1,7 @@
 ---
 name: 4dreamteam
-version: 0.0.3
-description: Coordinate the 4DreamTeam file-based agent framework for Codex. Use when the user wants to run a task through product, analytic, developer, quality, wiki, marketing, devops, and release roles; turn business requests into product briefs; decompose features; plan product development; prepare accepted work for changelog and commit; create press releases, product messaging, README positioning, and market-facing analytical materials; create, audit, sync, blueprint, or deepen a project knowledge base; inspect or document infrastructure, servers, deployments, logs, SSH access, migrations, or operational runbooks; continue a pending, rejected, or completed task; verify work with independent quality checks; initialize, update, validate, or summarize a 4DreamTeam workspace; improve the 4DreamTeam skill itself; or asks to work with 4DreamTeam workflow, 4DreamTeam lead, tasks, reports, accepted/rejected quality, release plans, or per-project docs knowledge bases.
+version: 0.0.4
+description: Coordinate the 4DreamTeam file-based agent framework for Codex. Use when the user wants to run a task through product, analytic, developer, quality, wiki, marketing, devops, and release roles; turn business requests into product briefs; decompose features; plan product development; prepare accepted work for changelog and commit; create press releases, product messaging, README positioning, and market-facing analytical materials; create, audit, sync, blueprint, deepen, index, or search a project knowledge base; inspect or document infrastructure, servers, deployments, logs, SSH access, migrations, or operational runbooks; continue a pending, rejected, or completed task; verify work with independent quality checks; initialize, update, validate, or summarize a 4DreamTeam workspace; improve the 4DreamTeam skill itself; or asks to work with 4DreamTeam workflow, 4DreamTeam lead, tasks, reports, accepted/rejected quality, release plans, source maps, local wiki indexes, or per-project docs knowledge bases.
 ---
 
 # 4DreamTeam
@@ -21,7 +21,7 @@ Use this skill as the main entrypoint for the 4DreamTeam framework. The user sho
 - Task analysis: read `references/analytic.md`.
 - Implementation: read `references/developer.md`.
 - Independent acceptance: read `references/quality.md`.
-- Knowledge base, docs, source boundaries, bootstrap/audit/sync/check/blueprint/deepening: read `references/wiki.md`, then follow `references/wiki/index.md`.
+- Knowledge base, docs, source boundaries, source maps, local wiki indexes, bootstrap/audit/sync/check/blueprint/deepening: read `references/wiki.md`, then follow `references/wiki/index.md`.
 - Marketing, press releases, product messaging, README positioning, launch materials, market-facing analysis: read `references/marketing.md`.
 - Infrastructure operations, server documentation, deployment diagnostics, SSH access, logs, migrations, and operational runbooks: read `references/devops.md`.
 - Release packaging, changelogs, branch checks, commit plans, staging, and commits after accepted work: read `references/release.md`.
@@ -62,4 +62,5 @@ Use bundled templates from `assets/templates/`:
 7. Treat approved source paths as hard read boundaries.
 8. DevOps server documentation belongs in `docs/<project-name>/devops/servers/`; DevOps keys are looked up only in workspace-root `keys/`.
 9. Release commits require accepted quality or product acceptance, a visible commit plan, and explicit user approval before staging or committing.
-10. Report created and changed files at the end.
+10. Wiki source maps are maintained in `docs/<project-name>/source-map.md`; generated `.index/*` files must be rebuilt with the Bun wiki tooling instead of edited by hand.
+11. Report created and changed files at the end.
