@@ -1,7 +1,10 @@
 ---
 name: 4dreamteam
-version: 0.0.5
 description: Coordinate the 4DreamTeam file-based agent framework for Codex. Use when the user wants to run a task through product, analytic, developer, quality, wiki, marketing, devops, and release roles; turn business requests into product briefs; decompose features; plan product development; prepare accepted work for changelog and commit; create press releases, product messaging, README positioning, and market-facing analytical materials; create, audit, sync, blueprint, deepen, index, or search a project knowledge base; inspect or document infrastructure, servers, deployments, logs, SSH access, migrations, or operational runbooks; continue a pending, rejected, or completed task; verify work with independent quality checks; initialize, update, validate, or summarize a 4DreamTeam workspace; improve the 4DreamTeam skill itself; or asks to work with 4DreamTeam workflow, 4DreamTeam lead, tasks, reports, accepted/rejected quality, release plans, source maps, index-first navigation, local wiki indexes, or per-project docs knowledge bases.
+metadata:
+  author: Tsmar
+  version: 0.0.5
+  repository: https://github.com/Tsmar/4DreamTeam
 ---
 
 # 4DreamTeam
