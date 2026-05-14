@@ -1,114 +1,58 @@
 # PRODUCT-XXXX: <short title>
 
-## Status
+## Board State
 
-draft / ready-for-analytic / blocked
+- Current role: product
+- Status: backlog / ready-for-analytic / ready-for-developer / blocked
+- Next role: product / analytic / developer
 
-## Original Request
+## Source Request
 
-<original user request>
+<brief original request>
 
-## Business Goal
+## Goal
 
-<business goal being solved>
+<business or product goal>
 
-## Product Context
+## Audience
 
-<product, market, user, or current workflow context>
-
-## Target Audience
-
-- <audience> - <need / job>
-
-## Problem Statement
-
-<current problem or opportunity>
-
-## Value Proposition
-
-<value the result should create>
+- <audience> - <need/job>
 
 ## Scope
 
-### MVP
+In:
 
-1. <what is included in the first delivery>
-2. <what is included in the first delivery>
+- <included outcome>
 
-### Later
+Out:
 
-1. <what can be postponed>
-2. <what can be postponed>
+- <excluded outcome>
 
-### Out Of Scope
+Later:
 
-1. <what is explicitly not being done>
-2. <what is explicitly not being done>
+- <deferred item, or `None`>
 
 ## Product Scenarios
 
-1. As a <user type>, I want <action>, so that <value>.
-2. As a <user type>, I want <action>, so that <value>.
+1. <scenario or user story>
 
 ## Product Acceptance Criteria
 
-The work is accepted from a product standpoint when:
-
 1. <checkable product criterion>
 2. <checkable product criterion>
-3. <checkable product criterion>
-
-## Success Metrics
-
-- <metric> - <how to interpret it>
-
-If there are no metrics:
-
-- Metrics are not defined.
 
 ## Constraints
 
-- <constraint>
+- <constraint, or `None`>
 
 ## Assumptions
 
-- <assumption>
-
-If there are no assumptions:
-
-- No assumptions.
-
-## Risks
-
-- <risk>
-
-If there are no risks:
-
-- No explicit product risks.
-
-## Dependencies
-
-- <dependency>
-
-If there are no dependencies:
-
-- No dependencies identified.
-
-## Recommended Next Step
-
-Hand off to `analytic` / run discovery / ask business questions / postpone.
+- <assumption, or `None`>
 
 ## Blocking Questions
 
-If there are blocking questions:
+None.
 
-1. <question>
-2. <question>
+## Recommended Next Owner
 
-If there are no questions:
-
-No blocking questions.
-
-## Revision History
-
-No revisions yet.
+product / analytic / developer

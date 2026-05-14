@@ -35,9 +35,12 @@ Minimum structure that may be created in an empty folder after explicit user con
 ```txt
 AGENTS.md
 docs/index.md
-tasks/pending/.gitkeep
 tasks/product/.gitkeep
-tasks/in-progress/.gitkeep
+tasks/analytic/.gitkeep
+tasks/developer/.gitkeep
+tasks/quality/.gitkeep
+tasks/wiki/.gitkeep
+tasks/release/.gitkeep
 tasks/done/.gitkeep
 tasks/rejected/.gitkeep
 reports/product/.gitkeep
@@ -46,6 +49,7 @@ reports/product/rejected/.gitkeep
 reports/tasks/.gitkeep
 reports/quality/accepted/.gitkeep
 reports/quality/rejected/.gitkeep
+reports/release/.gitkeep
 ```
 
 Create `AGENTS.md` from the bundled template:
@@ -79,9 +83,11 @@ Route requests as follows:
 - validate workspace, check workspace structure, find inconsistent task/report/doc state -> workspace validation workflow;
 - update this workspace to the current 4DreamTeam skill version, refresh workspace rules, self-update workspace -> self-update workflow;
 - improve the `4DreamTeam` skill itself from a workspace with an approved skill source -> self-improvement workflow: product -> developer -> wiki -> product acceptance;
-- new project task -> analytic, then after approval developer -> quality;
+- clear engineering work such as bugfix, refactor, tests, small docs, or concrete code/config changes -> analytic, then developer -> quality;
+- small safe engineering task with explicit `auto` or direct "go ahead" permission -> analytic compact task, then developer -> quality;
 - raw business request, product idea, roadmap, product development, or feature decomposition -> product, then after approval analytic;
-- continue pending/in-progress/rejected task -> the role matching the lifecycle state;
+- product backlog, discovery, product questions, or feature ideas -> product;
+- continue an existing task -> the role matching the task's board column;
 - continue product brief or product review -> product;
 - verify a completed task -> quality;
 - create a knowledge base for an existing project -> wiki bootstrap;
@@ -92,6 +98,44 @@ Route requests as follows:
 - press release, launch announcement, product marketing copy, README positioning, value proposition, audience-facing materials, competitive/product narrative, case study, market-facing analysis -> marketing;
 - infrastructure, servers, SSH, deploys, logs, systemd, Docker, nginx/reverse proxy, databases, migrations, diagnostics, incident/deploy/runbook documentation -> devops.
 - package accepted work for changelog, commit message, branch review, staging, git commit, release notes, or "prepare commit" -> release.
+
+Do not create a product brief for a clear engineering task unless the user explicitly asks for product framing.
+
+## Role Board
+
+The `tasks/` directory is a virtual Kanban board. A task file lives in the folder of the role that currently owns the next action.
+
+Board columns:
+
+```txt
+tasks/product/      # product backlog, discovery, briefs, product questions
+tasks/analytic/     # needs technical analysis before implementation
+tasks/developer/    # ready for implementation or developer rework
+tasks/quality/      # implementation complete, ready for independent quality
+tasks/wiki/         # accepted work that needs wiki documentation
+tasks/release/      # accepted work queued only after an explicit release request
+tasks/done/         # closed, no active next role
+tasks/rejected/     # rejected work awaiting a decision or correction
+```
+
+Movement rules:
+
+1. `product` may keep backlog items in `tasks/product/`, hand them to `tasks/analytic/`, or hand clear delivery work directly to `tasks/developer/`.
+2. `analytic` creates or moves implementation-ready task specs to `tasks/developer/`.
+3. `developer` moves completed implementation work to `tasks/quality/` and creates a developer report.
+4. `quality` moves accepted work to `tasks/wiki/` when docs are needed, otherwise to `tasks/done/`.
+5. `quality` moves rejected work to `tasks/rejected/`.
+6. Rework moves from `tasks/rejected/` to `tasks/developer/`, then back to `tasks/quality/`.
+7. `release` moves or queues work in `tasks/release/` only after an explicit user request for release, changelog, staging, commit, or release packaging.
+
+## Internal Artifact Policy
+
+Internal files are for agents, not end users.
+
+1. Write tasks, briefs, reports, release plans, and managed wiki pages in English.
+2. Keep internal artifacts concise, structured, evidence-oriented, and free of user-facing narration.
+3. Prefer pointers to source artifacts and changed files over repeating the full story.
+4. `$4DreamTeam` lead translates and summarizes results for the user in the user's language.
 
 ## Project Questions
 
@@ -127,24 +171,27 @@ Read only the current 4DreamTeam workspace:
 2. `docs/index.md`
 3. `docs/<project-name>/sources.md` files if present
 4. `tasks/product/`
-5. `tasks/pending/`
-6. `tasks/in-progress/`
-7. `tasks/done/`
-8. `tasks/rejected/`
-9. `reports/product/`
-10. `reports/tasks/`
-11. `reports/quality/accepted/`
-12. `reports/quality/rejected/`
-13. `reports/release/`
+5. `tasks/analytic/`
+6. `tasks/developer/`
+7. `tasks/quality/`
+8. `tasks/wiki/`
+9. `tasks/release/`
+10. `tasks/done/`
+11. `tasks/rejected/`
+12. `reports/product/`
+13. `reports/tasks/`
+14. `reports/quality/accepted/`
+15. `reports/quality/rejected/`
+16. `reports/release/`
 
 Do not use project source-map search for plain workspace status unless a project-specific deep dive is needed.
 
 Report:
 
 1. workspace preflight result;
-2. product briefs grouped by state;
-3. tasks grouped by state;
-4. developer reports and quality reports;
+2. role board summary: product, analytic, developer, quality, wiki, release, done, and rejected;
+3. product briefs and tasks grouped by current owner role;
+4. developer reports, quality reports, and release plans;
 5. rejected, blocked, or incomplete work;
 6. known project wikis and missing `sources.md`;
 7. the single recommended next action, or a short ordered list if multiple actions are equally important.
@@ -153,12 +200,12 @@ Do not change files during status or continuation unless the user explicitly app
 
 If the next action is obvious:
 
-1. rejected task -> explain rejection and offer developer correction;
-2. in-progress task -> continue developer workflow if the user approves;
-3. pending task -> ask for approval to start developer -> quality;
-4. ready product brief -> ask for approval to hand off to analytic;
-5. accepted quality report with docs needed -> ask for approval before wiki;
-6. accepted quality report or product acceptance ready to commit -> ask for approval before release;
+1. `tasks/rejected/` -> explain rejection and offer developer correction;
+2. `tasks/developer/` -> ask for approval to start or continue developer -> quality;
+3. `tasks/quality/` -> run quality if the user approves or execution mode allows it;
+4. `tasks/wiki/` -> ask for approval before wiki in controlled mode;
+5. `tasks/release/` -> prepare release plan if the user approves;
+6. product brief ready for analysis -> ask for approval to hand off to analytic;
 7. no active work -> suggest product intake, direct task intake, wiki bootstrap, devops, or release based on the user's goal.
 
 ## Workspace Validation
@@ -171,8 +218,11 @@ Check:
    - `AGENTS.md`
    - `docs/index.md`
    - `tasks/product/`
-   - `tasks/pending/`
-   - `tasks/in-progress/`
+   - `tasks/analytic/`
+   - `tasks/developer/`
+   - `tasks/quality/`
+   - `tasks/wiki/`
+   - `tasks/release/`
    - `tasks/done/`
    - `tasks/rejected/`
    - `reports/product/`
@@ -181,8 +231,8 @@ Check:
    - `reports/quality/rejected/`
    - `reports/release/`
 2. task/report consistency:
-   - done tasks have developer reports;
-   - done tasks have accepted or rejected quality reports when quality has run;
+   - tasks in `tasks/quality/`, `tasks/wiki/`, `tasks/release/`, and `tasks/done/` have developer reports unless the task is documentation-only and explicitly explains why;
+   - tasks in `tasks/wiki/`, `tasks/release/`, and `tasks/done/` have accepted quality reports when quality has run;
    - rejected tasks have rejected quality reports with actionable reasons;
    - reports are not orphaned from tasks or product briefs;
 3. wiki consistency:
@@ -190,10 +240,10 @@ Check:
    - managed wiki pages include status and expected `wiki-meta` where required by wiki rules;
    - obvious statuses are valid: `proposed`, `actual`, `accepted`, `superseded`, `deprecated`, or `unknown`;
 4. lifecycle risks:
-   - tasks stuck in `in-progress`;
+   - tasks stuck in a role column without a next action;
    - rejected work without a next action;
    - product briefs with blocking questions;
-   - accepted work that has not been packaged by `release` when a commit is expected;
+   - accepted work queued for release without explicit user request;
    - docs that appear to require post-acceptance updates before accepted quality exists.
 
 Return findings by severity and include a recommended repair plan. Do not repair files unless the user explicitly approves the specific changes.
@@ -211,8 +261,11 @@ Preflight:
 
 1. Confirm the current folder is a 4DreamTeam workspace.
 2. Confirm `assets/templates/workspace/AGENTS.md` is available from the installed skill.
-3. Explain that only `AGENTS.md` will be replaced.
-4. Wait for explicit approval before writing.
+3. Read the installed skill version from installed `SKILL.md` when available.
+4. Explain that only `AGENTS.md` will be replaced.
+5. Compare workspace-root `AGENTS.md` with the installed template and show a concise change summary before writing.
+6. If a readable diff can be produced, show the diff or the most important changed sections.
+7. Wait for explicit approval before writing.
 
 Write scope:
 
@@ -231,8 +284,9 @@ Rules:
 1. Replace only workspace-root `AGENTS.md`.
 2. Do not change `docs/`, `tasks/`, `reports/`, `keys/`, approved source repositories, or installed skill files.
 3. Do not create task, report, wiki, or quality artifacts for self-update unless the user explicitly asks for an auditable lifecycle.
-4. After replacing `AGENTS.md`, tell the user to restart Codex so the updated skill and workspace instructions are loaded in a clean session.
-5. After restart, recommend `$4DreamTeam validate workspace` if the user wants to verify the workspace.
+4. After replacing `AGENTS.md`, report the source template path, target path, and installed skill version when known.
+5. Tell the user to restart Codex so the updated skill and workspace instructions are loaded in a clean session.
+6. After restart, recommend `$4DreamTeam validate workspace` if the user wants to verify the workspace.
 
 ## Self-Improvement Workflow
 
@@ -280,13 +334,13 @@ After receiving a high-level user task:
 3. Determine the route from `Routing`.
 4. If this is a product workflow, run the `product` role.
 5. If `product` created blocking questions, stop and ask the user.
-6. In `controlled` mode, stop after the product brief is created and ask the user to approve it before `analytic`.
-7. If this is a task workflow or the product brief is approved, run `analytic`.
+6. In `controlled` mode, stop after the product brief is created and ask the user to approve whether it goes to `analytic`, `developer`, or remains in product backlog.
+7. If this is a task workflow or the product brief is approved for technical analysis, run `analytic`.
 8. If `analytic` created blocking questions, stop and ask the user.
-9. In `controlled` mode, stop after the task is created and ask the user to approve the task specification.
+9. In `controlled` mode, stop after the task is created unless the user explicitly allowed the small safe task fast path or approved the task in advance.
 10. If the task is approved, run `developer -> quality` without stopping between the roles.
-11. If `quality` returns `rejected`, stop in `controlled` mode and show the user the rejection reason. In `auto` mode, return the task to `developer` only if the fix is safe and does not require a user decision.
-12. If `quality` returns `accepted`, stop before `wiki` in `controlled` mode if documentation needs to be updated.
+11. If `quality` returns `rejected`, stop in `controlled` mode and show the user the rejection reason. In `auto` mode, return the task to `developer` at most once only if the fix is safe and does not require a user decision.
+12. If `quality` returns `accepted`, use the wiki post-acceptance decision table to determine whether documentation is needed. Stop before `wiki` in `controlled` mode if documentation should be updated.
 13. If `quality` returns `accepted`, run `wiki` if documentation needs to be updated and the execution mode allows it.
 14. If the user requested product acceptance of the result or wiki, run `product` after `wiki`.
 15. In the final response, report created and changed file paths.
@@ -311,15 +365,55 @@ Do not stop between `developer` and `quality`. These roles work as a pair.
 
 Use `auto` mode only when the user explicitly allows a full pass without intermediate confirmations.
 
-Even in `auto` mode, stop for blocking questions, destructive actions, access to secrets, unclear acceptance criteria, unsafe architecture/API/migration changes, or a rejected loop that cannot be safely fixed.
+Even in `auto` mode, stop for blocking questions, destructive actions, access to secrets, unclear acceptance criteria, unsafe architecture/API/migration changes, a second quality rejection, or a rejected loop that cannot be safely fixed.
+
+## Small Safe Task Fast Path
+
+Use the fast path only when the user explicitly says `auto`, `go ahead`, `do it`, or gives equivalent direct permission.
+
+A small safe task must meet all conditions:
+
+1. Scope is small and localized.
+2. Acceptance criteria are obvious and checkable.
+3. No public API, schema, migration, architecture, data format, auth, permission, deployment, or external-service behavior changes are required.
+4. No secrets, destructive commands, production data, or server state changes are needed.
+5. Relevant checks are available or the reason they cannot run is low risk.
+
+Fast path flow:
+
+```txt
+analytic compact task -> developer -> quality
+```
+
+Never skip `quality` on the fast path.
+
+## Human-In-The-Loop Gates
+
+Human approval is required at these gates unless a stricter role rule stops earlier:
+
+1. Workspace bootstrap - before creating workspace files.
+2. Product intake - before handing a product brief to `analytic` or `developer` in controlled mode.
+3. Analytic - before implementation in controlled mode, except approved small safe fast path.
+4. Developer -> Quality - no human gate between these roles.
+5. Quality rejection - controlled mode stops; auto mode allows at most one safe retry.
+6. Wiki bootstrap, blueprint, and deepening - before writing docs unless the user explicitly accepts defaults or auto.
+7. Wiki post-acceptance - before docs updates in controlled mode.
+8. DevOps - before server state changes, deploys, restarts, migrations, firewall/DNS/nginx/systemd/Docker/env/database changes, or secret use.
+9. Release - before staging or committing; pushing requires separate explicit approval.
+10. Workspace self-update - after diff or summary, before replacing root `AGENTS.md`.
+11. Self-improvement - after product scope, before developer changes; product acceptance before optional release.
+12. Destructive commands, secrets, production data, external access, or irreversible actions - always require explicit approval.
 
 ## File Contract
 
 Roles pass state only through files:
 
-- `/tasks/pending/TASK-XXXX.md`
 - `/tasks/product/PRODUCT-XXXX.md`
-- `/tasks/in-progress/TASK-XXXX.md`
+- `/tasks/analytic/TASK-XXXX.md`
+- `/tasks/developer/TASK-XXXX.md`
+- `/tasks/quality/TASK-XXXX.md`
+- `/tasks/wiki/TASK-XXXX.md`
+- `/tasks/release/TASK-XXXX.md`
 - `/tasks/done/TASK-XXXX.md`
 - `/tasks/rejected/TASK-XXXX.md`
 - `/reports/product/PRODUCT-XXXX-report.md`

@@ -53,7 +53,9 @@ Consider `skill-installer` when a task concerns installation, removal, installed
 When changing the skill, verify that:
 
 - the `name` in frontmatter matches the expected skill name;
+- the `name` is discoverable lowercase hyphen-case;
 - the `description` clearly explains when the skill should trigger;
+- the `description` stays within Codex skill metadata limits, including the 1024-character frontmatter limit;
 - short instructions in `SKILL.md` do not conflict with detailed references;
 - old names, paths, or outdated installation notes are not left behind;
 - templates match the rules that reference them.

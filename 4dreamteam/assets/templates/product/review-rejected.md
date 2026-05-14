@@ -4,36 +4,29 @@
 
 rejected
 
-## Reviewed Materials
+## Reviewed Artifacts
 
 - `tasks/product/PRODUCT-XXXX.md`
 - `<path>`
 
-## Rejection Reason
+## Rejection Summary
 
-<short and concrete>
+<short concrete reason>
 
-## Product Acceptance Checklist
+## Goal-Fit Results
 
-| Criterion | Result | What is unclear or inconsistent |
-|---|---:|---|
-| It is clear what the product or feature does | passed / failed / partial | <comment> |
-| It is clear who it is for | passed / failed / partial | <comment> |
-| Key workflows are clear | passed / failed / partial | <comment> |
-| Value and scope boundaries are visible | passed / failed / partial | <comment> |
-| Terms are explained | passed / failed / partial | <comment> |
-| Unknowns are not disguised as facts | passed / failed / partial | <comment> |
+| Check | Result | Required Fix |
+|---|---|---|
+| Goal is satisfied | passed / failed / partial | <fix> |
+| Audience is clear | passed / failed / partial | <fix> |
+| Scope boundaries are clear | passed / failed / partial | <fix> |
+| Key workflows are understandable | passed / failed / partial | <fix> |
+| Unknowns are not presented as facts | passed / failed / partial | <fix> |
 
-## Product Owner Questions
+## Open Product Questions
 
-1. <question>
-2. <question>
+- <question>
 
-## Required Fixes
+## Required Changes
 
-- <recommendation>
-- <recommendation>
-
-## Conclusion
-
-The result is not accepted by the product owner. Clarification or rework is required.
+- <minimal change needed>

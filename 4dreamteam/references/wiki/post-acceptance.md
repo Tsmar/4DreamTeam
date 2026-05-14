@@ -25,6 +25,29 @@ If an accepted quality report is missing, stop and do not change `docs/`, except
 6. If documentation is needed, update `docs/`.
 7. For significant architecture decisions, create an ADR in `docs/<project-name>/decisions`.
 
+## Docs Needed Decision Table
+
+Docs are needed when accepted work changes any of these:
+
+1. architecture;
+2. public APIs, endpoints, schemas, events, or data contracts;
+3. domain model or business workflow;
+4. user-visible behavior or operational behavior;
+5. project rules, technical constraints, setup, or run commands;
+6. deployment, infrastructure, runbooks, migrations, or incident procedures;
+7. existing documentation would become stale or contradictory.
+
+Docs are usually not needed for:
+
+1. internal refactors with no observable behavior change;
+2. test-only changes;
+3. typo or formatting fixes;
+4. dependency lockfile-only changes;
+5. non-user-visible cleanup;
+6. generated artifact refreshes that do not change documented behavior.
+
+If uncertain, report the uncertainty and ask before writing docs in controlled mode.
+
 Use this template for ADRs:
 
 ```txt

@@ -29,8 +29,8 @@ If the user does not specify optional inputs, use these defaults:
 2. Audience: `product + technical`.
 3. Detail depth: depends on audience.
 4. Document discovered flows/contracts/schemas/integrations: `yes` if confirmed by approved sources.
-5. Knowledge base language: the language of the user request or existing documentation.
-6. Technical details language style: the overall knowledge base language, while code terms, variable names, functions, classes, schemas, APIs, endpoints, files, and directories stay as in sources.
+5. Knowledge base language: English.
+6. Technical details style: English prose, while code terms, variable names, functions, classes, schemas, APIs, endpoints, files, and directories stay as in sources.
 
 ## Intake
 
@@ -44,8 +44,6 @@ Minimum parameters:
 4. Audience: `product + technical`, `product only`, `technical only`.
 5. Whether to document discovered `flows`, `contracts`, `schemas`, `integrations`.
 6. Forbidden paths beyond the standard ignore list.
-7. Knowledge base language.
-8. Technical details style: fully English, or the general knowledge base language while preserving English code terms.
 
 If project name or approved sources are missing, stop and ask.
 
@@ -77,8 +75,8 @@ The summary must include:
 4. project type;
 5. audience;
 6. detail depth computed from audience;
-7. knowledge base language;
-8. technical details language style;
+7. knowledge base language: English;
+8. technical details style: English prose with source identifiers preserved;
 9. discovered flows/contracts/schemas/integrations policy;
 10. additional forbidden paths.
 

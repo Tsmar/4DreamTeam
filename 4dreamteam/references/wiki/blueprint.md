@@ -35,8 +35,7 @@ Collect:
 4. expected product capabilities;
 5. expected technical areas;
 6. known constraints;
-7. knowledge base language;
-8. allowed input docs or sources, if any.
+7. allowed input docs or sources, if any.
 
 If project name is missing, stop and ask for it.
 

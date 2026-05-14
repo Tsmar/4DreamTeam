@@ -41,8 +41,7 @@ Collect:
 2. approved sources;
 3. deepening scope;
 4. desired depth: `depth 2`, `depth 3`, or mixed;
-5. language and technical detail style if the existing wiki does not define them;
-6. forbidden paths beyond the standard ignore list.
+5. forbidden paths beyond the standard ignore list.
 
 ## Deepening Plan Gate
 

@@ -2,17 +2,17 @@
 
 ## Purpose
 
-`developer` implements a task from `/tasks/pending` or `/tasks/in-progress`.
+`developer` implements tasks from `/tasks/developer`.
 
 ## Responsibilities
 
-1. Take a task from `/tasks/pending`.
-2. Move it to `/tasks/in-progress`.
+1. Take a task from `/tasks/developer`.
+2. Mark the task status as `working` inside the task file when work begins.
 3. Implement only what the task describes.
 4. Do not change acceptance criteria independently.
 5. Add or update tests.
 6. Run relevant checks.
-7. After completion, move the task to `/tasks/done`.
+7. After completion, move the task to `/tasks/quality`.
 8. Create a report in `/reports/tasks/TASK-XXXX-report.md`.
 9. Hand the result to `quality` immediately after completion, without stopping the workflow between `developer` and `quality`.
 
@@ -38,11 +38,13 @@ Before implementing in an unfamiliar project area, use index-first navigation wh
 
 ## Writing
 
+Write developer reports in English for agents. Keep reports concise and evidence-oriented; `$4DreamTeam` lead handles user-facing explanation and localization.
+
 - source code within task scope
 - tests within task scope
 - `/reports/tasks`
-- `/tasks/in-progress`
-- `/tasks/done`
+- `/tasks/developer`
+- `/tasks/quality`
 
 ## Blockers
 
@@ -60,10 +62,10 @@ Also stop if implementation requires going beyond task scope, changing public AP
 If the task is in `/tasks/rejected`:
 
 1. Read the rejected quality report.
-2. Move the task to `/tasks/in-progress`.
+2. Move the task to `/tasks/developer`.
 3. Add a revision section to `Revision history`.
 4. Fix only the violated acceptance criteria.
-5. After verification, move the task to `/tasks/done`.
+5. After verification, move the task to `/tasks/quality`.
 6. Update the developer report.
 
 ## Required Artifact

@@ -4,26 +4,25 @@
 
 accepted
 
-## Reviewed Materials
+## Reviewed Artifacts
 
 - `tasks/product/PRODUCT-XXXX.md`
 - `<path>`
 
-## Product Acceptance Checklist
+## Goal-Fit Results
 
-| Criterion | Result | Comment |
-|---|---:|---|
-| It is clear what the product or feature does | passed | <comment> |
-| It is clear who it is for | passed | <comment> |
-| Key workflows are clear | passed | <comment> |
-| Value and scope boundaries are visible | passed | <comment> |
-| Terms are explained | passed | <comment> |
-| Unknowns are not disguised as facts | passed | <comment> |
+| Check | Result | Evidence |
+|---|---|---|
+| Goal is satisfied | passed | <evidence> |
+| Audience is clear | passed | <evidence> |
+| Scope boundaries are clear | passed | <evidence> |
+| Key workflows are understandable | passed | <evidence> |
+| Unknowns are not presented as facts | passed | <evidence> |
 
-## Product Owner Questions
+## Open Product Questions
 
-No questions.
+None.
 
-## Conclusion
+## Next Owner
 
-The result is accepted by the product owner. The product goal and content are clear.
+done / release

@@ -4,41 +4,34 @@
 
 accepted
 
-## Reviewed Task
+## Reviewed Artifacts
 
-`/tasks/done/TASK-XXXX.md`
+- Task: `tasks/wiki/TASK-XXXX.md` or `tasks/done/TASK-XXXX.md`
+- Developer report: `reports/tasks/TASK-XXXX-report.md`
 
-## Reviewed Developer Report
+## Acceptance Results
 
-`/reports/tasks/TASK-XXXX-report.md`
+| Criterion | Result | Evidence |
+|---|---|---|
+| <criterion> | passed | <file, test, or manual check> |
 
-## Pin Test
+## Checks Run
 
-| Acceptance Criterion | Result | Evidence |
-|---|---:|---|
-| <criterion> | passed | <file / test / manual check> |
+| Check | Result | Evidence |
+|---|---|---|
+| `<command or manual check>` | passed / not-run | <short evidence or reason> |
 
-## Checks
+## Scope Check
 
-Commands:
+- Unrelated changes: none / listed below
+- Notes: <short note>
 
-```bash
-<command>
-<command>
-```
+## Docs Decision
 
-Result:
+- Docs needed: yes / no
+- Reason: <decision-table reason>
+- Next task column: `tasks/wiki` / `tasks/done`
 
-```txt
-<result>
-```
+## Residual Risk
 
-## Unrelated Changes Check
-
-Result:
-
-<description>
-
-## Conclusion
-
-Work accepted. Acceptance criteria are met.
+- <risk, or `None`>

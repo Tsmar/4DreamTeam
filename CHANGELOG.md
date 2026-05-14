@@ -1,5 +1,35 @@
 # Changelog
 
+## 0.0.9 - 2026-05-14
+
+- Removed all legacy task column references for `tasks/pending` and `tasks/in-progress` from skill rules, workspace templates, and README documentation.
+- Kept the role-based task board as the only documented workspace task structure.
+- Bumped the skill version to `0.0.9`.
+
+## 0.0.8 - 2026-05-14
+
+- Reworked task flow around a role-based virtual Kanban board: `product`, `analytic`, `developer`, `quality`, `wiki`, `release`, `done`, and `rejected`.
+- Added legacy compatibility for `tasks/pending` and `tasks/in-progress` without automatic migration during status, validation, or self-update.
+- Added clear routing for direct engineering tasks, small safe task fast path, compact analytic tasks, and explicit release-only behavior.
+- Added a centralized human-in-the-loop gate map covering workspace bootstrap, product, analytic, quality rejection, wiki, devops, release, self-update, and safety approvals.
+- Optimized internal task, product, developer, quality, and release templates for concise English agent-first artifacts.
+- Updated workspace template and README documentation to describe the role board and legacy task columns.
+- Bumped the skill version to `0.0.8`.
+
+## 0.0.7 - 2026-05-14
+
+- Made managed wiki documentation English-only for agent efficiency and consistency.
+- Updated wiki bootstrap, blueprint, and deepening rules so knowledge base language is no longer a user-selected parameter.
+- Added guidance to translate or summarize non-English inputs and migrate touched mixed-language wiki pages to English.
+- Bumped the skill version to `0.0.7`.
+
+## 0.0.6 - 2026-05-14
+
+- Improved the self-update workflow to show a concise AGENTS.md change summary or diff before writing.
+- Added installed skill version reporting for workspace self-update preflight and completion messages.
+- Required self-update completion to report the source template path and target workspace rules file.
+- Bumped the skill version to `0.0.6`.
+
 ## 0.0.5 - 2026-05-14
 
 - Added Index-First Navigation rules requiring local wiki search before broad project wiki/source reading when a current source-map index exists.

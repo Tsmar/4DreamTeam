@@ -1,80 +1,60 @@
 # TASK-XXXX: <short title>
 
-## Status
+## Board State
 
-pending
+- Current role: developer
+- Status: ready
+- Next role: quality
 
-## Original Request
+## Source Request
 
-<original user request>
+<brief pointer or original request>
 
 ## Goal
 
-<what must be achieved>
+<one or two sentences>
 
-## Project Context
+## Scope
 
-<important information from docs and source code>
+In:
 
-## Assumptions
+- <required change>
 
-- <assumption>
-- <assumption>
+Out:
 
-If there are no assumptions:
+- <explicit non-goal>
 
-- No assumptions.
+## Context Pointers
 
-## Affected Areas
+- `<path>` - <why it matters>
 
-- `<path>` - <why it is affected>
-- `<path>` - <why it is affected>
+## Requirements
 
-## Implementation Requirements
-
-1. <requirement>
-2. <requirement>
-3. <requirement>
+1. <implementation requirement>
+2. <implementation requirement>
 
 ## Acceptance Criteria
 
-Work is complete when:
+1. <checkable criterion>
+2. <checkable criterion>
 
-1. <checkable condition>
-2. <checkable condition>
-3. <checkable condition>
+## Required Checks
 
-## Tests
-
-Add or update:
-
-- <unit/integration/e2e/manual test>
-- <unit/integration/e2e/manual test>
+- `<command or manual check>` - <expected evidence>
 
 ## Constraints
 
-- Do not change public APIs without a separate instruction.
-- Do not remove existing functionality.
+- Do not change public APIs, schemas, migrations, architecture, or dependencies unless listed in Requirements.
 - Do not perform unrelated refactoring.
-- Do not change architecture outside task scope.
-- Do not add new dependencies without justification.
 
-## Risks
+## Assumptions
 
-- <risk>
-- <risk>
+- <assumption, or `None`>
 
 ## Blocking Questions
 
-If there are blocking questions:
-
-1. <question>
-2. <question>
-
-If there are no questions:
-
-No blocking questions.
+None.
 
 ## Revision History
 
-No revisions yet.
+- Initial task.

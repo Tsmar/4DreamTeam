@@ -214,8 +214,11 @@ AGENTS.md
 docs/index.md
 tasks/
   product/
-  pending/
-  in-progress/
+  analytic/
+  developer/
+  quality/
+  wiki/
+  release/
   done/
   rejected/
 reports/
@@ -224,6 +227,8 @@ reports/
   quality/
   release/
 ```
+
+`tasks/` - это role-based virtual Kanban board. Файл задачи лежит в папке роли, которая владеет следующим действием.
 
 Документация проекта находится здесь:
 
@@ -326,7 +331,7 @@ Use the accepted task/report for <change>.
 Run $4DreamTeam status.
 ```
 
-Проверка статуса суммирует предварительную проверку workspace, продуктовые описания, задачи в состояниях pending/in-progress/done/rejected, отчеты разработчика, отчеты качества, известные wiki проектов, отсутствующие `sources.md`, блокеры и рекомендуемое следующее действие.
+Проверка статуса суммирует предварительную проверку workspace, role board (`product`, `analytic`, `developer`, `quality`, `wiki`, `release`, `done`, `rejected`), отчеты разработчика, отчеты качества, известные wiki проектов, отсутствующие `sources.md`, блокеры и рекомендуемое следующее действие.
 
 Статус по умолчанию не меняет файлы.
 

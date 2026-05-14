@@ -71,14 +71,13 @@ Documentation, tests, and comments are used only if they are inside approved sou
 
 ## Language Policy
 
-When creating or substantially expanding a knowledge base, clarify:
+Managed wiki pages are written in English only, regardless of the user request language, source language, or existing workspace language.
 
-1. Which language to use for the knowledge base.
-2. How to write technical details:
-   - fully in English;
-   - in the general knowledge base language, preserving only terms from code and sources in English.
+When creating, syncing, deepening, or substantially expanding a knowledge base:
 
-If the user does not specify a language, use the language of the request or existing documentation.
+1. Write page titles, headings, summaries, explanations, statuses, notes, and ADR content in English.
+2. Translate or summarize non-English user input and source documentation into English.
+3. If an existing managed wiki contains non-English prose, keep the workflow focused on the requested scope, migrate touched pages to English, and report remaining mixed-language areas.
 
 Never translate:
 

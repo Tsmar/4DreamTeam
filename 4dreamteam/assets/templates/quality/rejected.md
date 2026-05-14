@@ -4,51 +4,32 @@
 
 rejected
 
-## Reviewed Task
+## Reviewed Artifacts
 
-`/tasks/done/TASK-XXXX.md`
+- Task: `tasks/rejected/TASK-XXXX.md`
+- Developer report: `reports/tasks/TASK-XXXX-report.md`
 
-## Reviewed Developer Report
+## Rejection Summary
 
-`/reports/tasks/TASK-XXXX-report.md`
+<short concrete reason>
 
-## Rejection Reason
+## Failed Criteria
 
-<short and concrete>
-
-## Violated Acceptance Criteria
-
-| Requirement | Problem | How To Fix |
+| Criterion | Problem | Required Fix |
 |---|---|---|
-| <requirement> | <problem> | <recommendation> |
+| <criterion> | <problem> | <minimal fix scope> |
 
-## Pin Test
+## Checks Run
 
-| Acceptance Criterion | Result | Evidence |
-|---|---:|---|
-| <criterion> | passed / failed | <file / test / manual check> |
+| Check | Result | Evidence |
+|---|---|---|
+| `<command or manual check>` | passed / failed / not-run | <short evidence or reason> |
 
-## Checks
+## Scope Check
 
-Commands:
+- Unrelated changes: none / listed below
+- Notes: <short note>
 
-```bash
-<command>
-<command>
-```
+## Rework Boundary
 
-Result:
-
-```txt
-<result>
-```
-
-## Unrelated Changes Check
-
-Result:
-
-<description>
-
-## Conclusion
-
-Work is not accepted. Developer rework is required.
+- Fix only the failed criteria above unless the user approves scope changes.

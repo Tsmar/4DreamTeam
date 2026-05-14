@@ -214,8 +214,11 @@ AGENTS.md
 docs/index.md
 tasks/
   product/
-  pending/
-  in-progress/
+  analytic/
+  developer/
+  quality/
+  wiki/
+  release/
   done/
   rejected/
 reports/
@@ -224,6 +227,8 @@ reports/
   quality/
   release/
 ```
+
+`tasks/` is a role-based virtual Kanban board. A task file lives in the folder of the role that owns the next action.
 
 Project documentation lives under:
 
@@ -326,7 +331,7 @@ Use this when returning to a workspace or deciding what should happen next:
 Run $4DreamTeam status.
 ```
 
-The status workflow summarizes workspace preflight, product briefs, pending/in-progress/done/rejected tasks, developer reports, quality reports, known project wikis, missing `sources.md`, blockers, and the recommended next action.
+The status workflow summarizes workspace preflight, the role board (`product`, `analytic`, `developer`, `quality`, `wiki`, `release`, `done`, `rejected`), developer reports, quality reports, known project wikis, missing `sources.md`, blockers, and the recommended next action.
 
 Status does not change files by default.
 

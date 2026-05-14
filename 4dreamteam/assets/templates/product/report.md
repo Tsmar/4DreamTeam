@@ -2,58 +2,34 @@
 
 ## Status
 
-completed
+completed / blocked
 
 ## Basis
 
-Product brief:
+- Product brief: `tasks/product/PRODUCT-XXXX.md`
 
-`tasks/product/PRODUCT-XXXX.md`
+## Findings
 
-## What Was Analyzed
+- <concise finding>
 
-- <direction>
-- <direction>
+## Decisions
 
-## Product Decisions
+- <decision> - <reason>
 
-- <decision> - <justification>
+## Candidates
 
-## Roadmap Candidates
-
-| Candidate | Value | Uncertainty | Suggested Priority |
-|---|---|---|---:|
+| Candidate | Value | Uncertainty | Priority |
+|---|---|---|---|
 | <candidate> | <value> | low / medium / high | P0 / P1 / P2 |
 
-## MVP / Later Split
+## Risks
 
-### MVP
-
-- <item>
-
-### Later
-
-- <item>
-
-## Product Risks
-
-- <risk>
-
-If there are no risks:
-
-- No explicit product risks.
+- <risk, or `None`>
 
 ## Open Questions
 
-If there are questions:
+- <question, or `None`>
 
-1. <question>
-2. <question>
+## Recommended Next Owner
 
-If there are no questions:
-
-No open questions.
-
-## Recommended Next Step
-
-<next action>
+product / analytic / developer

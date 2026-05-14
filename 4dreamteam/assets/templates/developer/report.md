@@ -2,68 +2,36 @@
 
 ## Status
 
-implemented
+completed / blocked
 
 ## Basis
 
-Task:
-
-`/tasks/done/TASK-XXXX.md`
-
-## What Was Done
-
-- <change>
-- <change>
-- <change>
+- Task: `tasks/quality/TASK-XXXX.md`
 
 ## Changed Files
 
-- `<path>` - <what changed>
-- `<path>` - <what changed>
+- `<path>` - <change summary>
 
-## Added Or Updated Tests
+## Implementation Summary
 
-- `<path>` - <what it verifies>
-- `<path>` - <what it verifies>
+- <concise implementation note>
 
-If tests were not added:
+## Checks Run
 
-Tests were not added.
+| Check | Result | Evidence |
+|---|---|---|
+| `<command or manual check>` | passed / failed / not-run | <short evidence or reason> |
 
-Reason:
+## Acceptance Coverage
 
-<justification>
+| Criterion | Developer Status | Evidence |
+|---|---|---|
+| <criterion> | covered / blocked | <file, test, or note> |
 
-## Verification
+## Risks And Follow-Ups
 
-Commands:
+- <risk/follow-up, or `None`>
 
-```bash
-<command>
-<command>
-```
+## Quality Handoff
 
-Result:
-
-```txt
-<execution result>
-```
-
-## Acceptance Criteria Coverage
-
-| Requirement | Status | Comment |
-|---|---:|---|
-| <requirement> | passed / failed / partial | <comment> |
-
-## Known Limitations
-
-- <limitation>
-
-If there are no limitations:
-
-- No known limitations.
-
-## What Quality Should Check
-
-- <risk point>
-- <risk point>
+- <specific area quality should inspect, or `Standard acceptance verification`>

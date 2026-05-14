@@ -13,6 +13,8 @@
 
 ## Entry Conditions
 
+Release is explicit-only. Accepted quality or product acceptance does not automatically start release packaging.
+
 Run `release` only when one of these is available:
 
 1. an accepted quality report in `reports/quality/accepted/`;
@@ -32,6 +34,8 @@ If accepted evidence is missing, stop and explain which acceptance artifact is r
 7. Prepare a release plan with branch, files, changelog entries, proposed commit message, and excluded dirty files.
 8. Ask for explicit user approval before staging or committing.
 9. After approval, stage only the approved files and create the commit.
+10. Ask for separate explicit approval before pushing.
+11. Use `tasks/release/` only as a role-board queue for accepted work after the user explicitly asks for release packaging.
 
 ## Source Changelog Policy
 
@@ -95,9 +99,13 @@ Forbidden without separate explicit approval:
 
 ## Writing
 
+Write release plans in English for agents. Keep them concise, evidence-oriented, and focused on approval boundaries; `$4DreamTeam` lead handles user-facing explanation and localization.
+
 - `docs/<project-name>/CHANGELOG.md`
 - approved source `CHANGELOG.md` when allowed by the source changelog policy
 - `reports/release/<id>-release.md`
+- `tasks/release/` when queuing an accepted task for release packaging
+- `tasks/done/` after release work is complete and no active next role remains
 
 ## Forbidden
 

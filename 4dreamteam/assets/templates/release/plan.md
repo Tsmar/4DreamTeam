@@ -2,66 +2,36 @@
 
 ## Status
 
-planned / committed / blocked
+planned / approved / committed / blocked
 
 ## Accepted Basis
 
-- `<path>` - <accepted task, quality report, product acceptance, or other accepted evidence>
+- `<path>` - <accepted evidence>
 
 ## Repository
 
-`<path>`
-
-## Branch
-
+- Path: `<path>`
 - Current branch: `<branch>`
 - Target branch: `<branch or requires user decision>`
 
 ## Included Files
 
-- `<path>` - <why it belongs to this release>
+- `<path>` - <reason>
 
 ## Excluded Dirty Files
 
-- `<path>` - <why it is not included>
+- `<path>` - <reason, or `None`>
 
-If there are no excluded dirty files:
+## Changelog
 
-- No excluded dirty files.
-
-## Workspace Changelog Entry
-
-Target:
-
-`docs/<project-name>/CHANGELOG.md`
-
-Entry:
+- Workspace target: `docs/<project-name>/CHANGELOG.md` / not applicable
+- Source target: `<approved-source>/CHANGELOG.md` / not applicable
 
 ```md
 <entry>
 ```
 
-## Source Changelog Entry
-
-Target:
-
-`<approved-source>/CHANGELOG.md`
-
-Entry:
-
-```md
-<entry>
-```
-
-If source changelog is not applicable:
-
-Not applicable.
-
-Reason:
-
-<reason>
-
-## Proposed Commit Message
+## Commit
 
 ```txt
 <type>(<scope>): <summary>
@@ -74,12 +44,12 @@ git add <specific-file> <specific-file>
 git commit -m "<message>"
 ```
 
-## Approval
+## Approval State
 
-User approval:
-
-pending / approved
+- Stage/commit approval: pending / approved
+- Push approval: not requested / pending / approved
 
 ## Result
 
-<commit hash or blocked reason>
+- Commit: `<hash>` / not created
+- Notes: <blocked reason or `None`>

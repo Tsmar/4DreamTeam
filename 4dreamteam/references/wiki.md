@@ -23,6 +23,8 @@ Do not load all mode files unless necessary.
 
 `wiki` updates `/docs` only within the selected mode and only from confirmed sources allowed for that mode.
 
+Managed wiki pages are English-only agent-facing documentation. `$4DreamTeam` lead handles user-facing explanation and localization.
+
 Main routes:
 
 - `post-acceptance` - update docs after an accepted quality report.

@@ -27,6 +27,23 @@ Allowed working artifacts:
 - `docs/<project-name>/devops/servers/`
 - `docs/<project-name>/devops/runbooks/` only when a runbook is explicitly requested
 
+## Role Board
+
+`tasks/` is a virtual Kanban board by role. A task file lives in the folder of the role that owns the next action:
+
+- `tasks/product/` - product backlog, discovery, briefs, and product questions
+- `tasks/analytic/` - needs technical analysis
+- `tasks/developer/` - ready for implementation or developer rework
+- `tasks/quality/` - ready for independent quality
+- `tasks/wiki/` - accepted work needing documentation
+- `tasks/release/` - accepted work queued after an explicit release request
+- `tasks/done/` - closed with no active next role
+- `tasks/rejected/` - rejected work awaiting decision or correction
+
+## Internal Artifact Policy
+
+Internal tasks, briefs, reports, release plans, and managed wiki pages are written in English for agents. `$4DreamTeam` lead summarizes results to the user in the user's language.
+
 ## Source Access
 
 Read external source code only as explicitly approved sources.
@@ -49,7 +66,9 @@ When the user asks to update this workspace to the currently installed 4DreamTea
 
 Do not change `docs/`, `tasks/`, `reports/`, `keys/`, approved source repositories, or installed skill files during workspace self-update.
 
-After replacing `AGENTS.md`, ask the user to restart Codex so the updated skill and workspace instructions are loaded in a clean session.
+Before replacing `AGENTS.md`, show a concise change summary or diff and wait for explicit approval.
+
+After replacing `AGENTS.md`, report the source template, target path, and installed skill version, then ask the user to restart Codex so the updated skill and workspace instructions are loaded in a clean session.
 
 ## Safety
 
