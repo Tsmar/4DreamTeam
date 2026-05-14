@@ -4,7 +4,7 @@ Languages: [English](README.md) | [Russian](README.ru.md)
 
 4DreamTeam is a Codex skill for people who have ideas and want help turning them into clear, reviewable, finished work.
 
-Instead of asking one AI agent to do everything in one long conversation, 4DreamTeam gives Codex a small team of roles: product, analyst, developer, quality reviewer, wiki maintainer, marketing specialist, and DevOps operator. The result is a workflow where ideas become briefs, briefs become tasks, tasks become checked work, and important knowledge stays in files instead of disappearing into chat history.
+Instead of asking one AI agent to do everything in one long conversation, 4DreamTeam gives Codex a small team of roles: product, analyst, developer, quality reviewer, wiki maintainer, marketing specialist, DevOps operator, and release manager. The result is a workflow where ideas become briefs, briefs become tasks, tasks become checked work, accepted work becomes clean project history, and important knowledge stays in files instead of disappearing into chat history.
 
 ## Why It Exists
 
@@ -36,7 +36,7 @@ That makes 4DreamTeam useful for a founder, product thinker, operator, developer
 4DreamTeam turns an idea into a traceable workflow:
 
 ```txt
-idea -> product brief -> technical task -> implementation -> quality review -> documentation
+idea -> product brief -> technical task -> implementation -> quality review -> documentation -> release
 ```
 
 It can also help with project knowledge bases, infrastructure notes, README positioning, press releases, market-facing materials, and continuing work across sessions.
@@ -74,6 +74,7 @@ It is especially useful when the work matters enough that you want decisions, as
 - summarize and validate a workspace;
 - update workspace rules after a skill upgrade;
 - improve 4DreamTeam itself through a simplified self-improvement lifecycle;
+- package accepted work into changelogs, commit plans, and git commits after explicit approval;
 - prepare press releases, README positioning, product messaging, and market-facing analytical materials;
 - document servers, deployments, SSH access, diagnostics, migrations, and runbooks with DevOps safety gates.
 
@@ -88,6 +89,7 @@ It is especially useful when the work matters enough that you want decisions, as
 | `wiki` | Creates and maintains source-backed project knowledge bases. |
 | `marketing` | Turns confirmed product value into press releases, README positioning, product messaging, launch materials, and market-facing analysis. |
 | `devops` | Handles infrastructure documentation, server cards, deployment diagnostics, SSH access rules, and operational runbooks. |
+| `release` | Packages accepted work into workspace/source changelog entries, a commit plan, and a git commit after explicit approval. |
 
 ## A Typical Journey
 
@@ -109,7 +111,8 @@ The owner takes reservations manually and loses track of changes.
 2. a technical task with implementation requirements;
 3. code changes and a developer report;
 4. an independent quality report;
-5. documentation updates if the accepted behavior changes the project.
+5. documentation updates if the accepted behavior changes the project;
+6. release packaging with changelog entries and a commit plan when the work should be committed.
 
 In controlled mode, 4DreamTeam stops at important gates so the user can approve the next step.
 
@@ -131,6 +134,7 @@ This gives you:
 - rejected work with clear correction paths;
 - project knowledge in Markdown;
 - DevOps facts documented only after verification.
+- release plans that show branches, included files, excluded dirty files, changelog entries, and commit messages before git changes are staged.
 
 The point is not ceremony. The point is continuity, auditability, and fewer hidden assumptions.
 
@@ -164,6 +168,7 @@ $4DreamTeam continue
 $4DreamTeam validate workspace
 $4DreamTeam self-update workspace
 $4DreamTeam check docs for <project-name>
+$4DreamTeam prepare release for <project-name>
 $4DreamTeam write a press release for <project-name>
 $4DreamTeam improve README positioning for <project-name>
 $4DreamTeam improve <project-name>
@@ -171,6 +176,8 @@ $4DreamTeam improve 4DreamTeam itself from ../codex/4DreamTeam
 ```
 
 `status`, `continue`, and `validate workspace` are read-only by default. 4DreamTeam should explain the next lifecycle step and wait for approval before changing files.
+
+`prepare release` runs the `release` role. It is available only for accepted work. It updates `docs/<project-name>/CHANGELOG.md`, updates an approved source `CHANGELOG.md` when the source changelog policy applies, prepares a commit plan, and stages or commits only after explicit approval. It never pushes without a separate explicit approval.
 
 `self-update workspace` replaces only the workspace root `AGENTS.md` from the installed skill template and then asks the user to restart Codex.
 
@@ -191,6 +198,7 @@ reports/
   product/
   tasks/
   quality/
+  release/
 ```
 
 Project documentation lives under:
@@ -259,6 +267,30 @@ The normal route is:
 ```txt
 analytic -> developer -> quality -> wiki if needed
 ```
+
+### Release Packaging
+
+Use this after work has accepted quality or product acceptance and should be committed:
+
+```txt
+Run $4DreamTeam.
+
+Goal:
+Prepare release for <project-name>.
+
+Context:
+Use the accepted task/report for <change>.
+```
+
+The `release` role:
+
+1. checks the current branch and dirty tree;
+2. separates included files from unrelated dirty files;
+3. updates `docs/<project-name>/CHANGELOG.md`;
+4. updates approved source `CHANGELOG.md` when the source changelog policy applies;
+5. proposes a commit message and exact file staging plan;
+6. asks for approval before `git add` and `git commit`;
+7. never pushes without a separate explicit approval.
 
 `quality` is not optional for implementation workflows.
 

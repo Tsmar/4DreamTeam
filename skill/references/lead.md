@@ -11,6 +11,7 @@ In the normal scenario, the user talks to you, and you choose the right role wor
 5. wiki
 6. marketing
 7. devops
+8. release
 
 Do not require the user to remember role names if you can determine the route yourself.
 
@@ -90,6 +91,7 @@ Route requests as follows:
 - deepen an existing knowledge base based on current implementation -> wiki deepening;
 - press release, launch announcement, product marketing copy, README positioning, value proposition, audience-facing materials, competitive/product narrative, case study, market-facing analysis -> marketing;
 - infrastructure, servers, SSH, deploys, logs, systemd, Docker, nginx/reverse proxy, databases, migrations, diagnostics, incident/deploy/runbook documentation -> devops.
+- package accepted work for changelog, commit message, branch review, staging, git commit, release notes, or "prepare commit" -> release.
 
 ## Project Questions
 
@@ -130,6 +132,7 @@ Read only the current 4DreamTeam workspace:
 10. `reports/tasks/`
 11. `reports/quality/accepted/`
 12. `reports/quality/rejected/`
+13. `reports/release/`
 
 Report:
 
@@ -150,7 +153,8 @@ If the next action is obvious:
 3. pending task -> ask for approval to start developer -> quality;
 4. ready product brief -> ask for approval to hand off to analytic;
 5. accepted quality report with docs needed -> ask for approval before wiki;
-6. no active work -> suggest product intake, direct task intake, wiki bootstrap, or devops based on the user's goal.
+6. accepted quality report or product acceptance ready to commit -> ask for approval before release;
+7. no active work -> suggest product intake, direct task intake, wiki bootstrap, devops, or release based on the user's goal.
 
 ## Workspace Validation
 
@@ -170,6 +174,7 @@ Check:
    - `reports/tasks/`
    - `reports/quality/accepted/`
    - `reports/quality/rejected/`
+   - `reports/release/`
 2. task/report consistency:
    - done tasks have developer reports;
    - done tasks have accepted or rejected quality reports when quality has run;
@@ -183,6 +188,7 @@ Check:
    - tasks stuck in `in-progress`;
    - rejected work without a next action;
    - product briefs with blocking questions;
+   - accepted work that has not been packaged by `release` when a commit is expected;
    - docs that appear to require post-acceptance updates before accepted quality exists.
 
 Return findings by severity and include a recommended repair plan. Do not repair files unless the user explicitly approves the specific changes.
@@ -247,7 +253,7 @@ The skill repository is not a normal project workspace. It is the source for:
 Self-improvement follows a simplified lifecycle:
 
 ```txt
-product -> developer -> wiki -> product acceptance
+product -> developer -> wiki -> product acceptance -> release when the user wants a commit
 ```
 
 Rules:
@@ -257,9 +263,10 @@ Rules:
 3. Use `developer` to edit only approved skill source files within the approved task scope.
 4. Use `wiki` after `developer` only if workspace knowledge base documentation needs to reflect the accepted skill behavior.
 5. Use `product` after `developer` and optional `wiki` to confirm that the resulting skill behavior matches what the product role wanted to see.
-6. Do not require a separate `analytic` task or independent `quality` report for self-improvement; product acceptance is the final approval gate for this mode.
-7. Preserve source repository language policy. Markdown documentation and templates in the skill repository must remain in English unless repository rules change explicitly.
-8. Do not weaken workspace preflight, source boundaries, controlled-mode gates, ordinary task quality gates, wiki gates, DevOps risk gates, or secret-handling rules.
+6. Use `release` after product acceptance only when the user asks to prepare or create a commit for the accepted change.
+7. Do not require a separate `analytic` task or independent `quality` report for self-improvement; product acceptance is the final approval gate before optional release packaging.
+8. Preserve source repository language policy. Markdown documentation and templates in the skill repository must remain in English unless repository rules change explicitly.
+9. Do not weaken workspace preflight, source boundaries, controlled-mode gates, ordinary task quality gates, wiki gates, DevOps risk gates, or secret-handling rules.
 
 After receiving a high-level user task:
 

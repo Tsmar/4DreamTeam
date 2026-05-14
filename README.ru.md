@@ -4,7 +4,7 @@
 
 4DreamTeam - это навык для Codex, созданный для людей, у которых есть идеи и которым нужна помощь, чтобы превратить их в понятную, проверяемую и доведенную до результата работу.
 
-Вместо того чтобы просить одного AI-агента сделать все в одном длинном диалоге, 4DreamTeam дает Codex небольшую команду ролей: product, analytic, developer, quality, wiki, marketing и devops. В результате идеи превращаются в продуктовые описания, описания - в задачи, задачи - в проверенную работу, а важные знания остаются в файлах, а не теряются в истории чата.
+Вместо того чтобы просить одного AI-агента сделать все в одном длинном диалоге, 4DreamTeam дает Codex небольшую команду ролей: product, analytic, developer, quality, wiki, marketing, devops и release. В результате идеи превращаются в продуктовые описания, описания - в задачи, задачи - в проверенную работу, принятая работа - в аккуратную историю проекта, а важные знания остаются в файлах, а не теряются в истории чата.
 
 ## Зачем он нужен
 
@@ -36,7 +36,7 @@
 4DreamTeam превращает идею в прослеживаемый рабочий процесс:
 
 ```txt
-idea -> product brief -> technical task -> implementation -> quality review -> documentation
+idea -> product brief -> technical task -> implementation -> quality review -> documentation -> release
 ```
 
 Он также помогает с базами знаний проектов, инфраструктурными заметками, позиционированием README, пресс-релизами, публичными материалами и продолжением работы между сессиями.
@@ -74,6 +74,7 @@ idea -> product brief -> technical task -> implementation -> quality review -> d
 - суммировать и проверять workspace;
 - обновлять правила workspace после обновления навыка;
 - улучшать сам 4DreamTeam через тот же контролируемый жизненный цикл;
+- упаковывать принятую работу в changelog, commit plan и git commit после явного подтверждения;
 - готовить пресс-релизы, позиционирование README, продуктовые сообщения и аналитические материалы для внешней аудитории;
 - документировать серверы, деплой, SSH-доступ, диагностику, миграции и runbook с DevOps-предохранителями.
 
@@ -88,6 +89,7 @@ idea -> product brief -> technical task -> implementation -> quality review -> d
 | `wiki` | Создает и поддерживает проектные базы знаний, основанные на подтвержденных источниках. |
 | `marketing` | Превращает подтвержденную продуктовую ценность в пресс-релизы, позиционирование README, продуктовые сообщения, материалы запуска и рыночную аналитику. |
 | `devops` | Ведет инфраструктурную документацию, карточки серверов, диагностику деплоя, правила SSH-доступа и операционные runbook. |
+| `release` | Упаковывает принятую работу в workspace/source changelog, commit plan и git commit после явного подтверждения. |
 
 ## Типичный путь
 
@@ -109,7 +111,8 @@ The owner takes reservations manually and loses track of changes.
 2. техническую задачу с требованиями к реализации;
 3. изменения в коде и отчет разработчика;
 4. независимый отчет качества;
-5. обновление документации, если принятое поведение меняет проект.
+5. обновление документации, если принятое поведение меняет проект;
+6. release packaging с changelog и commit plan, если работу нужно зафиксировать в git.
 
 В `controlled` mode 4DreamTeam останавливается на важных этапах, чтобы пользователь мог подтвердить следующий шаг.
 
@@ -130,7 +133,8 @@ docs/
 - отчеты разработчика отдельно от отчетов качества;
 - отклоненную работу с понятными путями исправления;
 - знания проекта в Markdown;
-- DevOps-факты, задокументированные только после проверки.
+- DevOps-факты, задокументированные только после проверки;
+- release plans, где до staging видны ветка, включенные файлы, исключенные dirty files, changelog и commit message.
 
 Смысл не в бюрократии. Смысл в непрерывности, проверяемости и меньшем количестве скрытых предположений.
 
@@ -164,6 +168,7 @@ $4DreamTeam continue
 $4DreamTeam validate workspace
 $4DreamTeam self-update workspace
 $4DreamTeam check docs for <project-name>
+$4DreamTeam prepare release for <project-name>
 $4DreamTeam write a press release for <project-name>
 $4DreamTeam improve README positioning for <project-name>
 $4DreamTeam improve <project-name>
@@ -171,6 +176,8 @@ $4DreamTeam improve 4DreamTeam itself from ../codex/4DreamTeam
 ```
 
 `status`, `continue` и `validate workspace` по умолчанию работают в режиме чтения. 4DreamTeam должен объяснить следующий шаг жизненного цикла и дождаться подтверждения перед изменением файлов.
+
+`prepare release` запускает роль `release`. Она доступна только для принятой работы, обновляет `docs/<project-name>/CHANGELOG.md`, обновляет approved source `CHANGELOG.md`, когда это требуется политикой source changelog, готовит commit plan и выполняет staging/commit только после явного подтверждения. Push не выполняется без отдельного явного подтверждения.
 
 `self-update workspace` заменяет только корневой `AGENTS.md` workspace из шаблона установленного навыка, а затем просит пользователя перезапустить Codex.
 
@@ -191,6 +198,7 @@ reports/
   product/
   tasks/
   quality/
+  release/
 ```
 
 Документация проекта находится здесь:
@@ -259,6 +267,30 @@ X works, is covered by tests, and quality review is accepted.
 ```txt
 analytic -> developer -> quality -> wiki if needed
 ```
+
+### Release Packaging
+
+Используйте это после accepted quality или product acceptance, когда работу нужно закоммитить:
+
+```txt
+Run $4DreamTeam.
+
+Goal:
+Prepare release for <project-name>.
+
+Context:
+Use the accepted task/report for <change>.
+```
+
+Роль `release`:
+
+1. проверяет текущую ветку и dirty tree;
+2. отделяет включаемые файлы от unrelated dirty files;
+3. обновляет `docs/<project-name>/CHANGELOG.md`;
+4. обновляет approved source `CHANGELOG.md`, когда применяется source changelog policy;
+5. предлагает commit message и точный staging plan;
+6. спрашивает подтверждение перед `git add` и `git commit`;
+7. не делает push без отдельного явного подтверждения.
 
 `quality` не является необязательным этапом для процесса реализации.
 
