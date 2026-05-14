@@ -100,8 +100,9 @@ Use this read-only workflow when the user asks a direct question about an existi
 Start with the smallest relevant part of the project documentation:
 
 1. `docs/index.md` only if the project wiki must be identified.
-2. The specific `docs/<project-name>/` pages that are likely to answer the question.
-3. `docs/<project-name>/sources.md` only if source boundaries may be needed.
+2. If the question is broad and `docs/<project-name>/.index/source-map.json` exists and is current, use index-first navigation to find the relevant semantic groups.
+3. The specific `docs/<project-name>/` pages that are likely to answer the question.
+4. `docs/<project-name>/sources.md` only if source boundaries may be needed.
 
 Do not perform a broad documentation audit or inspect approved sources by default.
 
@@ -113,6 +114,8 @@ Inspect approved source paths only if:
 4. the user explicitly asks to verify the answer from sources.
 
 If source inspection is needed but the approved source boundary is missing or insufficient, stop and ask for access to the exact path needed.
+
+Do not read the whole project wiki or broad source tree for project questions when index-first navigation can narrow the scope.
 
 ## Status And Continuation
 
@@ -133,6 +136,8 @@ Read only the current 4DreamTeam workspace:
 11. `reports/quality/accepted/`
 12. `reports/quality/rejected/`
 13. `reports/release/`
+
+Do not use project source-map search for plain workspace status unless a project-specific deep dive is needed.
 
 Report:
 

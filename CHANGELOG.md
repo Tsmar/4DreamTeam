@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.0.5 - 2026-05-14
+
+- Added Index-First Navigation rules requiring local wiki search before broad project wiki/source reading when a current source-map index exists.
+- Added skip conditions for exact file/page tasks, precise approved source scope, workspace status, missing/stale indexes, and pre-bootstrap wikis.
+- Added rebuild/check requirements after `source-map.md` changes.
+- Added concise index-first reading rules to lead, product, analytic, developer, quality, and devops references.
+- Preserved source boundary safety: search results do not grant access outside approved source roots.
+- Bumped the skill version to `0.0.5`.
+
 ## 0.0.4 - 2026-05-14
 
 - Added a structured source map standard for managed wikis with source roots, areas, semantic groups, primary/supporting files, related wiki pages, and update triggers.

@@ -29,6 +29,8 @@
 - `references/analytic.md`
 - `AGENTS.md`
 
+Before broad `/docs` or source-code reading, use index-first navigation when the project wiki has an up-to-date `.index/source-map.json`. Use the top semantic groups to choose the smallest relevant wiki pages and approved source files. Skip search when the user or product brief already names exact files, pages, or source scope.
+
 ## Writing
 
 - `/tasks/pending/TASK-XXXX.md`

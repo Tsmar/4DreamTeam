@@ -34,6 +34,8 @@
 - `references/developer.md`
 - `AGENTS.md`
 
+Before implementing in an unfamiliar project area, use index-first navigation when the project wiki has an up-to-date `.index/source-map.json`. Read only the relevant task, top wiki pages, and approved source files from the top search results before opening broader source areas. Skip search for exact file tasks or when the task already defines precise source scope.
+
 ## Writing
 
 - source code within task scope

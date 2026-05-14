@@ -126,6 +126,8 @@ Use this when the user asks to develop the product, find growth directions, or b
 
 Use this after wiki work or task results when product-owner acceptance is needed.
 
+For broad product acceptance of wiki or project results, use index-first navigation when the project wiki has an up-to-date `.index/source-map.json`. Skip search when the reviewed materials already identify exact files or pages.
+
 Check:
 
 1. Whether it is clear what the product or feature does.

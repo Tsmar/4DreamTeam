@@ -251,6 +251,48 @@ bun skill/tools/wiki.ts search <docs-project-path> "<query>"
 
 If the tooling is unavailable in the current workspace, keep `source-map.md` updated and report that local index generation was not run.
 
+## Index-First Navigation
+
+When a managed wiki has an up-to-date index at:
+
+```txt
+docs/<project-name>/.index/source-map.json
+```
+
+roles must use local wiki search before broad project wiki or approved-source reading for:
+
+1. project orientation;
+2. finding source-of-truth files for behavior, API, workflow, schema, integration, role rules, infrastructure, or release artifacts;
+3. preparing analytic tasks;
+4. starting developer work in an unfamiliar area;
+5. quality checks for documentation or source-backed behavior;
+6. wiki sync, check, or deepening;
+7. broad project questions.
+
+Search-first flow:
+
+1. Run `bun skill/tools/wiki.ts index check <docs-project-path>` if index freshness is uncertain.
+2. Run `bun skill/tools/wiki.ts search <docs-project-path> "<query>"`.
+3. Read only the relevant wiki pages and approved source files from the top results, usually 1-3 semantic groups.
+4. If search results are missing, stale, or insufficient, fall back to the smallest relevant docs/source scope and report that fallback.
+
+Skip search when:
+
+1. the user gave an exact file or exact wiki page;
+2. the task already has exact approved source scope;
+3. the workflow is workspace status without project-specific deep dive;
+4. `source-map.md` or `.index/source-map.json` is absent;
+5. `index check` reports stale or missing index and the current mode is read-only;
+6. wiki bootstrap has not created a source map yet.
+
+After any change to `source-map.md`:
+
+1. run `bun skill/tools/wiki.ts index build <docs-project-path>`;
+2. run `bun skill/tools/wiki.ts index check <docs-project-path>`;
+3. do not edit `.index/*` manually.
+
+Search results do not expand source permissions. Read only files inside approved source boundaries from `sources.md`.
+
 ## Page Status Policy
 
 Do not add status to ordinary wiki filenames.

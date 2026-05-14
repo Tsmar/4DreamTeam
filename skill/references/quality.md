@@ -34,6 +34,8 @@ For documentation-oriented work, `quality` also verifies source backing, status 
 - `references/quality.md`
 - `AGENTS.md`
 
+For documentation quality or source-backed behavior checks, use index-first navigation when the project wiki has an up-to-date `.index/source-map.json`. Run or request `index check` when index freshness matters, then read the relevant wiki/source files from the top semantic groups. Skip search when the task and reports already identify exact files to verify.
+
 ## Writing
 
 - `/reports/quality/accepted/TASK-XXXX-quality.md`

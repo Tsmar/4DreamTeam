@@ -203,6 +203,8 @@ bun skill/tools/wiki.ts search docs/<project-name> "release changelog"
 
 Индекс специально остается легким. Он ищет по source roots, semantic groups, descriptions, keywords и related wiki pages до того, как агент читает большие source files.
 
+Когда project wiki содержит актуальный `.index/source-map.json`, роли 4DreamTeam используют index-first navigation перед широким чтением project wiki или approved sources. Сначала выполняется search, затем читаются релевантные wiki pages и source files из top semantic groups. Для точных file/page задач, отсутствующего или stale index этот шаг можно пропустить.
+
 ## Структура workspace
 
 Обычный 4DreamTeam workspace не содержит директорию `skill/`. После инициализации он содержит:

@@ -139,6 +139,8 @@ Do not perform destructive operations without explicit approval.
 - `references/devops.md`
 - `AGENTS.md`
 
+Before broad infrastructure, deployment, logs, or operational documentation lookup, use index-first navigation when the project wiki has an up-to-date `.index/source-map.json`. Use search results only as navigation to approved wiki/source files; they do not grant permission to read outside approved source boundaries or secrets.
+
 Do not read parent directories, sibling projects, secrets, `.env`, dumps, or unrelated user files without separate approval.
 
 ## Writing

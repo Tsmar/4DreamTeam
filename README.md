@@ -203,6 +203,8 @@ bun skill/tools/wiki.ts search docs/<project-name> "release changelog"
 
 The index is intentionally lightweight. It searches source roots, semantic groups, file descriptions, keywords, and related wiki pages before an agent reads larger source files.
 
+When a project wiki has a current `.index/source-map.json`, 4DreamTeam roles use index-first navigation before broad project wiki or approved-source reading. They search first, then read the relevant wiki pages and source files from the top semantic groups. Exact file/page tasks and missing or stale indexes can skip this step.
+
 ## Workspace Shape
 
 A normal 4DreamTeam workspace does not contain the `skill/` directory. After initialization, it contains:
