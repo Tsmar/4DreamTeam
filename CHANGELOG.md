@@ -1,5 +1,21 @@
 # Changelog
 
+## 0.1.2 - 2026-05-15
+
+- Split the large lead reference into route-specific modules for preflight, routing, lifecycle, contracts, safety, read-only workflows, and self-maintenance.
+- Split wiki shared rules into focused modules for source boundaries, page shape, source maps, and local indexing.
+- Added reference-loading guidance so agents load the smallest sufficient rule set for each route.
+- Added README guidance for reducing token and context usage when working with 4DreamTeam.
+- Bumped the skill version to `0.1.2`.
+
+## 0.1.1 - 2026-05-15
+
+- Replaced the local wiki index/search tool with a dependency-free Python 3 standard-library script at `4dreamteam/scripts/wiki_index.py`.
+- Removed the legacy TypeScript wiki tool.
+- Updated wiki rules, README files, and package script to use the bundled Python wiki index script and direct `source-map.md` fallback when tooling is unavailable.
+- Fixed wiki tooling path guidance so agents resolve the installed skill path instead of relying on a hardcoded repository path.
+- Bumped the skill version to `0.1.1`.
+
 ## 0.1.0 - 2026-05-14
 
 - Strengthened `analytic` with an implementation-ready gate, technical impact checklist, validation plan requirement, discovery separation, and blocking question rules.
@@ -73,7 +89,7 @@
 ## 0.0.4 - 2026-05-14
 
 - Added a structured source map standard for managed wikis with source roots, areas, semantic groups, primary/supporting files, related wiki pages, and update triggers.
-- Added Bun/TypeScript wiki tooling at `skill/tools/wiki.ts` for local `index build`, `index check`, and `search` commands.
+- Added local wiki tooling for `index build`, `index check`, and `search` commands.
 - Added generated `.index/source-map.json` and `.index/manifest.json` rules as derived artifacts from `source-map.md`.
 - Updated wiki bootstrap, deepening, sync, and check rules to maintain source maps and local indexes.
 - Updated the source map template to represent semantic navigation instead of source boundary policy.

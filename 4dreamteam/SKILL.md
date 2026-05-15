@@ -4,7 +4,7 @@ description: Coordinate the 4DreamTeam file-based agent framework for Codex. Use
 license: MIT
 metadata:
   author: Tsmar
-  version: 0.1.0
+  version: 0.1.2
   repository: https://github.com/Tsmar/4DreamTeam
 ---
 
@@ -15,9 +15,10 @@ Use this skill as the main entrypoint for the 4DreamTeam framework. The user sho
 ## First Steps
 
 1. Read `references/lead.md`.
-2. Check whether the current folder is a 4DreamTeam workspace before writing files. Do not require a `skill/` folder in normal workspaces after the skill is installed.
-3. Route the request to the relevant role workflow.
-4. Load only the role reference needed for the route.
+2. Follow the lead module map and load only the smallest sufficient detailed reference files for the route.
+3. Check whether the current folder is a 4DreamTeam workspace before writing files. Do not require a `skill/` folder in normal workspaces after the skill is installed.
+4. Route the request to the relevant role workflow.
+5. Load only the role reference and mode-specific references needed for the route.
 
 ## Role References
 
@@ -55,6 +56,16 @@ Use bundled templates from `assets/templates/`:
 - `assets/templates/devops/server-card.md`
 - `assets/templates/workspace/AGENTS.md`
 
+## Reference Loading
+
+Use route-specific references to reduce unnecessary context:
+
+- Read `references/lead.md` as the compact entrypoint and module map.
+- Read `references/lead/read-only.md` only for status, continuation, validation, or direct project questions.
+- Read `references/lead/self-maintenance.md` only for self-update or self-improvement.
+- Read `references/lead/lifecycle.md`, `references/lead/contracts.md`, or `references/lead/safety.md` when their gates or artifacts apply.
+- For wiki work, read `references/wiki.md`, `references/wiki/index.md`, `references/wiki/shared.md`, then only the shared modules and mode file selected by the route.
+
 ## Hard Guarantees
 
 1. Do not bypass 4DreamTeam workflow with ad-hoc work when a 4DreamTeam route applies.
@@ -66,6 +77,6 @@ Use bundled templates from `assets/templates/`:
 7. Treat approved source paths as hard read boundaries.
 8. DevOps server documentation belongs in `docs/<project-name>/devops/servers/`; DevOps keys are looked up only in workspace-root `keys/`.
 9. Release commits require accepted quality or product acceptance, a visible commit plan, and explicit user approval before staging or committing.
-10. Wiki source maps are maintained in `docs/<project-name>/source-map.md`; generated `.index/*` files must be rebuilt with the Bun wiki tooling instead of edited by hand.
+10. Wiki source maps are maintained in `docs/<project-name>/source-map.md`; generated `.index/*` files must be rebuilt with the bundled wiki index tooling instead of edited by hand.
 11. When a current local wiki index exists, use index-first navigation before broad project wiki or approved-source reading.
 12. Report created and changed files at the end.

@@ -98,8 +98,8 @@ Do not document line-by-line implementation. Deepening is an architectural map, 
 When deepening adds or clarifies architecture areas, roles, endpoints, schemas, templates, integrations, infrastructure units, or release-relevant artifacts:
 
 1. Update `docs/<project-name>/source-map.md` with semantic groups and update triggers.
-2. Rebuild `.index/source-map.json` and `.index/manifest.json` with Bun wiki tooling when available.
-3. Run `bun skill/tools/wiki.ts index check <docs-project-path>` when available.
+2. Rebuild `.index/source-map.json` and `.index/manifest.json` with bundled Python wiki index tooling when available.
+3. Run `python3 <resolved-skill-path>/scripts/wiki_index.py index check <docs-project-path>` when available.
 
 Do not add every file. Add only source files that help agents locate the source of truth.
 

@@ -193,17 +193,34 @@ docs/<project-name>/source-map.md
 
 `source-map.md` - редактируемый источник правды для смысловой навигации по approved sources. Generated `.index` files являются производными и не должны редактироваться вручную.
 
-В репозитории есть dependency-free Bun/TypeScript CLI:
+В skill есть dependency-free Python 3 CLI. Сначала определите путь установленного skill, затем выполните:
 
 ```bash
-bun skill/tools/wiki.ts index build docs/<project-name>
-bun skill/tools/wiki.ts index check docs/<project-name>
-bun skill/tools/wiki.ts search docs/<project-name> "release changelog"
+python3 <resolved-skill-path>/scripts/wiki_index.py index build docs/<project-name>
+python3 <resolved-skill-path>/scripts/wiki_index.py index check docs/<project-name>
+python3 <resolved-skill-path>/scripts/wiki_index.py search docs/<project-name> "release changelog"
 ```
+
+В checkout этого репозитория путь: `4dreamteam/scripts/wiki_index.py`. Если скрипт недоступен, используйте `source-map.md` напрямую через узкий `rg` search и сообщите, что generated `.index` files не были перестроены.
 
 Индекс специально остается легким. Он ищет по source roots, semantic groups, descriptions, keywords и related wiki pages до того, как агент читает большие source files.
 
 Когда project wiki содержит актуальный `.index/source-map.json`, роли 4DreamTeam используют index-first navigation перед широким чтением project wiki или approved sources. Сначала выполняется search, затем читаются релевантные wiki pages и source files из top semantic groups. Для точных file/page задач, отсутствующего или stale index этот шаг можно пропустить.
+
+## Эффективное использование
+
+4DreamTeam сохраняет работу проверяемой, но можно помочь Codex тратить меньше контекста на каждый шаг:
+
+- Указывайте project, task, report, wiki page или source file, если они уже известны.
+- Используйте `$4DreamTeam status`, `$4DreamTeam continue` или `$4DreamTeam validate workspace` для ориентации; эти маршруты по умолчанию работают в режиме чтения.
+- Задавайте прямой вопрос как прямой вопрос, если вам не нужна задача или изменение файлов.
+- Для небольшой реализации описывайте точное поведение, ограничения и разрешен ли режим `auto`.
+- Для проверки документации сначала используйте `check docs for <project-name>` или `search docs for <project-name> <query>`, а не широкий source inspection.
+- Избегайте запросов вроде "прочитай весь проект", если действительно не нужен обзор всего проекта.
+- Указывайте approved source paths явно. Доступ разрешается только к этому пути и его потомкам.
+- Указывайте acceptance criteria, когда они уже понятны; иначе 4DreamTeam сформирует их на этапе product или analytic.
+
+Внутри workflow агенты должны следовать той же дисциплине: сначала читать `references/lead.md`, затем только нужные route-specific lead, role, wiki shared и mode files.
 
 ## Структура workspace
 

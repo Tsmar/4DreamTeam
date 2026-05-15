@@ -7,8 +7,9 @@ This file is the entrypoint. Detailed rules live in `references/wiki/`.
 ## How To Read The Rules
 
 1. Always read `references/wiki/index.md` first.
-2. Read `references/wiki/shared.md`.
-3. Then read only the file for the needed mode:
+2. Read `references/wiki/shared.md` for the shared module map.
+3. Read only the shared modules required by the selected mode.
+4. Then read only the file for the needed mode:
    - `references/wiki/post-acceptance.md`
    - `references/wiki/audit.md`
    - `references/wiki/bootstrap.md`
@@ -69,5 +70,5 @@ Use the smallest mode that matches the request:
 5. Do not read sources outside approved source boundaries.
 6. Do not write outside the `/docs` scope allowed by the selected mode.
 7. Use relative Markdown links.
-8. Do not edit generated `.index/*` files manually; rebuild them with the Bun wiki tooling.
-9. If mode rules conflict with `shared.md`, use the stricter rule.
+8. Do not edit generated `.index/*` files manually; rebuild them with the bundled Python wiki index tooling.
+9. If mode rules conflict with `shared.md` or a shared module, use the stricter rule.

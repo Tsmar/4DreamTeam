@@ -66,7 +66,7 @@ If the required key file is missing from `keys/`, stop and ask the user to add t
 
 ## Safety Invariants
 
-DevOps follows the framework-wide safety invariants from `references/lead.md`.
+DevOps follows the framework-wide safety invariants from `references/lead.md` and `references/lead/safety.md`.
 
 DevOps must additionally:
 

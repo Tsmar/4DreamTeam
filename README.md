@@ -260,17 +260,34 @@ docs/<project-name>/source-map.md
 
 `source-map.md` is the editable source of truth for semantic navigation across approved sources. Generated `.index` files are derived from it and should not be edited by hand.
 
-The repository includes a dependency-free Bun/TypeScript CLI:
+The skill includes a dependency-free Python 3 CLI. Resolve the installed skill path first, then run:
 
 ```bash
-bun skill/tools/wiki.ts index build docs/<project-name>
-bun skill/tools/wiki.ts index check docs/<project-name>
-bun skill/tools/wiki.ts search docs/<project-name> "release changelog"
+python3 <resolved-skill-path>/scripts/wiki_index.py index build docs/<project-name>
+python3 <resolved-skill-path>/scripts/wiki_index.py index check docs/<project-name>
+python3 <resolved-skill-path>/scripts/wiki_index.py search docs/<project-name> "release changelog"
 ```
+
+From this repository checkout, the path is `4dreamteam/scripts/wiki_index.py`. If the script is unavailable, use `source-map.md` directly with narrow `rg` searches and report that generated `.index` files were not rebuilt.
 
 The index is intentionally lightweight. It searches source roots, semantic groups, file descriptions, keywords, and related wiki pages before an agent reads larger source files.
 
 When a project wiki has a current `.index/source-map.json`, 4DreamTeam roles use index-first navigation before broad project wiki or approved-source reading. They search first, then read the relevant wiki pages and source files from the top semantic groups. Exact file/page tasks and missing or stale indexes can skip this step.
+
+## Efficient Usage
+
+4DreamTeam keeps work traceable, but you can help Codex spend less context on each turn by making the route narrow:
+
+- Name the project, task, report, wiki page, or source file when you know it.
+- Use `$4DreamTeam status`, `$4DreamTeam continue`, or `$4DreamTeam validate workspace` for orientation; these routes are read-only by default.
+- Ask direct questions as direct questions when you do not need a task or file changes.
+- For small implementation work, describe the exact behavior and constraints, and say whether `auto` is allowed.
+- For documentation checks, prefer `check docs for <project-name>` or `search docs for <project-name> <query>` before asking for broad source inspection.
+- Avoid broad prompts such as "read the whole project" unless the whole project really needs review.
+- Keep approved source paths explicit. A source path grants access only to that path and its descendants.
+- Mention exact acceptance criteria when you already know them; otherwise 4DreamTeam will create them during product or analytic work.
+
+Agents should mirror this discipline internally: load `references/lead.md` first, then only the route-specific lead, role, wiki shared, and mode files needed for the current request.
 
 ## Workspace Shape
 

@@ -109,6 +109,6 @@ The minimum bootstrap must create:
 Recommended bootstrap output:
 
 1. `docs/<project-name>/source-map.md` when approved sources contain meaningful source areas or multiple important artifact types.
-2. `docs/<project-name>/.index/source-map.json` and `docs/<project-name>/.index/manifest.json` when Bun wiki tooling is available.
+2. `docs/<project-name>/.index/source-map.json` and `docs/<project-name>/.index/manifest.json` when bundled Python wiki index tooling is available.
 
 Create additional sections only if they reflect real approved sources.

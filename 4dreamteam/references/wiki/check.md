@@ -23,7 +23,7 @@ Verify that documentation does not contradict approved source code and correctly
 6. Check relative links for local wiki pages that should exist.
 7. Check whether product-facing pages are understandable without reading implementation details first.
 8. If `source-map.md` exists, check that it is not a raw file manifest and that primary links point to approved sources.
-9. If `.index/source-map.json` exists, run or recommend `bun skill/tools/wiki.ts index check <docs-project-path>` to detect stale generated index state.
+9. If `.index/source-map.json` exists, run or recommend `python3 <resolved-skill-path>/scripts/wiki_index.py index check <docs-project-path>` to detect stale generated index state.
 10. Report findings by severity.
 
 ## Output

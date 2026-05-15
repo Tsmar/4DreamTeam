@@ -3,6 +3,6 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "wiki": "bun skill/tools/wiki.ts"
+    "wiki": "python3 4dreamteam/scripts/wiki_index.py"
   }
 }

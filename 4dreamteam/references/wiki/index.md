@@ -8,9 +8,10 @@ For any wiki request:
 
 1. Read `references/wiki.md`.
 2. Read this file.
-3. Read `shared.md`.
-4. Determine the mode.
-5. Read only the mode file.
+3. Determine the mode.
+4. Read `shared.md` for the shared module map.
+5. Read only the shared modules required by the selected mode.
+6. Read only the mode file.
 
 ## Modes
 
@@ -99,7 +100,11 @@ If mode selection affects file writes and cannot be safely inferred from the req
 
 ## File Map
 
-- `shared.md` - rules for sources, statuses, language, page shape, and common write/read restrictions.
+- `shared.md` - compact map for common wiki rules and shared modules.
+- `shared/source-boundaries.md` - source boundaries, ignore list, source truth, and project-name rules.
+- `shared/page-shape.md` - language policy, wiki shape, documentation depth, drilldown links, and page status policy.
+- `shared/source-map.md` - source-map purpose and structure.
+- `shared/indexing.md` - generated local index rules, Python index commands, and index-first navigation.
 - `post-acceptance.md` - docs update after accepted quality.
 - `audit.md` - read-only gap analysis.
 - `bootstrap.md` - first managed wiki creation from approved sources.

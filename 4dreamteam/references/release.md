@@ -109,7 +109,7 @@ Forbidden without separate explicit approval:
 6. amending commits
 7. rebasing or branch deletion
 
-Release follows the framework-wide safety invariants from `references/lead.md`.
+Release follows the framework-wide safety invariants from `references/lead.md` and `references/lead/safety.md`.
 
 Additional release rules:
 
