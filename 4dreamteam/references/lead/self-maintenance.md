@@ -84,6 +84,8 @@ Rules:
 9. A narrowly scoped copyedit or typo fix may use product acceptance without a full quality report only when it does not affect behavior, templates, safety, routing, gates, source boundaries, or release/devops behavior.
 10. Preserve source repository language policy. Markdown documentation and templates in the skill repository must remain in English unless repository rules change explicitly.
 11. Do not weaken workspace preflight, source boundaries, controlled-mode gates, ordinary task quality gates, wiki gates, DevOps risk gates, or secret-handling rules.
+12. Do not collapse self-improvement into ad-hoc direct edits. Changes to role behavior, routing, templates, lifecycle, safety, approval gates, source boundaries, release/devops behavior, or output contracts must have auditable workspace artifacts for product scope, developer implementation, and quality review.
+13. If an agent accidentally edits the skill source before creating the required artifacts, stop further source edits, create the missing product/task/developer/quality artifacts with accurate timing notes, then run quality against the actual diff before reporting completion.
 
 After receiving a high-level user task:
 

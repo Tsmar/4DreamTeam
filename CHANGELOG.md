@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.1.3 - 2026-05-16
+
+- Strengthened `marketing` into a GTM, positioning, value validation, release narrative, README positioning, and claim audit role.
+- Added marketing templates for value review, README positioning review, release narrative, GTM brief, and claim audit.
+- Expanded lead routing so marketing is used for value reviews, claim audits, release narratives, GTM/positioning, and user-facing release communication, while skipping purely internal work without user-facing impact.
+- Clarified self-improvement rules so role, routing, template, lifecycle, safety, and output-contract changes must not bypass product, developer, and quality artifacts.
+- Bumped the skill version to `0.1.3`.
+
 ## 0.1.2 - 2026-05-15
 
 - Split the large lead reference into route-specific modules for preflight, routing, lifecycle, contracts, safety, read-only workflows, and self-maintenance.

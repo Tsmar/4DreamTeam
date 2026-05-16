@@ -4,7 +4,7 @@ description: Coordinate the 4DreamTeam file-based agent framework for Codex. Use
 license: MIT
 metadata:
   author: Tsmar
-  version: 0.1.2
+  version: 0.1.3
   repository: https://github.com/Tsmar/4DreamTeam
 ---
 
@@ -27,7 +27,7 @@ Use this skill as the main entrypoint for the 4DreamTeam framework. The user sho
 - Implementation: read `references/developer.md`.
 - Independent acceptance: read `references/quality.md`.
 - Knowledge base, docs, source boundaries, source maps, local wiki indexes, bootstrap/audit/sync/check/blueprint/deepening: read `references/wiki.md`, then follow `references/wiki/index.md`.
-- Marketing, press releases, product messaging, README positioning, launch materials, market-facing analysis: read `references/marketing.md`.
+- Marketing, GTM briefs, value reviews, claim audits, release narratives, press releases, product messaging, README positioning, launch materials, market-facing analysis: read `references/marketing.md`.
 - Infrastructure operations, server documentation, deployment diagnostics, SSH access, logs, migrations, and operational runbooks: read `references/devops.md`.
 - Release packaging, changelogs, branch checks, commit plans, staging, and commits after accepted work: read `references/release.md`.
 
@@ -45,6 +45,11 @@ Use bundled templates from `assets/templates/`:
 - `assets/templates/quality/rejected.md`
 - `assets/templates/marketing/press-release.md`
 - `assets/templates/marketing/market-analysis.md`
+- `assets/templates/marketing/value-review.md`
+- `assets/templates/marketing/readme-positioning-review.md`
+- `assets/templates/marketing/release-narrative.md`
+- `assets/templates/marketing/gtm-brief.md`
+- `assets/templates/marketing/claim-audit.md`
 - `assets/templates/release/plan.md`
 - `assets/templates/wiki/docs-index.md`
 - `assets/templates/wiki/project.md`
@@ -57,6 +62,14 @@ Use bundled templates from `assets/templates/`:
 - `assets/templates/workspace/AGENTS.md`
 
 ## Reference Loading
+
+Marketing templates are selected by mode:
+
+- Use `assets/templates/marketing/value-review.md` when accepted work, a feature, UX/API/workflow change, or a release candidate needs user-facing value validation.
+- Use `assets/templates/marketing/readme-positioning-review.md` when reviewing README clarity, first-screen promise, audience, proof points, risky claims, and next steps.
+- Use `assets/templates/marketing/release-narrative.md` before release when accepted changes need user-facing and developer-facing release communication.
+- Use `assets/templates/marketing/gtm-brief.md` during early product, module, or large-epic shaping for ICP, jobs-to-be-done, positioning, messaging, adoption, objections, channels, assumptions, and validation needs.
+- Use `assets/templates/marketing/claim-audit.md` before public claims appear in README, landing pages, release notes, pitch decks, press releases, case studies, or launch copy.
 
 Use route-specific references to reduce unnecessary context:
 

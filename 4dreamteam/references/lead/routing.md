@@ -22,7 +22,7 @@ Route requests as follows:
 - update a knowledge base after an accepted report -> wiki post-acceptance/sync;
 - create a knowledge base for a future project -> wiki blueprint when this mode is enabled by wiki rules;
 - deepen an existing knowledge base based on current implementation -> wiki deepening;
-- press release, launch announcement, product marketing copy, README positioning, value proposition, audience-facing materials, competitive/product narrative, case study, market-facing analysis -> marketing;
+- press release, launch announcement, product marketing copy, README positioning, value proposition, value review, positioning review, release narrative, GTM brief, claim audit, audience-facing materials, competitive/product narrative, case study, market-facing analysis, market-facing explanation, or user-facing release communication -> marketing;
 - infrastructure, servers, SSH, deploys, logs, systemd, Docker, nginx/reverse proxy, databases, migrations, diagnostics, incident/deploy/runbook documentation -> devops;
 - package accepted work for changelog, commit message, branch review, staging, git commit, release notes, or "prepare commit" -> release.
 
@@ -43,7 +43,7 @@ Do not create an epic for a clear standalone engineering task unless the user ex
 | Docs need alignment with approved source changes | `wiki sync` | Use approved sources and write only allowed docs scope. |
 | Release, changelog, commit, staging, tag, push, or publication | `release` | Requires accepted quality or product acceptance; staging/commit/push need explicit approval. |
 | Infrastructure, SSH, deploy, logs, migrations, server state | `devops` | Explain first; risky changes require explicit approval. |
-| Public messaging, README positioning, launch copy, market-facing analysis | `marketing` | Use confirmed sources; unsupported claims are excluded. |
+| Public messaging, README positioning, launch copy, value review, release narrative, GTM brief, claim audit, market-facing analysis | `marketing` | Use confirmed sources; unsupported, risky, or forbidden claims are excluded or marked as not usable. |
 | Secrets, destructive operations, production data, unapproved sources, unsafe ambiguity | stop | Ask for approval, source access, or clarification. |
 
 If multiple routes seem plausible, choose the route that preserves safety and auditability:
@@ -53,6 +53,23 @@ If multiple routes seem plausible, choose the route that preserves safety and au
 3. quality before wiki/release for implementation or framework behavior changes;
 4. devops before developer when server state or operational risk is involved;
 5. release only after accepted evidence exists.
+
+## Marketing Route Rules
+
+Use `marketing` when the request is about:
+
+- explaining product value;
+- preparing public-facing communication;
+- validating user-facing value;
+- reviewing README positioning;
+- preparing release narrative;
+- auditing marketing claims;
+- connecting technical changes to user or business outcomes;
+- structuring ICP, GTM, positioning, or messaging;
+- preparing market-facing explanations;
+- preparing user-facing release communication.
+
+Do not use `marketing` for purely internal refactoring, low-level implementation details, test-only changes, or infrastructure work without user-facing impact, unless the user explicitly asks for external communication.
 
 ## Incomplete Context
 
