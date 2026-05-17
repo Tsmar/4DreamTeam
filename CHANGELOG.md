@@ -1,5 +1,21 @@
 # Changelog
 
+## 0.1.5 - 2026-05-17
+
+- Reworked the English and Russian README files into lighter product landing pages focused on real user situations, value, roles, quick start, and safety.
+- Moved detailed English documentation into repository `docs/` pages for examples, workflows, workspace structure, wiki index behavior, `agentmemory`, and development notes.
+- Documented the `agentmemory` and wiki fallback relationship in the README with results from a curated wiki-seeding benchmark.
+- Clarified that `agentmemory` is optional, useful for continuity, and not a replacement for wiki, task, report, or approved-source verification.
+- Bumped the skill version to `0.1.5`.
+
+## 0.1.4 - 2026-05-17
+
+- Added an optional lead memory policy for using `agentmemory` as a non-authoritative recall layer.
+- Defined wiki/tasks/reports fallback behavior when `agentmemory` is unavailable, slow, empty, low-signal, or contradictory.
+- Added safe memory save rules that prohibit secrets, credentials, `.env` contents, production data, large copied artifacts, and unaccepted speculation.
+- Added a benchmark pattern for comparing wiki-only, memory-only, and memory-plus-wiki fallback workflows.
+- Bumped the skill version to `0.1.4`.
+
 ## 0.1.3 - 2026-05-16
 
 - Strengthened `marketing` into a GTM, positioning, value validation, release narrative, README positioning, and claim audit role.

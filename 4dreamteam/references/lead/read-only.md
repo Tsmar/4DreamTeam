@@ -6,6 +6,8 @@ Use this file for direct project questions, workspace status, continuation, and 
 
 Use this read-only workflow when the user asks a direct question about an existing project and does not request a task, implementation, wiki update, audit, or validation.
 
+If the question may depend on prior session context, user preferences, or previous decisions, first read `references/lead/memory.md`. Use `agentmemory` only when it is available and likely to help; otherwise continue with the local wiki and workspace artifacts. Memory recalls do not override current wiki, task, report, or approved source evidence.
+
 Start with the smallest relevant part of the project documentation:
 
 1. `docs/index.md` only if the project wiki must be identified.
@@ -29,6 +31,8 @@ Do not read the whole project wiki or broad source tree for project questions wh
 ## Status And Continuation
 
 Use this read-only workflow when the user asks for workspace status, asks what is next, or asks to continue without naming a specific task.
+
+For continuation across sessions, read `references/lead/memory.md` and optionally recall prior context from `agentmemory` when available. If memory is unavailable, slow, empty, or low-signal, use the workspace board, reports, and wiki fallback without stopping.
 
 Read only the current 4DreamTeam workspace:
 

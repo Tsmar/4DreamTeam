@@ -23,6 +23,7 @@ Read these files only when needed:
 - `references/lead/lifecycle.md` - role board, task lifecycle state machine, internal artifact policy, and file contract.
 - `references/lead/contracts.md` - mandatory output contracts, role instruction quality checklist, and instruction/template boundary.
 - `references/lead/safety.md` - safety invariants, execution modes, small safe task fast path, human-in-the-loop gates, blocking questions, and role blockers.
+- `references/lead/memory.md` - optional `agentmemory` recall/save policy, wiki fallback, and memory effectiveness benchmark.
 - `references/lead/read-only.md` - direct project questions, status/continuation, and workspace validation.
 - `references/lead/self-maintenance.md` - workspace self-update and skill self-improvement workflows.
 
@@ -44,11 +45,12 @@ After routing, load only the relevant role reference:
 1. Read `references/lead/preflight.md` before writing files in a workspace.
 2. Read `references/lead/routing.md` to choose the route.
 3. Read `references/lead/safety.md` when the request may need approval, source access, secrets, infrastructure, git, release, or mode decisions.
-4. Read `references/lead/read-only.md` for status, continuation, validation, or direct project questions.
-5. Read `references/lead/self-maintenance.md` for workspace self-update or 4DreamTeam self-improvement.
-6. Read `references/lead/lifecycle.md` when moving tasks between role-board columns or checking lifecycle state.
-7. Read `references/lead/contracts.md` when creating or reviewing role artifacts, templates, or role instruction changes.
-8. Load the selected role reference and continue with that role workflow.
+4. Read `references/lead/memory.md` when prior session context, saved decisions, user preferences, wiki fallback, or memory effectiveness is relevant.
+5. Read `references/lead/read-only.md` for status, continuation, validation, or direct project questions.
+6. Read `references/lead/self-maintenance.md` for workspace self-update or 4DreamTeam self-improvement.
+7. Read `references/lead/lifecycle.md` when moving tasks between role-board columns or checking lifecycle state.
+8. Read `references/lead/contracts.md` when creating or reviewing role artifacts, templates, or role instruction changes.
+9. Load the selected role reference and continue with that role workflow.
 
 ## Hard Guarantees
 
