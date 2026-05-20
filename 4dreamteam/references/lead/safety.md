@@ -71,7 +71,7 @@ Record meaningful approvals in the relevant task, report, release plan, or DevOp
 
 1. Workspace bootstrap - before creating workspace files.
 2. Product intake and backlog formation - before handing epic tasks to `analytic` or `developer` in controlled mode.
-3. Analytic - before implementation in controlled mode, except approved small safe fast path.
+3. Analytic - before implementation in controlled mode, except approved small safe fast path. Analytic must also stop for user confirmation before accepting decisions that change managed documentation, public behavior, APIs/contracts, architecture, or operational behavior.
 4. Developer -> Quality - no human gate between these roles.
 5. Quality rejection - controlled mode stops; auto mode allows at most one safe retry.
 6. Wiki bootstrap, blueprint, and deepening - before writing docs unless the user explicitly accepts defaults or auto.
@@ -100,11 +100,11 @@ The agent decides these questions itself and records them in `Assumptions`.
 
 `product` stops the workflow if the business goal, target audience, MVP/later split, or product acceptance criteria are unclear; if the goal and constraints conflict; if access to unapproved sources is needed; or if product acceptance requires materials outside available scope.
 
-`analytic` stops the workflow if the task goal is unclear, acceptance criteria cannot be made checkable, a decision is required about public API, data, migrations, or architecture, access to secrets or external services is needed, the request contradicts code or docs without a safe choice, there is a risk of removing existing functionality, or the affected area cannot be determined.
+`analytic` stops the workflow if the task goal is unclear, acceptance criteria cannot be made checkable, a decision is required about public API, data, migrations, or architecture, access to secrets or external services is needed, the request contradicts code or docs without a safe choice, there is a risk of removing existing functionality, the affected area cannot be determined, a documentation-changing decision has not been confirmed by the user, or required pre-development documentation alignment is still open.
 
 `developer` stops the workflow if the task is incomplete or contradictory, implementation requires going outside task scope, public API, data format, migrations, or architecture changes are needed without explicit requirements, a secret, database, external service, or destructive command is needed without approval, relevant tests cannot be run, or a new solution is found that is not described in the task.
 
-`quality` rejects work through a rejected quality report if at least one acceptance criterion is not met, there are unrelated changes, tests were not added without sufficient justification, available relevant checks were not run, implementation changed public behavior outside the task, or the developer report does not match actual changes.
+`quality` rejects work through a rejected quality report if at least one acceptance criterion is not met, there are unrelated changes, tests were not added without sufficient justification, available relevant checks were not run, implementation changed public behavior outside the task, required documentation alignment evidence is missing from the task, or the developer report does not match actual changes.
 
 `wiki post-acceptance` stops if there is no accepted quality report, accepted behavior is unclear, docs update would require describing unconfirmed changes, or an ADR is needed but the architecture decision is not recorded in the task or quality report. Other wiki modes stop according to their mode-specific gates in `references/wiki/`.
 

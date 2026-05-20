@@ -46,6 +46,58 @@ docs/<project-name>/devops/runbooks/<runbook-name>.md
 
 Do not use a separate root-level `servers/` folder.
 
+## Server Card Mirror
+
+Each managed server card must also be mirrored on its corresponding server when the server is reachable through the SSH/account context used by DevOps.
+
+Purpose:
+
+1. make the card recoverable if the local workstation copy is lost;
+2. keep a server-local history of card changes;
+3. make operational context available from the server itself without relying on a public repository.
+
+Canonical local card:
+
+```txt
+docs/<project-name>/devops/servers/<server-name>.md
+```
+
+Server-side mirror repository:
+
+```txt
+~/server-card
+```
+
+Rules:
+
+1. `~/server-card` is a private local git repository under the home directory of the SSH/account context used by the agent.
+2. The mirrored Markdown file name must match the local server-card file name, for example `~/server-card/main_hetzner_nginx_1.md`.
+3. The mirror repository has no required remote.
+4. Do not store private keys, passwords, `.env` files, database dumps, tokens, or unredacted secrets in the mirror.
+5. Do not create or track separate mirror copies inside this workspace repository; only the canonical local card belongs in `docs/<project-name>/devops/servers/`.
+6. After server management approval, DevOps may update `~/server-card` automatically after local server-card changes. This approval does not allow unrelated risky server state changes.
+7. After each local server-card change, copy the updated card to `~/server-card/<same-card-file-name>` and create a server-side git commit with a concise operational documentation message.
+8. If the server has no git identity configured, set repo-local identity only:
+   - `user.name`: `4DreamTeam DevOps`
+   - `user.email`: `4dreamteam@local`
+9. If the server-side mirror cannot be checked, updated, or committed, report that clearly and keep the local canonical card update.
+
+First connection/onboarding:
+
+1. When connecting to a managed server for the first time, check whether `~/server-card/<same-card-file-name>` already exists.
+2. If `~/server-card` is a git repository, inspect recent card history before operational work when doing so is safe and relevant.
+3. Use the existing mirrored card as server-local context, but do not treat it as more authoritative than verified current server facts.
+4. Redact or ignore any sensitive content found there; do not copy secrets into local docs, tasks, reports, or chat.
+
+Pre-task version check:
+
+1. Before performing DevOps tasks on a managed server, check `~/server-card/<same-card-file-name>` when the server is reachable.
+2. When the server-side mirrored card exists and can be read, treat it as the source of truth for server-local operational context.
+3. Compare the server-side card version, checksum, or last mirror commit with the local canonical card before continuing.
+4. If the server-side card and local card differ, stop before operational work, report the mismatch, and reconcile the local canonical card from the server-side card unless the user explicitly chooses another action.
+5. If the server-side card cannot be checked, report that clearly and continue only with the known local-card context and appropriate caution.
+6. Do not copy secrets or unredacted sensitive values from the server-side card into local docs, tasks, reports, or chat.
+
 ## Keys
 
 DevOps looks for SSH keys only in the `keys/` folder at the root of the current 4DreamTeam workspace:
@@ -120,6 +172,8 @@ Before SSH access, confirm that these are known:
 - reason for connecting.
 
 Initial work on an unknown server should start with discovery and documentation, not immediate changes.
+
+When a server is connected for management, initial work should also check `~/server-card` for an existing mirrored card and git history before proceeding without prior operational context. For later connections, check the server-side card version before performing tasks so stale local context does not drive operations.
 
 ## Risk Gates
 
@@ -203,5 +257,6 @@ In the final report, briefly state:
 - what was changed;
 - what was verified;
 - what remains unknown;
+- whether the server-side card mirror was checked or updated;
 - the next safe step.
 - what sensitive output was redacted, if any.

@@ -6,7 +6,7 @@ This folder is the repository for the Codex skill `4DreamTeam`.
 
 It contains:
 
-- the self-contained skill in `skill/`;
+- the self-contained skill in `4dreamteam/`;
 - agent metadata and UI interface files;
 - role references;
 - templates for files that the skill creates in user workspaces;
@@ -24,21 +24,21 @@ Do not route these requests through the `4DreamTeam` framework itself. Work as t
 
 Before changing the skill, identify which layer the request affects:
 
-- `skill/SKILL.md` - name, description, trigger surface, main entrypoint, and hard guarantees.
-- `skill/agents/openai.yaml` - display name, short description, icons, brand color, and default prompt.
-- `skill/references/` - detailed workflow and role-specific behavior.
-- `skill/references/wiki/` - knowledge-base route rules.
-- `skill/assets/templates/` - files the skill creates or uses as templates.
+- `4dreamteam/SKILL.md` - name, description, trigger surface, main entrypoint, and hard guarantees.
+- `4dreamteam/agents/openai.yaml` - display name, short description, icons, brand color, and default prompt.
+- `4dreamteam/references/` - detailed workflow and role-specific behavior.
+- `4dreamteam/references/wiki/` - knowledge-base route rules.
+- `4dreamteam/assets/templates/` - files the skill creates or uses as templates.
 - `README.md` - user-facing installation, verification, and usage guide.
 - `AGENTS.md` - development rules for this repository only.
 
-Keep `AGENTS.md` short. Do not duplicate lifecycle, task format, wiki structure, or role-specific rules here. Those details belong in `skill/references/`.
+Keep `AGENTS.md` short. Do not duplicate lifecycle, task format, wiki structure, or role-specific rules here. Those details belong in `4dreamteam/references/`.
 
 ## Language Policy
 
 All Markdown documentation and templates in this repository must be written in English.
 
-Do not add Russian text to `README.md`, `AGENTS.md`, `skill/references/`, or `skill/assets/templates/`. User-facing examples must also be in English.
+Do not add Russian text to `README.md`, `AGENTS.md`, `4dreamteam/references/`, or `4dreamteam/assets/templates/`. User-facing examples must also be in English.
 
 Localized user-facing README translations are allowed in files named `README.<locale>.md`, such as `README.ru.md`. Keep source-of-truth skill instructions, templates, and repository rules in English.
 

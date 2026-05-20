@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.1.6 - 2026-05-20
+
+- Added an analytic documentation-alignment gate before developer handoff when confirmed decisions would make managed docs stale or contradictory.
+- Added pre-development wiki sync guidance for confirmed requirements using `proposed` status without weakening post-acceptance docs rules.
+- Added DevOps server-card mirrors in `~/server-card`, including first-connection context recovery, server-local git history, automatic mirror updates after management approval, and secret-safe failure reporting.
+- Added a DevOps pre-task server-card version check so server work starts from the server-side card when it is available.
+- Corrected repository path documentation from stale `skill/` and `../codex/4DreamTeam` examples to the actual `4dreamteam/` source layout and portable local-checkout wording.
+- Added explicit skill installation instructions for the GitHub `4dreamteam` folder in README and workflow docs.
+- Bumped the skill version to `0.1.6`.
+
 ## 0.1.5 - 2026-05-17
 
 - Reworked the English and Russian README files into lighter product landing pages focused on real user situations, value, roles, quick start, and safety.

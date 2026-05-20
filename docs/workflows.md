@@ -2,6 +2,12 @@
 
 This page holds the operational workflow details that used to live in the main README.
 
+## Install
+
+Open a new chat and write: install the skill from [Tsmar/4DreamTeam](https://github.com/Tsmar/4DreamTeam/tree/main/4dreamteam).
+
+Restart Codex after installation so the skill is loaded in a clean session.
+
 ## Quick Commands
 
 ```txt
@@ -17,7 +23,7 @@ $4DreamTeam prepare release for <project-name>
 $4DreamTeam write a press release for <project-name>
 $4DreamTeam improve README positioning for <project-name>
 $4DreamTeam improve <project-name>
-$4DreamTeam improve 4DreamTeam itself from ../codex/4DreamTeam
+$4DreamTeam improve 4DreamTeam itself from your local checkout of https://github.com/Tsmar/4DreamTeam, for example /Users/Tsmar/Projects/4DreamTeam
 ```
 
 `status`, `continue`, and `validate workspace` are read-only by default. 4DreamTeam should explain the next lifecycle step and wait for approval before changing files.
@@ -193,7 +199,7 @@ Knowledge base:
 4DreamTeam
 
 Approved source:
-../codex/4DreamTeam
+your local checkout of https://github.com/Tsmar/4DreamTeam, for example /Users/Tsmar/Projects/4DreamTeam
 ```
 
 Self-improvement follows a controlled lifecycle:

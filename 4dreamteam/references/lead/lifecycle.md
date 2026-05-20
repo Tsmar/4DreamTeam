@@ -25,13 +25,14 @@ Movement rules:
 1. `product` creates and shapes epics in `tasks/backlog/`.
 2. Every epic contains only tasks as child work items. Do not create Product or Item entities.
 3. `product` may keep an epic in `tasks/backlog/`, hand its tasks to `tasks/analytic/`, or hand clear delivery tasks directly to `tasks/developer/`.
-4. `analytic` creates or moves implementation-ready task specs to `tasks/developer/`.
-5. `developer` moves completed implementation work to `tasks/quality/` and creates a developer report.
-6. `quality` moves accepted work to `tasks/wiki/` when docs are needed, otherwise to `tasks/done/`.
-7. `quality` moves rejected work to `tasks/rejected/`.
-8. Rework moves from `tasks/rejected/` to `tasks/developer/`, then back to `tasks/quality/`.
-9. `release` moves work from `tasks/done/` to `tasks/release/` only after an explicit user request for release, changelog, staging, commit, or release packaging.
-10. `release` moves work from `tasks/release/` to `tasks/released/` only after the release branch is pushed and the chosen release publication step is complete.
+4. `analytic` creates or moves implementation-ready task specs to `tasks/developer/` only after required documentation alignment is complete or explicitly not required.
+5. When analytic decisions require pre-development documentation alignment, `wiki sync` updates managed docs with `proposed` status before developer handoff.
+6. `developer` moves completed implementation work to `tasks/quality/` and creates a developer report.
+7. `quality` moves accepted work to `tasks/wiki/` when docs are needed, otherwise to `tasks/done/`.
+8. `quality` moves rejected work to `tasks/rejected/`.
+9. Rework moves from `tasks/rejected/` to `tasks/developer/`, then back to `tasks/quality/`.
+10. `release` moves work from `tasks/done/` to `tasks/release/` only after an explicit user request for release, changelog, staging, commit, or release packaging.
+11. `release` moves work from `tasks/release/` to `tasks/released/` only after the release branch is pushed and the chosen release publication step is complete.
 
 ## Task Lifecycle State Machine
 
@@ -41,8 +42,9 @@ Use folder location as the primary state. Use the task's status field for finer 
 |---|---|---|---|---|
 | `draft` | product | Epic or draft task in `tasks/backlog/` | Product goal and audience are visible. | `product-approved`, `blocked`, `rejected` |
 | `product-approved` | product | Epic with scope, non-goals, task candidates, and product acceptance criteria. | No product blocking questions. | `analytic-ready`, `developer-ready`, `blocked` |
-| `analytic-ready` | analytic | Task candidate in epic or `tasks/analytic/`. | Technical impact can be analyzed from approved docs/sources. | `developer-ready`, `blocked`, `needs-product` |
-| `developer-ready` | developer | `tasks/developer/TASK-XXXX.md` with affected areas, acceptance criteria, and validation plan. | No analytic blocking questions. | `developer-in-progress`, `blocked` |
+| `analytic-ready` | analytic | Task candidate in epic or `tasks/analytic/`. | Technical impact can be analyzed from approved docs/sources. | `docs-alignment`, `developer-ready`, `blocked`, `needs-product` |
+| `docs-alignment` | analytic / wiki | Analytic task plus confirmed documentation-changing decision. | Managed docs are aligned as `proposed`, or alignment is explicitly not required/deferred. | `developer-ready`, `blocked` |
+| `developer-ready` | developer | `tasks/developer/TASK-XXXX.md` with affected areas, acceptance criteria, validation plan, and documentation alignment evidence. | No analytic blocking questions and no required docs alignment remains open. | `developer-in-progress`, `blocked` |
 | `developer-in-progress` | developer | Task status marked `working`. | Implementation plan exists before patching. | `developer-done`, `blocked` |
 | `developer-done` | developer | Developer report in `reports/tasks/`. | Relevant checks run or skipped with reasons. | `quality-review` |
 | `quality-review` | quality | Task in `tasks/quality/` and developer report. | Acceptance matrix covers every criterion. | `accepted`, `rejected` |

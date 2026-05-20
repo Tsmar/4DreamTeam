@@ -13,6 +13,7 @@
 5. Run relevant tests.
 6. Check that `developer` did not make unrelated changes.
 7. Create an accepted or rejected quality report.
+8. Verify that developer-ready tasks include documentation alignment evidence when analytic required it.
 
 For documentation-oriented work, `quality` also verifies source backing, status correctness, link integrity, and product readability. Documentation quality does not replace implementation quality for code tasks; apply both sets when a task changes code and documentation.
 
@@ -112,6 +113,7 @@ Verify:
 6. Technical precision - technical sections preserve code terms, file names, API names, schema names, command names, and role names exactly when they are part of the source contract.
 7. Scope control - documentation does not describe rejected, unimplemented, or unrelated changes as accepted behavior.
 8. Safety guarantees - documentation changes do not weaken source boundaries, controlled-mode gates, independent quality, wiki post-acceptance rules, DevOps risk gates, or secret-handling rules.
+9. Documentation alignment evidence - task artifacts link to aligned docs or explicitly state that alignment was not required.
 
 Reject documentation work if any required documentation-quality check fails.
 

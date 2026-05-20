@@ -1,6 +1,6 @@
 # Wiki Mode: Sync
 
-Update a managed wiki from accepted changes or explicitly approved source changes.
+Update a managed wiki from accepted changes, explicitly approved source changes, or confirmed pre-development requirements.
 
 ## Purpose
 
@@ -11,12 +11,13 @@ Bring an existing wiki into alignment with the current confirmed state.
 1. Accepted quality report.
 2. Explicitly approved source changes.
 3. The user explicitly asks to synchronize an existing wiki with approved sources.
+4. `analytic` has a user-confirmed decision that must align managed docs before developer handoff.
 
 ## Required Inputs
 
 1. Project name or path to `docs/<project-name>`.
 2. Existing managed wiki.
-3. Approved sources or accepted report context.
+3. Approved sources, accepted report context, or confirmed analytic decision context.
 
 ## Workflow
 
@@ -26,8 +27,9 @@ Bring an existing wiki into alignment with the current confirmed state.
 4. Read relevant approved sources.
 5. Find stale, missing, and incorrect pages.
 6. Before writing, show a sync plan unless the user gave auto permission.
-7. Update only pages that actually changed according to approved sources.
+7. Update only pages that actually changed according to approved sources, accepted reports, or confirmed pre-development requirements.
 8. If source ownership or navigation changed, update `source-map.md` and rebuild the generated `.index` files when bundled Python wiki index tooling is available.
+9. When syncing pre-development requirements, use `proposed` status and make clear that the behavior is confirmed as intended scope, not implemented behavior.
 
 ## Write Scope
 
@@ -42,6 +44,7 @@ Use:
 
 - `actual` for code-backed current behavior;
 - `accepted` only for changes confirmed by an accepted quality report;
+- `proposed` for confirmed pre-development requirements that are not yet implemented;
 - `unknown` if the source of truth is unavailable.
 
 ## Stop Conditions

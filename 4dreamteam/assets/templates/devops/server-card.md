@@ -30,6 +30,16 @@ source_state: verified-only
 
 - <note>
 
+## Mirror
+
+- Server-side repository: `~/server-card`
+- Server-side card: `~/server-card/<same-card-file-name>`
+- Status: updated / not checked / unavailable
+- Last mirror commit: <commit hash or unknown>
+- Last version check: <YYYY-MM-DD or unknown>
+- Local/server version: matched / server-newer / local-newer / mismatch / unknown
+- Notes: <mirror update notes, failures, or `None`; do not include secrets>
+
 ## Verification History
 
 | Date | Check | Result |

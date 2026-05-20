@@ -112,7 +112,9 @@ That means:
 
 ## Quick Start
 
-Install this repository as a Codex skill from GitHub or a local checkout. Restart Codex, then check that the skill is available:
+Open a new chat and write: install the skill from [Tsmar/4DreamTeam](https://github.com/Tsmar/4DreamTeam/tree/main/4dreamteam).
+
+Restart Codex, then check that the skill is available:
 
 ```txt
 Is the 4DreamTeam skill available?
@@ -137,7 +139,7 @@ $4DreamTeam connect project <project-name> from <source-path>
 $4DreamTeam check docs for <project-name>
 $4DreamTeam search docs for <project-name> <query>
 $4DreamTeam prepare release for <project-name>
-$4DreamTeam improve 4DreamTeam itself from ../codex/4DreamTeam
+$4DreamTeam improve 4DreamTeam itself from your local checkout of https://github.com/Tsmar/4DreamTeam, for example /Users/Tsmar/Projects/4DreamTeam
 ```
 
 `status`, `continue`, and `validate workspace` are read-only by default. Release staging, commits, pushes, tags, deployments, migrations, and destructive actions require explicit approval.
@@ -166,6 +168,6 @@ Detailed documentation lives in [docs/](docs/):
 
 ## Status
 
-Current documented version: `0.1.5`.
+Current documented version: `0.1.6`.
 
 See [CHANGELOG.md](CHANGELOG.md) for release history.

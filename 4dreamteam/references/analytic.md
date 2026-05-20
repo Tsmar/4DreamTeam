@@ -12,6 +12,7 @@
 4. Define task goal, context, affected areas, implementation requirements, acceptance criteria, required tests, constraints, risks, and blocking questions.
 5. Ask the user only blocking questions.
 6. If the task can be safely clarified through assumptions, write those assumptions explicitly into the task.
+7. Decide whether task-shaping decisions require documentation alignment before developer handoff.
 
 ## Output Contract
 
@@ -26,12 +27,13 @@ Every analytic output must include:
 7. Acceptance criteria.
 8. Validation plan.
 9. Handoff decision: `developer-ready`, `blocked`, or `needs-product`.
+10. Documentation alignment decision: links to aligned docs or `not required`.
 
 ## Forbidden
 
 1. Do not change production code.
 2. Do not create implementation reports.
-3. Do not update project documentation.
+3. Do not update project documentation directly; when pre-development documentation alignment is needed, hand off to `wiki sync` after client confirmation.
 4. Do not change existing acceptance criteria after the task has been handed to development.
 
 ## Reading
@@ -83,6 +85,32 @@ Create or move a task to `/tasks/developer/TASK-XXXX.md` only when it is impleme
 4. The validation plan is explicit.
 5. Assumptions are safe, visible, and non-blocking.
 6. No product, architecture, API, data, migration, security, or source-access decision is missing.
+7. Documentation alignment is complete or explicitly not required.
+
+## Documentation Alignment Gate
+
+Before developer handoff, decide whether analytic decisions would make existing managed documentation stale, contradictory, or incomplete for developer context.
+
+Trigger the gate when task-shaping decisions affect:
+
+1. requirements or non-goals documented in managed wiki pages;
+2. public behavior, user-visible workflows, or operational behavior;
+3. public APIs, contracts, schemas, data formats, or compatibility expectations;
+4. architecture, technical constraints, deployment, DevOps, or runbook context;
+5. documentation semantics, status, source boundaries, or accepted requirements.
+
+Do not trigger the gate for tiny task-local implementation details that do not affect managed documentation or developer context.
+
+If the gate is triggered:
+
+1. stop and ask the user to confirm the decision before treating it as accepted scope;
+2. record the confirmed decision in the task's assumptions or requirements;
+3. hand off the required documentation change to `wiki sync` for pre-development alignment;
+4. keep the task in `/tasks/analytic/TASK-XXXX.md` until the docs are aligned or the user explicitly defers the docs update;
+5. use `proposed` status for confirmed requirements that are not implemented yet;
+6. move the task to `/tasks/developer/TASK-XXXX.md` only after adding links to the aligned docs, or after recording `Documentation alignment: not required`.
+
+Pre-development alignment does not replace post-acceptance documentation. After implementation is accepted, `wiki post-acceptance` still decides whether accepted behavior should be documented as `accepted` or `actual` according to the wiki rules.
 
 ## Technical Impact Checklist
 
@@ -98,6 +126,7 @@ Every non-compact technical task must explicitly cover:
 8. Rollback / recovery.
 9. Documentation impact.
 10. Assumptions and open questions.
+11. Documentation alignment.
 
 If an area has no impact, write `no` with a short reason instead of omitting it.
 
@@ -112,6 +141,8 @@ Stop before developer handoff when:
 5. The request conflicts with current source behavior or documentation and no safe default exists.
 6. Required source access is missing.
 7. The validation plan cannot be defined.
+8. A documentation-changing analytic decision has not been confirmed by the user.
+9. Required pre-development documentation alignment is not complete and was not explicitly deferred by the user.
 
 Do not stop for safe implementation details that can be recorded as assumptions.
 
@@ -126,5 +157,6 @@ Use compact task mode for small safe tasks. Keep the same `TASK-XXXX.md` artifac
 5. Required checks.
 6. Constraints and out of scope.
 7. Blocking questions, if any.
+8. Documentation alignment decision.
 
 Compact mode does not weaken acceptance criteria or quality verification.

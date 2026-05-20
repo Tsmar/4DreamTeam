@@ -6,7 +6,7 @@ Use this file before writing files in a 4DreamTeam workspace.
 
 The global `$4DreamTeam` skill is available from any chat, but full framework work expects a 4DreamTeam workspace.
 
-Do not require a `skill/` folder in a working workspace after the skill is installed. The `skill/` folder is needed only in the skill repository, where `SKILL.md`, `references/`, `assets/`, and `agents/` live.
+Do not require a `skill/` or `4dreamteam/` folder in a working workspace after the skill is installed. The `4dreamteam/` folder exists in the skill source repository, where `SKILL.md`, `references/`, `assets/`, and `agents/` live.
 
 A normal 4DreamTeam workspace after skill installation contains:
 
@@ -52,7 +52,7 @@ Create `docs/index.md` from the bundled template:
 assets/templates/wiki/docs-index.md
 ```
 
-Do not create `skill/`, `skills/`, `references/`, or `assets/` inside a working workspace. Those resources are already provided by the installed skill.
+Do not create `skill/`, `skills/`, `4dreamteam/`, `references/`, or `assets/` inside a working workspace. Those resources are already provided by the installed skill.
 
 If the current folder does not look like a 4DreamTeam workspace:
 

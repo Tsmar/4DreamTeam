@@ -46,6 +46,7 @@ Out:
 | Rollback / recovery | yes / no | <short note> |
 | Documentation impact | yes / no | <short note> |
 | Assumptions and open questions | yes / no | <short note> |
+| Documentation alignment | yes / no | <links to aligned docs or `not required`> |
 
 ## Requirements
 
@@ -64,6 +65,11 @@ Out:
 ## Validation Plan
 
 - `<check or review>` - <what this proves>
+
+## Documentation Alignment
+
+- Decision: required / not required / deferred by user
+- Evidence: <links to aligned docs, sync task/report, or reason alignment is not required>
 
 ## Constraints
 

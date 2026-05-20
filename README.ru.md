@@ -112,7 +112,9 @@ docs/
 
 ## Быстрый старт
 
-Установите этот репозиторий как Codex skill из GitHub или локальной копии. Перезапустите Codex и проверьте, что skill доступен:
+Откройте новый чат и напишите: установи скилл из [Tsmar/4DreamTeam](https://github.com/Tsmar/4DreamTeam/tree/main/4dreamteam).
+
+Перезапустите Codex и проверьте, что skill доступен:
 
 ```txt
 Is the 4DreamTeam skill available?
@@ -137,7 +139,7 @@ $4DreamTeam connect project <project-name> from <source-path>
 $4DreamTeam check docs for <project-name>
 $4DreamTeam search docs for <project-name> <query>
 $4DreamTeam prepare release for <project-name>
-$4DreamTeam improve 4DreamTeam itself from ../codex/4DreamTeam
+$4DreamTeam improve 4DreamTeam itself from your local checkout of https://github.com/Tsmar/4DreamTeam, for example /Users/Tsmar/Projects/4DreamTeam
 ```
 
 `status`, `continue` и `validate workspace` по умолчанию работают read-only. Release staging, commits, pushes, tags, deploys, migrations и destructive actions требуют explicit approval.
@@ -166,6 +168,6 @@ $4DreamTeam improve 4DreamTeam itself from ../codex/4DreamTeam
 
 ## Статус
 
-Текущая документированная версия: `0.1.5`.
+Текущая документированная версия: `0.1.6`.
 
 История изменений: [CHANGELOG.md](CHANGELOG.md).

@@ -49,10 +49,10 @@ Use this workflow when the user wants 4DreamTeam to improve the `4DreamTeam` ski
 Required source boundary:
 
 ```txt
-../codex/4DreamTeam
+your local checkout of https://github.com/Tsmar/4DreamTeam, for example /Users/Tsmar/Projects/4DreamTeam
 ```
 
-or another explicitly approved path to the skill repository.
+or another explicitly approved local path to the skill repository.
 
 The skill repository is not a normal project workspace. It is the source for:
 

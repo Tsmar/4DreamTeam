@@ -217,7 +217,7 @@ DevOps must not print key contents, copy secrets into docs, or change server sta
 User:
 
 ```txt
-$4DreamTeam improve 4DreamTeam itself from ../codex/4DreamTeam
+$4DreamTeam improve 4DreamTeam itself from your local checkout of https://github.com/Tsmar/4DreamTeam, for example /Users/Tsmar/Projects/4DreamTeam
 ```
 
 Likely route:
