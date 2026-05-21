@@ -4,7 +4,7 @@ Languages: [English](README.md) | [Russian](README.ru.md)
 
 4DreamTeam is a Codex skill for turning rough ideas, half-finished work, stale documentation, and release pressure into a traceable workflow.
 
-Instead of asking one AI agent to keep everything in one long chat, 4DreamTeam gives Codex a small team of roles: product, analytic, developer, quality, wiki, marketing, devops, and release. Work becomes visible in files: epics, tasks, developer reports, quality reports, source-backed docs, and release plans.
+Instead of asking one AI agent to keep everything in one long chat, 4DreamTeam gives Codex a small team of roles: product, analytic, developer, quality, wiki, marketing, devops, and release. An operator sits above the workflow and controls source access, role-transition gates, auto mode, file writes, git, infrastructure, and publication. Work becomes visible in files: epics, tasks, developer reports, quality reports, source-backed docs, release plans, and epic handoffs.
 
 The result is not ceremony. It is continuity: you can come back later, see what happened, understand what is accepted, and decide the next safe step.
 
@@ -99,6 +99,7 @@ Prepare the accepted work for release.
 tasks/
 reports/
 docs/
+sources/
 ```
 
 That means:
@@ -106,8 +107,11 @@ That means:
 - decisions and assumptions survive beyond one chat;
 - tasks can be resumed without guessing;
 - developer work and quality review are separate;
+- a workspace is a git repository overlay that can sit above existing projects, file collections, images, and other source materials;
+- `sources/` can stage source materials or symlinks, but it is not listed, indexed, or read until the operator confirms first-touch access;
 - rejected work has a clear correction path;
 - project knowledge lives in Markdown;
+- completed epics leave handoff notes for the next session, next agent, or next epic;
 - release plans show what will be staged before git changes happen.
 
 ## Quick Start
@@ -162,12 +166,14 @@ Detailed documentation lives in [docs/](docs/):
 - it does not bypass the framework workflow when a 4DreamTeam route applies;
 - it does not skip independent quality review for implementation work;
 - it treats approved source paths as hard boundaries;
+- it treats confirmed workspace `sources/` descendants as hard boundaries only after operator first-touch confirmation;
+- it asks the operator before scoped auto-mode transitions such as `lead -> product`, `product -> analytic`, `analytic -> developer`, and `quality -> wiki`;
 - it does not expose secrets, credentials, `.env` contents, or private keys;
 - it does not run destructive, infrastructure, release, or publication actions without explicit approval;
 - it does not invent marketing or DevOps claims that are not backed by confirmed sources.
 
 ## Status
 
-Current documented version: `0.1.6`.
+Current documented version: `0.1.8`.
 
 See [CHANGELOG.md](CHANGELOG.md) for release history.

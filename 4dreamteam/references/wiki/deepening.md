@@ -22,7 +22,7 @@ Use this mode when the user asks to:
 ## Required Inputs
 
 1. Existing `docs/<project-name>`.
-2. Approved sources for the area being deepened.
+2. Approved sources for the area being deepened, or confirmed workspace `sources/` inventory for that area.
 3. Deepening scope: whole project or a specific area.
 
 If scope is missing, propose a safe plan based on the most important gaps and wait for confirmation before writing.
@@ -38,7 +38,7 @@ Do not use deepening to document a new feature before an accepted quality report
 Collect:
 
 1. project name or path to `docs/<project-name>`;
-2. approved sources;
+2. approved sources and source inventory state when workspace `sources/` is used;
 3. deepening scope;
 4. desired depth: `depth 2`, `depth 3`, or mixed;
 5. forbidden paths beyond the standard ignore list.
@@ -48,7 +48,7 @@ Collect:
 Before writing, show the deepening plan:
 
 1. project wiki path;
-2. approved sources;
+2. approved sources and source inventory state when workspace `sources/` is used;
 3. areas to deepen;
 4. pages to create;
 5. pages to update;
@@ -98,8 +98,10 @@ Do not document line-by-line implementation. Deepening is an architectural map, 
 When deepening adds or clarifies architecture areas, roles, endpoints, schemas, templates, integrations, infrastructure units, or release-relevant artifacts:
 
 1. Update `docs/<project-name>/source-map.md` with semantic groups and update triggers.
-2. Rebuild `.index/source-map.json` and `.index/manifest.json` with bundled Python wiki index tooling when available.
-3. Run `python3 <resolved-skill-path>/scripts/wiki_index.py index check <docs-project-path>` when available.
+2. Update `sources.md` and rebuild `.index/sources/*` when source registry or source inventory changed.
+3. Rebuild `.index/source-map.json` and `.index/manifest.json` with bundled Python wiki index tooling when available.
+4. Run `python3 <resolved-skill-path>/scripts/wiki_index.py index check <docs-project-path>` when available.
+5. Run `python3 <resolved-skill-path>/scripts/wiki_index.py sources check <docs-project-path>` when source inventory exists.
 
 Do not add every file. Add only source files that help agents locate the source of truth.
 
@@ -117,6 +119,7 @@ Stop if:
 
 1. Existing wiki cannot be found.
 2. Approved sources are missing.
-3. Requested scope requires reading outside approved boundaries.
-4. The user asks to document behavior that sources do not confirm.
-5. Deepening would overwrite accepted/proposed content with a different status without confirmation.
+3. Workspace `sources/` first-touch confirmation is missing when needed.
+4. Requested scope requires reading outside approved boundaries.
+5. The user asks to document behavior that sources do not confirm.
+6. Deepening would overwrite accepted/proposed content with a different status without confirmation.

@@ -18,6 +18,7 @@ tasks/release/      # accepted work selected for release packaging
 tasks/released/     # work included in a pushed release
 tasks/done/         # closed, no active next role
 tasks/rejected/     # rejected work awaiting a decision or correction
+reports/handoffs/   # epic completion handoffs for the next session or next epic
 ```
 
 Movement rules:
@@ -33,6 +34,7 @@ Movement rules:
 9. Rework moves from `tasks/rejected/` to `tasks/developer/`, then back to `tasks/quality/`.
 10. `release` moves work from `tasks/done/` to `tasks/release/` only after an explicit user request for release, changelog, staging, commit, or release packaging.
 11. `release` moves work from `tasks/release/` to `tasks/released/` only after the release branch is pushed and the chosen release publication step is complete.
+12. Before an epic is closed as done or the next epic becomes the active implementation focus, lead creates `reports/handoffs/EPIC-XXXX-handoff.md`.
 
 ## Task Lifecycle State Machine
 
@@ -56,6 +58,7 @@ Use folder location as the primary state. Use the task's status field for finer 
 | `release-planned` | release | Release plan in `reports/release/`. | Included/excluded files and approval requirements are visible. | `released`, `blocked` |
 | `released` | release | Release report with pushed release evidence. | Branch push and requested publication steps succeeded. | `done` |
 | `done` | lead | Task in `tasks/done/` or `tasks/released/`. | No active next role remains. | none |
+| `epic-handoff` | lead | `reports/handoffs/EPIC-XXXX-handoff.md`. | Completed epic changes, evidence, risks, and next-session pointers are captured. | next epic intake, continuation, `done` |
 
 Never move a task forward by changing only the status text. The required artifact and evidence must exist.
 
@@ -87,3 +90,19 @@ Roles pass state only through files:
 - `/reports/tasks/TASK-XXXX-report.md`
 - `/reports/quality/accepted/TASK-XXXX-quality.md`
 - `/reports/quality/rejected/TASK-XXXX-quality.md`
+- `/reports/handoffs/EPIC-XXXX-handoff.md`
+
+## Epic Completion Handoff
+
+Create an epic handoff for every completed epic.
+
+The handoff is durable inter-session memory for the next agent, next session, or next epic. It should be high-signal and can be long when the project is large or complex.
+
+Rules:
+
+1. Use `assets/templates/lead/epic-handoff.md`.
+2. Create the handoff before starting the next epic as the active implementation focus.
+3. Include the most important accepted changes, changed files, validation evidence, workflow notes, project nuances, open threads, and suggested next starting points.
+4. Prefer pointers to tasks, reports, wiki pages, commits, and source files over copied source text.
+5. Do not include secrets, credentials, raw logs, dumps, or large source excerpts.
+6. Distinguish accepted facts from suggestions, risks, and open questions.

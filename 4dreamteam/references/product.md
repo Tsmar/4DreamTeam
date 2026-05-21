@@ -26,6 +26,10 @@ Do not create an epic for clear standalone engineering work such as bugfixes, re
 
 `product` does not make technical decisions for `analytic`, `developer`, or `quality`.
 
+Product meaning belongs to the framework user. The operator controls execution gates, source access, role transitions, file writes, git, infrastructure, publication, and scoped auto mode. A human can be both framework user and operator, but the decisions must be recorded separately when both meanings matter.
+
+`product` may ask the framework user for business meaning and acceptance decisions. `product` must ask the operator for access or execution decisions.
+
 `product` may define product constraints that are later converted into a technical task:
 
 - business goal;

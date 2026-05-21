@@ -4,7 +4,7 @@ description: Coordinate the 4DreamTeam file-based agent framework for Codex. Use
 license: MIT
 metadata:
   author: Tsmar
-  version: 0.1.6
+  version: 0.1.8
   repository: https://github.com/Tsmar/4DreamTeam
 ---
 
@@ -43,6 +43,7 @@ Use bundled templates from `assets/templates/`:
 - `assets/templates/developer/report.md`
 - `assets/templates/quality/accepted.md`
 - `assets/templates/quality/rejected.md`
+- `assets/templates/lead/epic-handoff.md`
 - `assets/templates/marketing/press-release.md`
 - `assets/templates/marketing/market-analysis.md`
 - `assets/templates/marketing/value-review.md`
@@ -55,11 +56,13 @@ Use bundled templates from `assets/templates/`:
 - `assets/templates/wiki/project.md`
 - `assets/templates/wiki/product-overview.md`
 - `assets/templates/wiki/architecture-overview.md`
+- `assets/templates/wiki/sources.md`
 - `assets/templates/wiki/source-map.md`
 - `assets/templates/wiki/adr.md`
 - `assets/templates/devops/server-index.md`
 - `assets/templates/devops/server-card.md`
 - `assets/templates/workspace/AGENTS.md`
+- `assets/templates/workspace/sources.gitignore`
 
 ## Reference Loading
 
@@ -74,6 +77,7 @@ Marketing templates are selected by mode:
 Use route-specific references to reduce unnecessary context:
 
 - Read `references/lead.md` as the compact entrypoint and module map.
+- Follow the context budget policy in `references/lead/context-budget.md` when a route may require broad reading, staged expansion, or artifact handoff.
 - Read `references/lead/memory.md` only when prior session context, saved decisions, user preferences, wiki fallback, or memory effectiveness is relevant.
 - Read `references/lead/read-only.md` only for status, continuation, validation, or direct project questions.
 - Read `references/lead/self-maintenance.md` only for self-update or self-improvement.
@@ -84,13 +88,16 @@ Use route-specific references to reduce unnecessary context:
 
 1. Do not bypass 4DreamTeam workflow with ad-hoc work when a 4DreamTeam route applies.
 2. Do not write files until workspace preflight passes or the user explicitly confirms using the current folder as a 4DreamTeam workspace.
-3. In an empty folder, create only workspace artifacts after confirmation: `AGENTS.md`, `docs/index.md`, `tasks/`, and `reports/`. Use `assets/templates/workspace/AGENTS.md` for `AGENTS.md`. Do not create a `skill/` skill folder there.
+3. In an empty folder, create only workspace artifacts after confirmation: `AGENTS.md`, `docs/index.md`, `tasks/`, `reports/`, and `sources/.gitignore`. Use `assets/templates/workspace/AGENTS.md` for `AGENTS.md` and `assets/templates/workspace/sources.gitignore` for `sources/.gitignore`. Do not create a `skill/` skill folder there.
 4. Do not skip independent quality for task implementation workflows.
 5. Do not run wiki post-acceptance updates before accepted quality report.
 6. For wiki bootstrap, show intake summary and wait for confirmation before creating files unless the user explicitly accepts defaults/auto.
-7. Treat approved source paths as hard read boundaries.
-8. DevOps server documentation belongs in `docs/<project-name>/devops/servers/`; DevOps keys are looked up only in workspace-root `keys/`.
-9. Release commits require accepted quality or product acceptance, a visible commit plan, and explicit user approval before staging or committing.
-10. Wiki source maps are maintained in `docs/<project-name>/source-map.md`; generated `.index/*` files must be rebuilt with the bundled wiki index tooling instead of edited by hand.
-11. When a current local wiki index exists, use index-first navigation before broad project wiki or approved-source reading.
-12. Report created and changed files at the end.
+7. Treat confirmed workspace `sources/` descendants and explicitly approved external source paths as hard read boundaries.
+8. Do not list, stat, resolve, inventory, index, or read workspace `sources/` before operator first-touch confirmation.
+9. Ask the operator to confirm scoped auto mode for `lead -> product`, `product -> analytic`, `analytic -> developer`, and `quality -> wiki` transitions unless the exact transition is already approved for the current scope.
+10. Create an epic handoff in `reports/handoffs/` before closing a completed epic or starting the next epic as the active implementation focus.
+11. DevOps server documentation belongs in `docs/<project-name>/devops/servers/`; DevOps keys are looked up only in workspace-root `keys/`.
+12. Release commits require accepted quality or product acceptance, a visible commit plan, and explicit user approval before staging or committing.
+13. Wiki source maps are maintained in `docs/<project-name>/source-map.md`; generated `.index/*` files must be rebuilt with the bundled wiki index tooling instead of edited by hand.
+14. When a current local wiki index exists, use index-first navigation before broad project wiki or approved-source reading.
+15. Report created and changed files at the end.

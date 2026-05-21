@@ -14,6 +14,55 @@ from typing import Any
 
 
 INDEX_VERSION = 1
+SOURCE_INDEX_VERSION = 1
+SOURCE_IGNORE_NAMES = {
+    ".git",
+    ".hg",
+    ".svn",
+    "node_modules",
+    "dist",
+    "build",
+    "out",
+    "coverage",
+    ".cache",
+    ".next",
+    ".nuxt",
+    ".vite",
+    ".turbo",
+    ".vercel",
+    ".DS_Store",
+    "vendor",
+    "target",
+    ".gradle",
+    ".idea",
+    ".vscode",
+    "__pycache__",
+    ".pytest_cache",
+    ".mypy_cache",
+}
+SOURCE_IGNORE_SUFFIXES = (
+    ".log",
+    ".tmp",
+    ".bak",
+    ".pem",
+    ".key",
+    ".p12",
+    ".sqlite",
+    ".db",
+    ".dump",
+    ".zip",
+    ".tar",
+    ".tar.gz",
+    ".tgz",
+    ".7z",
+    ".rar",
+)
+SOURCE_FORBIDDEN_NAMES = {
+    ".env",
+}
+SOURCE_FORBIDDEN_PREFIXES = (
+    ".env.",
+)
 
 
 def sha256(content: str) -> str:
@@ -118,6 +167,7 @@ def parse_source_map(project_path: Path) -> dict[str, Any]:
                 {
                     "id": meta.get("id") or kebab(meta.get("path", "source-root")),
                     "path": meta.get("path", ""),
+                    "resolvedPath": meta.get("resolvedPath") or meta.get("resolved_path") or meta.get("path", ""),
                     "type": meta.get("type", "unknown"),
                     "purpose": meta.get("purpose"),
                     "writePolicy": meta.get("writePolicy"),
@@ -168,6 +218,10 @@ def index_dir(project_path: Path) -> Path:
     return project_path / ".index"
 
 
+def source_index_dir(project_path: Path) -> Path:
+    return index_dir(project_path) / "sources"
+
+
 def write_json(file: Path, value: Any) -> None:
     file.write_text(json.dumps(value, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
 
@@ -190,10 +244,177 @@ def build(project_path: Path) -> int:
     return 0
 
 
+def source_path_id(path: Path) -> str:
+    value = kebab(str(path))
+    return value or "source"
+
+
+def source_entry_status(path: Path) -> tuple[str, str]:
+    name = path.name
+    lower_name = name.lower()
+    if name in SOURCE_FORBIDDEN_NAMES or any(name.startswith(prefix) for prefix in SOURCE_FORBIDDEN_PREFIXES):
+        return ("forbidden", "forbidden-name")
+    if name in SOURCE_IGNORE_NAMES or lower_name.endswith(SOURCE_IGNORE_SUFFIXES):
+        return ("ignored", "ignore-list")
+    return ("active", "")
+
+
+def source_entry_type(path: Path) -> str:
+    try:
+        if path.is_symlink():
+            return "symlink"
+        if path.is_dir():
+            return "directory"
+        if path.is_file():
+            return "file"
+        return "unknown"
+    except OSError:
+        return "unknown"
+
+
+def source_fingerprint(entry: dict[str, Any]) -> str:
+    parts = [
+        entry.get("path", ""),
+        entry.get("resolvedPath", ""),
+        entry.get("type", ""),
+        entry.get("status", ""),
+        str(entry.get("size", "")),
+        str(entry.get("mtime", "")),
+    ]
+    return sha256("\n".join(parts))
+
+
+def stat_source_entry(path: Path, root: Path) -> dict[str, Any]:
+    path_type = "missing"
+    status = "missing"
+    reason = "path-missing"
+    size: int | None = None
+    mtime: float | None = None
+    resolved_path = ""
+
+    try:
+        exists = path.exists() or path.is_symlink()
+        if exists:
+            path_type = source_entry_type(path)
+            status, reason = source_entry_status(path)
+            stat_value = path.lstat() if path.is_symlink() else path.stat()
+            size = stat_value.st_size
+            mtime = stat_value.st_mtime
+            if path.is_symlink():
+                resolved_path = str(path.resolve(strict=False))
+    except OSError as error:
+        status = "forbidden"
+        reason = f"stat-error:{error.__class__.__name__}"
+
+    entry = {
+        "path": str(path),
+        "relativePath": "." if path == root else os.path.relpath(path, root),
+        "resolvedPath": resolved_path,
+        "type": path_type,
+        "status": status,
+        "reason": reason,
+        "size": size,
+        "mtime": mtime,
+    }
+    entry["fingerprint"] = source_fingerprint(entry)
+    return entry
+
+
+def walk_source_entries(root: Path) -> list[dict[str, Any]]:
+    entries: list[dict[str, Any]] = []
+
+    def visit(path: Path) -> None:
+        entry = stat_source_entry(path, root)
+        entries.append(entry)
+        if entry["status"] != "active" or entry["type"] != "directory":
+            return
+        try:
+            children = sorted(path.iterdir(), key=lambda child: child.name.lower())
+        except OSError as error:
+            error_entry = {
+                "path": str(path),
+                "relativePath": entry["relativePath"],
+                "resolvedPath": "",
+                "type": "directory",
+                "status": "forbidden",
+                "reason": f"list-error:{error.__class__.__name__}",
+                "size": entry.get("size"),
+                "mtime": entry.get("mtime"),
+            }
+            error_entry["fingerprint"] = source_fingerprint(error_entry)
+            entries.append(error_entry)
+            return
+        for child in children:
+            visit(child)
+
+    visit(root)
+    return entries
+
+
+def build_source_inventory(project_path: Path, source_paths: list[Path]) -> int:
+    if not source_paths:
+        raise RuntimeError("sources build requires at least one source path")
+
+    directory = source_index_dir(project_path)
+    directory.mkdir(parents=True, exist_ok=True)
+
+    sources: list[dict[str, Any]] = []
+    used_ids: set[str] = set()
+    for source_path in source_paths:
+        source_id = source_path_id(source_path)
+        if source_id in used_ids:
+            suffix = 2
+            while f"{source_id}-{suffix}" in used_ids:
+                suffix += 1
+            source_id = f"{source_id}-{suffix}"
+        used_ids.add(source_id)
+
+        entries = walk_source_entries(source_path)
+        inventory = {
+            "project": project_path.name,
+            "sourceIndexVersion": SOURCE_INDEX_VERSION,
+            "generatedAt": iso_now(),
+            "sourceId": source_id,
+            "sourcePath": str(source_path),
+            "resolvedPath": str(source_path.resolve(strict=False)),
+            "entryCount": len(entries),
+            "entries": entries,
+        }
+        inventory_file = directory / f"{source_id}.json"
+        write_json(inventory_file, inventory)
+        sources.append(
+            {
+                "id": source_id,
+                "path": str(source_path),
+                "resolvedPath": inventory["resolvedPath"],
+                "entryCount": len(entries),
+                "inventoryPath": os.path.relpath(inventory_file, project_path),
+            }
+        )
+
+    manifest = {
+        "project": project_path.name,
+        "sourceIndexVersion": SOURCE_INDEX_VERSION,
+        "generatedAt": iso_now(),
+        "sourceCount": len(sources),
+        "sources": sources,
+    }
+    write_json(directory / "manifest.json", manifest)
+    print(f"Built source inventory for {project_path.name}: {len(sources)} sources")
+    return 0
+
+
 def read_index(project_path: Path) -> dict[str, Any]:
     file = index_dir(project_path) / "source-map.json"
     if not file.exists():
         raise RuntimeError(f"Missing index: {file}")
+    return json.loads(file.read_text(encoding="utf-8"))
+
+
+def read_source_manifest(project_path: Path) -> dict[str, Any]:
+    file = source_index_dir(project_path) / "manifest.json"
+    if not file.exists():
+        raise RuntimeError(f"Missing source inventory manifest: {file}")
     return json.loads(file.read_text(encoding="utf-8"))
 
 
@@ -204,6 +425,17 @@ def print_check(errors: list[str], warnings: list[str]) -> int:
         print(f"ERROR {error}", file=sys.stderr)
     if not errors:
         print("OK wiki index check passed")
+        return 0
+    return 1
+
+
+def print_source_check(errors: list[str], warnings: list[str]) -> int:
+    for warning in warnings:
+        print(f"WARN {warning}")
+    for error in errors:
+        print(f"ERROR {error}", file=sys.stderr)
+    if not errors:
+        print("OK source inventory check passed")
         return 0
     return 1
 
@@ -261,6 +493,44 @@ def check(project_path: Path) -> int:
         warnings.append("Could not compare source-map.md and index mtimes")
 
     return print_check(errors, warnings)
+
+
+def check_sources(project_path: Path) -> int:
+    errors: list[str] = []
+    warnings: list[str] = []
+    manifest_file = source_index_dir(project_path) / "manifest.json"
+
+    if not manifest_file.exists():
+        errors.append(f"Missing source inventory manifest: {manifest_file}")
+        return print_source_check(errors, warnings)
+
+    manifest = read_source_manifest(project_path)
+    if manifest.get("sourceIndexVersion") != SOURCE_INDEX_VERSION:
+        warnings.append("Source inventory version differs from current script version")
+
+    ids: set[str] = set()
+    for source in manifest.get("sources", []):
+        source_id = source.get("id", "")
+        if not source_id:
+            errors.append("Source manifest entry is missing id")
+            continue
+        if source_id in ids:
+            errors.append(f"Duplicate source id: {source_id}")
+        ids.add(source_id)
+
+        inventory_file = project_path / source.get("inventoryPath", "")
+        if not inventory_file.exists():
+            errors.append(f"Missing source inventory file for {source_id}: {inventory_file}")
+            continue
+        inventory = json.loads(inventory_file.read_text(encoding="utf-8"))
+        if inventory.get("sourceId") != source_id:
+            errors.append(f"Source inventory id mismatch: {source_id}")
+        if inventory.get("entryCount") != len(inventory.get("entries", [])):
+            errors.append(f"Source inventory entry count mismatch: {source_id}")
+        if not Path(source.get("path", "")).exists():
+            warnings.append(f"Source path no longer exists: {source.get('path', '')}")
+
+    return print_source_check(errors, warnings)
 
 
 def tokenize(query: str) -> list[str]:
@@ -325,10 +595,63 @@ def search(project_path: Path, query: str) -> int:
     return 0
 
 
+def score_source_entry(entry: dict[str, Any], query_tokens: list[str]) -> int:
+    weighted = [
+        (entry.get("path", ""), 8),
+        (entry.get("relativePath", ""), 7),
+        (entry.get("resolvedPath", ""), 5),
+        (entry.get("type", ""), 4),
+        (entry.get("status", ""), 4),
+        (entry.get("reason", ""), 2),
+    ]
+    score = 0
+    for text, weight in weighted:
+        haystack = str(text).lower()
+        for token in query_tokens:
+            if token in haystack:
+                score += weight
+    return score
+
+
+def search_sources(project_path: Path, query: str) -> int:
+    manifest = read_source_manifest(project_path)
+    query_tokens = tokenize(query)
+    matches: list[dict[str, Any]] = []
+    for source in manifest.get("sources", []):
+        inventory_file = project_path / source.get("inventoryPath", "")
+        if not inventory_file.exists():
+            continue
+        inventory = json.loads(inventory_file.read_text(encoding="utf-8"))
+        for entry in inventory.get("entries", []):
+            score = score_source_entry(entry, query_tokens)
+            if score > 0:
+                matches.append({"sourceId": source.get("id", ""), "entry": entry, "score": score})
+
+    matches.sort(key=lambda item: item["score"], reverse=True)
+    matches = matches[:12]
+
+    if not matches:
+        print(f"No source inventory matches for: {query}")
+        return 0
+
+    print(f"Top source inventory matches for: {query}\n")
+    for index_number, item in enumerate(matches, start=1):
+        entry = item["entry"]
+        print(f"{index_number}. {item['sourceId']} score={item['score']}")
+        print(f"   {entry.get('relativePath', entry.get('path', ''))}")
+        print(f"   type={entry.get('type', '')} status={entry.get('status', '')}")
+        if entry.get("resolvedPath"):
+            print(f"   resolved={entry['resolvedPath']}")
+        if entry.get("reason"):
+            print(f"   reason={entry['reason']}")
+        print()
+    return 0
+
+
 def main(argv: list[str]) -> int:
     parser = argparse.ArgumentParser(
         prog="wiki_index.py",
-        description="Build, check, and search 4DreamTeam local wiki indexes.",
+        description="Build, check, and search 4DreamTeam local wiki and source inventory indexes.",
     )
     subparsers = parser.add_subparsers(dest="command")
 
@@ -343,6 +666,17 @@ def main(argv: list[str]) -> int:
     search_parser.add_argument("project_path")
     search_parser.add_argument("query", nargs=argparse.REMAINDER)
 
+    sources_parser = subparsers.add_parser("sources")
+    sources_subparsers = sources_parser.add_subparsers(dest="sources_command")
+    sources_build_parser = sources_subparsers.add_parser("build")
+    sources_build_parser.add_argument("project_path")
+    sources_build_parser.add_argument("source_paths", nargs="+")
+    sources_check_parser = sources_subparsers.add_parser("check")
+    sources_check_parser.add_argument("project_path")
+    sources_search_parser = sources_subparsers.add_parser("search")
+    sources_search_parser.add_argument("project_path")
+    sources_search_parser.add_argument("query", nargs=argparse.REMAINDER)
+
     args = parser.parse_args(argv)
     try:
         if args.command == "index" and args.index_command == "build":
@@ -354,6 +688,18 @@ def main(argv: list[str]) -> int:
             if not query:
                 parser.error("search requires a query")
             return search(Path(args.project_path).resolve(), query)
+        if args.command == "sources" and args.sources_command == "build":
+            return build_source_inventory(
+                Path(args.project_path).resolve(),
+                [Path(source_path).resolve() for source_path in args.source_paths],
+            )
+        if args.command == "sources" and args.sources_command == "check":
+            return check_sources(Path(args.project_path).resolve())
+        if args.command == "sources" and args.sources_command == "search":
+            query = " ".join(args.query).strip()
+            if not query:
+                parser.error("sources search requires a query")
+            return search_sources(Path(args.project_path).resolve(), query)
         parser.print_usage(sys.stderr)
         return 1
     except RuntimeError as error:

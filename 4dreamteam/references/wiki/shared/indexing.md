@@ -10,12 +10,15 @@ Generated index files may live under:
 docs/<project-name>/.index/
   source-map.json
   manifest.json
+  sources/
+    manifest.json
+    <source-id>.json
 ```
 
 Rules:
 
 1. `source-map.md` is the editable source of truth.
-2. `.index/source-map.json` and `.index/manifest.json` are generated artifacts.
+2. `.index/source-map.json`, `.index/manifest.json`, and `.index/sources/*` are generated artifacts.
 3. Agents must not edit `.index/*` manually.
 4. Rebuild the index after source map changes with the bundled Python wiki index script:
 
@@ -81,3 +84,34 @@ After any change to `source-map.md`:
 3. do not edit `.index/*` manually.
 
 Search results do not expand source permissions. Read only files inside approved source boundaries from `sources.md`.
+
+## Source Inventory Index
+
+The source inventory index is a low-token registry of confirmed approved sources. It records paths, entry types, sizes, mtimes, symlink targets, ignore/forbidden status, and lightweight fingerprints. It must not read file contents.
+
+Generate it after operator first-touch confirmation and before wiki bootstrap, sync, or deepening reads source content from workspace `sources/`:
+
+```bash
+python3 <resolved-skill-path>/scripts/wiki_index.py sources build <docs-project-path> <source-path>...
+```
+
+Check it with:
+
+```bash
+python3 <resolved-skill-path>/scripts/wiki_index.py sources check <docs-project-path>
+```
+
+Search it with:
+
+```bash
+python3 <resolved-skill-path>/scripts/wiki_index.py sources search <docs-project-path> "<query>"
+```
+
+Rules:
+
+1. `sources.md` is the human-readable source registry.
+2. `.index/sources/manifest.json` and `.index/sources/<source-id>.json` are generated inventories.
+3. Agents must not edit generated source inventory files manually.
+4. Source inventory does not grant source access and does not replace operator confirmation.
+5. Source inventory is raw path-level metadata. Keep semantic navigation in `source-map.md`.
+6. New files after confirmation require operator rescan/actualization confirmation before rebuilding the source inventory.

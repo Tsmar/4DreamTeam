@@ -8,6 +8,11 @@ An approved source is a hard boundary.
 
 Read only descendants of the specified source path.
 
+Approved sources can be:
+
+1. confirmed descendants of the workspace `sources/` directory;
+2. explicit external source paths approved by the operator.
+
 Forbidden:
 
 1. parent directories;
@@ -18,12 +23,33 @@ Forbidden:
 
 If a file outside an approved source is needed for a correct wiki, stop and request access to that exact path.
 
+## Workspace Sources
+
+`sources/` is the workspace-local staging area for source materials or symlinks to source materials.
+
+First-touch gate:
+
+1. Do not list, stat, resolve, inventory, index, or read `sources/` before operator first-touch confirmation.
+2. Ask the operator to personally inspect whether `sources/` exists and whether all current contents may be used.
+3. Confirmation is all-or-nothing for the current `sources/` contents. Do not request or accept named-entry confirmation in this task generation.
+4. If the operator denies access or confirms absence, do not inspect `sources/`.
+5. New files added after confirmation require a separate rescan/actualization confirmation.
+
+After confirmation:
+
+1. Every current descendant of `sources/` is an approved source boundary, subject to the ignore list and forbidden paths.
+2. If a descendant is a symlink, resolve it, record both the workspace alias and resolved target, and treat the resolved target as the boundary. Do not read parent or sibling paths.
+3. `sources/.gitignore` may be created or repaired before first-touch confirmation without listing or reading other `sources/` contents.
+4. Archive extraction and deep archive inspection are out of scope unless a separate task explicitly defines them.
+
 ## Ignore List
 
 Approved sources are read recursively, excluding:
 
 ```txt
 .git
+.hg
+.svn
 node_modules
 dist
 build
@@ -47,6 +73,12 @@ coverage
 *.sqlite
 *.db
 *.dump
+*.zip
+*.tar
+*.tar.gz
+*.tgz
+*.7z
+*.rar
 vendor
 target
 .gradle
@@ -61,7 +93,7 @@ The user may add forbidden paths beyond the standard list.
 
 ## Source Truth
 
-Code in approved sources is the primary source of truth.
+Code and artifacts in confirmed workspace `sources/` and explicit approved external sources are the primary source of truth.
 
 Do not invent behavior that does not exist in approved code sources.
 

@@ -22,15 +22,16 @@ Semantic navigation map for approved sources. This page helps agents find the so
 <!-- source-root
 id: <root-id>
 path: <approved-source-path>
+resolved_path: <resolved-source-path-or-same-as-path>
 type: frontend / backend / fullstack / skill-development / docs / infra / library / mixed / unknown
 purpose: <why this source root exists>
 write_policy: read-only / writable-with-approved-task / requires-confirmation
 changelog_policy: none / source-changelog-if-exists / source-changelog-required
 -->
 
-| Root | Type | Purpose | Write Policy | Changelog Policy |
-|---|---|---|---|---|
-| `<approved-source-path>` | `<type>` | <purpose> | `<policy>` | `<policy>` |
+| Root | Resolved Path | Type | Purpose | Write Policy | Changelog Policy |
+|---|---|---|---|---|---|
+| `<approved-source-path>` | `<resolved-source-path-or-same-as-path>` | `<type>` | <purpose> | `<policy>` | `<policy>` |
 
 ## Source Areas
 

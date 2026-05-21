@@ -74,7 +74,7 @@ product -> developer -> quality -> wiki when needed -> product acceptance -> rel
 Rules:
 
 1. Use `product` to define the improvement goal, audience, scope, product acceptance criteria, and the exact developer task scope.
-2. Stop after `product` and ask the human to approve what goes into the `developer` task unless the user explicitly approved the task scope.
+2. Stop after `product` and ask the framework user to approve product meaning and task scope, then ask the operator to approve the `product -> analytic` or `product -> developer` transition unless that exact transition is already approved.
 3. Use `developer` to edit only approved skill source files within the approved task scope.
 4. Use `quality` after `developer` for independent review before wiki, product acceptance, or release packaging.
 5. Use `wiki` after accepted quality only if workspace knowledge base documentation needs to reflect the accepted skill behavior.
@@ -97,10 +97,10 @@ After receiving a high-level user task:
 6. In `controlled` mode, stop after the epic is created or updated and ask the user to approve whether its tasks go to `analytic`, `developer`, or remain in backlog.
 7. If this is a task workflow or the epic tasks are approved for technical analysis, run `analytic`.
 8. If `analytic` created blocking questions, stop and ask the user.
-9. In `controlled` mode, stop after the task is created unless the user explicitly allowed the small safe task fast path or approved the task in advance.
+9. In `controlled` mode, stop after the task is created and ask the operator to approve `analytic -> developer` unless the user explicitly allowed the small safe task fast path or approved the task in advance.
 10. If the task is approved, run `developer -> quality` without stopping between the roles.
 11. If `quality` returns `rejected`, stop in `controlled` mode and show the user the rejection reason. In `auto` mode, return the task to `developer` at most once only if the fix is safe and does not require a user decision.
-12. If `quality` returns `accepted`, use the wiki post-acceptance decision table to determine whether documentation is needed. Stop before `wiki` in `controlled` mode if documentation should be updated.
+12. If `quality` returns `accepted`, use the wiki post-acceptance decision table to determine whether documentation is needed. Stop before `quality -> wiki` in `controlled` mode if documentation should be updated.
 13. If `quality` returns `accepted`, run `wiki` if documentation needs to be updated and the execution mode allows it.
 14. If the user requested product acceptance of the result or wiki, run `product` after `wiki`.
 15. In the final response, report created and changed file paths.

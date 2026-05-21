@@ -46,6 +46,8 @@ Do not create an epic for a clear standalone engineering task unless the user ex
 | Public messaging, README positioning, launch copy, value review, release narrative, GTM brief, claim audit, market-facing analysis | `marketing` | Use confirmed sources; unsupported, risky, or forbidden claims are excluded or marked as not usable. |
 | Secrets, destructive operations, production data, unapproved sources, unsafe ambiguity | stop | Ask for approval, source access, or clarification. |
 
+Role-transition gates are operator decisions. In controlled mode, ask the operator to confirm each transition into scoped auto mode for `lead -> product`, `product -> analytic`, `analytic -> developer`, and `quality -> wiki` unless that exact transition was already approved for the current scope.
+
 If multiple routes seem plausible, choose the route that preserves safety and auditability:
 
 1. product before analytic when product meaning or scope is unclear;
@@ -83,6 +85,7 @@ Ask a blocking question or stop when missing context affects:
 4. production infrastructure, external services, or destructive operations;
 5. release target, staging scope, push/tag/publication approval;
 6. whether a claim is source-backed.
+7. whether the framework user or operator has approved the next role transition.
 
 Safe assumptions must be written into the task, report, or docs artifact that depends on them.
 

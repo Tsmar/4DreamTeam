@@ -53,6 +53,7 @@ Read only the current 4DreamTeam workspace:
 15. `reports/quality/accepted/`
 16. `reports/quality/rejected/`
 17. `reports/release/`
+18. `reports/handoffs/`
 
 Do not use project source-map search for plain workspace status unless a project-specific deep dive is needed.
 
@@ -62,9 +63,10 @@ Report:
 2. role board summary: backlog, analytic, developer, quality, wiki, release, released, done, and rejected;
 3. epics and tasks grouped by current owner role;
 4. developer reports, quality reports, and release plans;
-5. rejected, blocked, or incomplete work;
-6. known project wikis and missing `sources.md`;
-7. the single recommended next action, or a short ordered list if multiple actions are equally important.
+5. epic handoffs and completed epics missing a handoff;
+6. rejected, blocked, or incomplete work;
+7. known project wikis and missing `sources.md`;
+8. the single recommended next action, or a short ordered list if multiple actions are equally important.
 
 Do not change files during status or continuation unless the user explicitly approves the next lifecycle step.
 
@@ -76,7 +78,8 @@ If the next action is obvious:
 4. `tasks/wiki/` -> ask for approval before wiki in controlled mode;
 5. `tasks/release/` -> prepare release plan if the user approves;
 6. epic ready for analysis -> ask for approval to hand its tasks off to analytic or developer;
-7. no active work -> suggest product intake, direct task intake, wiki bootstrap, devops, or release based on the user's goal.
+7. completed epic without a handoff -> recommend creating the epic handoff before starting the next epic;
+8. no active work -> suggest product intake, direct task intake, wiki bootstrap, devops, or release based on the user's goal.
 
 ## Workspace Validation
 
@@ -101,12 +104,14 @@ Check:
    - `reports/quality/accepted/`
    - `reports/quality/rejected/`
    - `reports/release/`
+   - `reports/handoffs/`
 2. task/report consistency:
    - tasks in `tasks/quality/`, `tasks/wiki/`, `tasks/release/`, `tasks/released/`, and `tasks/done/` have developer reports unless the task is documentation-only and explicitly explains why;
    - tasks in `tasks/wiki/`, `tasks/release/`, `tasks/released/`, and `tasks/done/` have accepted quality reports when quality has run;
    - tasks in `tasks/released/` have a release report with pushed release evidence;
    - rejected tasks have rejected quality reports with actionable reasons;
    - reports are not orphaned from tasks or epics;
+   - completed epics have `reports/handoffs/EPIC-XXXX-handoff.md`;
 3. wiki consistency:
    - each `docs/<project-name>/` has `sources.md`;
    - managed wiki pages include status and expected `wiki-meta` where required by wiki rules;

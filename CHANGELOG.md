@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.1.8 - 2026-05-21
+
+- Added a lead context budget policy for route-first loading, staged expansion, pointer-over-payload behavior, artifact handoff, and bulk-load guardrails.
+- Added workspace `sources/` as a git-ignored local source staging boundary with first-touch operator confirmation before listing, statting, resolving, inventorying, indexing, or reading.
+- Defined `framework user` as the product-meaning owner and `operator` as the above-workflow execution authority for source access, role transitions, scoped auto mode, writes, git, infrastructure, and publication.
+- Added scoped auto-mode and major role-transition gates while preserving automatic `developer -> quality` after approved developer work.
+- Added low-token source inventory support with `wiki_index.py sources build/check/search`, generated `.index/sources/*` manifests, symlink target recording, ignore/forbidden states, and lightweight path metadata fingerprints.
+- Added a human-readable wiki `sources.md` template and clarified the split between source registries, raw generated source inventory, and semantic `source-map.md` navigation.
+- Added required epic-completion handoffs under `reports/handoffs/EPIC-XXXX-handoff.md` plus a reusable `assets/templates/lead/epic-handoff.md` template.
+- Updated README and skill metadata to document version `0.1.8`.
+
 ## 0.1.6 - 2026-05-20
 
 - Added an analytic documentation-alignment gate before developer handoff when confirmed decisions would make managed docs stale or contradictory.

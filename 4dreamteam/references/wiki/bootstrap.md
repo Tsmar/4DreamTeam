@@ -1,6 +1,6 @@
 # Wiki Mode: Bootstrap
 
-Create a managed wiki for an existing project from explicitly specified approved sources.
+Create a managed wiki for an existing project from confirmed workspace sources or explicitly specified approved external sources.
 
 ## Required User Inputs
 
@@ -11,8 +11,8 @@ Knowledge base name:
 <project-name>
 
 Sources:
-- <approved-source-path>
-- <approved-source-path>
+- sources/ after operator first-touch confirmation, or
+- <explicit-approved-external-source-path>
 ```
 
 Do not ask the user for the output path. It is always computed automatically:
@@ -39,13 +39,13 @@ Before creating the knowledge base, collect missing parameters. Do not ask quest
 Minimum parameters:
 
 1. Knowledge base name or project name.
-2. Approved sources.
+2. Approved sources, or operator confirmation that the workspace `sources/` directory may be used.
 3. Project type: `backend`, `frontend`, `fullstack`, `library/SDK`, `mixed`, `unknown`.
 4. Audience: `product + technical`, `product only`, `technical only`.
 5. Whether to document discovered `flows`, `contracts`, `schemas`, `integrations`.
 6. Forbidden paths beyond the standard ignore list.
 
-If project name or approved sources are missing, stop and ask.
+If project name and approved sources are missing, stop and ask. If the user wants to use workspace `sources/`, first ask the operator to personally inspect and confirm the `sources/` first-touch gate before any listing, stat, resolution, inventory, indexing, or reading.
 
 During intake, the agent must clearly show:
 
@@ -65,13 +65,14 @@ Before confirmation, it is forbidden to:
 1. create or update `docs/<project-name>`;
 2. update `docs/index.md`;
 3. create `sources.md`;
-4. read approved sources deeper than needed for a minimal check of explicitly specified paths.
+4. read approved sources deeper than needed for a minimal check of explicitly specified paths;
+5. list, stat, resolve, inventory, index, or read workspace `sources/` before operator first-touch confirmation.
 
 The summary must include:
 
 1. project name;
 2. computed output path `docs/<project-name>`;
-3. approved sources;
+3. approved sources or the required `sources/` first-touch confirmation state;
 4. project type;
 5. audience;
 6. detail depth computed from audience;
@@ -88,15 +89,16 @@ The only exception is when the user explicitly writes: `I accept intake defaults
 
 1. Read only approved sources for the specific project.
 2. Each approved source is a recursive read boundary.
-3. If `../project-a/src` is specified, read only `../project-a/src/**` subject to the ignore list.
-4. Do not read parent directories, sibling directories, or inferred project roots outside the specified source.
-5. If an additional source is needed, stop and ask for access.
-6. Do not mix sources from different projects.
-7. Write only to `docs/<project-name>` and update `docs/index.md` when needed.
-8. Do not read secrets, `.env`, credentials, private keys, dumps, or unrelated user files.
-9. Build the wiki as an architecture map of the project, not a folder mirror.
-10. Mark unknown areas as `unknown` or `requires source access`.
-11. Use relative Markdown links.
+3. If `sources/` is confirmed, run the source inventory before reading source content and record the registry in `sources.md`.
+4. If `../project-a/src` is specified, read only `../project-a/src/**` subject to the ignore list.
+5. Do not read parent directories, sibling directories, or inferred project roots outside the specified source.
+6. If an additional source is needed, stop and ask for access.
+7. Do not mix sources from different projects.
+8. Write only to `docs/<project-name>` and update `docs/index.md` when needed.
+9. Do not read secrets, `.env`, credentials, private keys, dumps, or unrelated user files.
+10. Build the wiki as an architecture map of the project, not a folder mirror.
+11. Mark unknown areas as `unknown` or `requires source access`.
+12. Use relative Markdown links.
 
 ## Minimum Output
 
@@ -110,5 +112,6 @@ Recommended bootstrap output:
 
 1. `docs/<project-name>/source-map.md` when approved sources contain meaningful source areas or multiple important artifact types.
 2. `docs/<project-name>/.index/source-map.json` and `docs/<project-name>/.index/manifest.json` when bundled Python wiki index tooling is available.
+3. `docs/<project-name>/.index/sources/manifest.json` and `docs/<project-name>/.index/sources/<source-id>.json` when source inventory tooling is available and confirmed sources are used.
 
 Create additional sections only if they reflect real approved sources.

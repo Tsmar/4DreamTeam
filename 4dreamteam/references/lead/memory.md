@@ -28,6 +28,7 @@ Fallback order:
 
 ```txt
 agentmemory recall when available and relevant
+-> epic handoffs in reports/handoffs/ for completed epic context
 -> local wiki index/docs
 -> tasks and reports
 -> exact approved source files when needed and allowed
@@ -43,6 +44,12 @@ The local wiki is the authoritative project memory fallback.
 When a current `docs/<project-name>/.index/source-map.json` exists, use index-first navigation before broad wiki or approved-source reading. If the generated index is missing or stale, use `docs/<project-name>/source-map.md` directly, then the smallest relevant wiki pages.
 
 For plain workspace status, use the board and reports first. Do not run broad wiki search unless a project-specific question or continuation needs it.
+
+## Epic Handoffs
+
+Epic handoffs in `reports/handoffs/` are the preferred durable local memory for completed epics. Use them before broad task/report history when continuing into the next epic, restarting work in a new session, or orienting a new agent.
+
+Handoffs do not override current tasks, reports, wiki pages, approved sources, or the current user request. Treat them as compressed navigation and context: verify details from authoritative artifacts before changing behavior.
 
 ## Save Flow
 

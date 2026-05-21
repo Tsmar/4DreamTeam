@@ -12,6 +12,7 @@ Verify that documentation does not contradict approved source code and correctly
 2. Do not change files.
 3. Read only the existing wiki and approved sources.
 4. Do not draw conclusions from sources outside approved boundaries.
+5. If checking would require first-touch access to workspace `sources/`, stop before listing, statting, resolving, inventorying, indexing, or reading it.
 
 ## Workflow
 
@@ -24,7 +25,8 @@ Verify that documentation does not contradict approved source code and correctly
 7. Check whether product-facing pages are understandable without reading implementation details first.
 8. If `source-map.md` exists, check that it is not a raw file manifest and that primary links point to approved sources.
 9. If `.index/source-map.json` exists, run or recommend `python3 <resolved-skill-path>/scripts/wiki_index.py index check <docs-project-path>` to detect stale generated index state.
-10. Report findings by severity.
+10. If `.index/sources/manifest.json` exists, run or recommend `python3 <resolved-skill-path>/scripts/wiki_index.py sources check <docs-project-path>` to detect missing generated source inventory files.
+11. Report findings by severity.
 
 ## Output
 
