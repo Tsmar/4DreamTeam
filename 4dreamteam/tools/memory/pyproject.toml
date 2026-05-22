@@ -5,5 +5,8 @@ description = "Local 4DreamTeam memory storage tooling"
 requires-python = ">=3.10"
 dependencies = []
 
+[project.scripts]
+4dt-memory = "fourdt_memory.cli:main"
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
