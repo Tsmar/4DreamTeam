@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 import sqlite3
 import uuid
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
 
@@ -13,6 +13,12 @@ from .paths import WorkspaceIdentity, WorkspacePaths, workspace_identity, worksp
 
 def utc_now() -> str:
     return datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
+
+
+def utc_after_seconds(seconds: int) -> str:
+    return (datetime.now(timezone.utc) + timedelta(seconds=seconds)).replace(microsecond=0).isoformat().replace(
+        "+00:00", "Z"
+    )
 
 
 def new_id(prefix: str) -> str:
@@ -271,6 +277,42 @@ class MemoryStore:
         ).fetchall()
         return [dict(row) for row in rows]
 
+    def live_memory_export_rows(self) -> list[dict[str, Any]]:
+        rows = []
+        for item in self.list_live_memory_items():
+            metadata = json.loads(item["metadata_json"])
+            if not isinstance(metadata, dict):
+                metadata = {}
+            evidence = self.evidence_for(item["id"])
+            rows.append(
+                {
+                    "id": item["id"],
+                    "scope": item["scope"],
+                    "type": item["type"],
+                    "role": item["role"],
+                    "content": item["content"],
+                    "summary": item["summary"],
+                    "metadata": metadata,
+                    "confidence": item["confidence"],
+                    "sourceType": item["source_type"],
+                    "sourceRef": item["source_ref"],
+                    "evidence": [
+                        {
+                            "sourceType": row["source_type"],
+                            "sourceRef": row["source_ref"],
+                            "quoteHash": row["quote_hash"],
+                        }
+                        for row in evidence
+                    ],
+                    "ttlAt": item["ttl_at"],
+                    "embeddingModel": item["embedding_model"],
+                    "indexedAt": item["indexed_at"],
+                    "createdAt": item["created_at"],
+                    "updatedAt": item["updated_at"],
+                }
+            )
+        return rows
+
     def set_session_state(self, session_id: str, state: dict[str, Any]) -> None:
         now = utc_now()
         state_json = json.dumps(state, sort_keys=True)
@@ -287,6 +329,11 @@ class MemoryStore:
         self.connect().commit()
         self.audit("session_set", payload={"sessionId": session_id})
 
+    def set_session_record(self, session_id: str, state: dict[str, Any], *, ttl_seconds: int) -> str:
+        expires_at = utc_after_seconds(ttl_seconds)
+        self.set_session_state(session_id, {"state": state, "expiresAt": expires_at})
+        return expires_at
+
     def get_session_state(self, session_id: str) -> dict[str, Any] | None:
         row = self.connect().execute(
             "SELECT state_json FROM agent_sessions WHERE id = ? AND workspace_id = ?",
@@ -298,6 +345,20 @@ class MemoryStore:
         if not isinstance(value, dict):
             raise ValueError("Session state must be a JSON object")
         return value
+
+    def get_session_record(self, session_id: str, *, now: str | None = None) -> dict[str, Any] | None:
+        value = self.get_session_state(session_id)
+        if value is None:
+            return None
+        if "state" not in value or "expiresAt" not in value:
+            return {"state": value, "expiresAt": None, "expired": False}
+        expires_at = value.get("expiresAt")
+        if isinstance(expires_at, str) and expires_at <= (now or utc_now()):
+            return None
+        state = value.get("state")
+        if not isinstance(state, dict):
+            return None
+        return {"state": state, "expiresAt": expires_at, "expired": False}
 
     def audit_entries(self, action: str | None = None) -> list[dict[str, Any]]:
         clauses = ["workspace_id = ?"]

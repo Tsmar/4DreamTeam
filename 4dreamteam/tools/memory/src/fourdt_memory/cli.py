@@ -22,11 +22,10 @@ EXIT_DEGRADED = 3
 EXIT_UNSAFE_SAVE = 4
 
 PLACEHOLDER_COMMANDS = {
-    "export",
-    "import",
-    "session",
-    "benchmark",
 }
+
+SESSION_STATE_MAX_BYTES = 8192
+DEFAULT_SESSION_TTL_SECONDS = 24 * 60 * 60
 
 
 def response(
@@ -59,6 +58,10 @@ def error_response(code: str, message: str, status: str | None = None) -> dict[s
 def emit(payload: dict[str, Any], json_output: bool) -> None:
     if json_output:
         print(json.dumps(payload, sort_keys=True))
+        return
+
+    if payload.get("ok") and "jsonl" in payload:
+        print(payload["jsonl"], end="" if str(payload["jsonl"]).endswith("\n") else "\n")
         return
 
     if payload.get("ok"):
@@ -106,6 +109,32 @@ def build_parser() -> argparse.ArgumentParser:
     add_common_arguments(reindex_parser)
     reindex_parser.add_argument("--embedding-provider", default="none", choices=["none", "hash"])
     reindex_parser.add_argument("--embedding-model")
+
+    export_parser = subparsers.add_parser("export")
+    add_common_arguments(export_parser)
+    export_parser.add_argument("--format", default="jsonl", choices=["jsonl"])
+    export_parser.add_argument("--output")
+
+    import_parser = subparsers.add_parser("import")
+    add_common_arguments(import_parser)
+    import_parser.add_argument("input")
+    import_parser.add_argument("--format", default="jsonl", choices=["jsonl"])
+    import_parser.add_argument("--apply", action="store_true")
+
+    session_parser = subparsers.add_parser("session")
+    session_subparsers = session_parser.add_subparsers(dest="session_command", required=True)
+    session_get = session_subparsers.add_parser("get")
+    add_common_arguments(session_get)
+    session_get.add_argument("id")
+    session_set = session_subparsers.add_parser("set")
+    add_common_arguments(session_set)
+    session_set.add_argument("id")
+    session_set.add_argument("state_json")
+    session_set.add_argument("--ttl-seconds", type=int, default=DEFAULT_SESSION_TTL_SECONDS)
+
+    benchmark_parser = subparsers.add_parser("benchmark")
+    add_common_arguments(benchmark_parser)
+    benchmark_parser.add_argument("--mode", choices=["wiki-only", "memory-only", "memory-plus-wiki"])
 
     get_parser = subparsers.add_parser("get")
     add_common_arguments(get_parser)
@@ -167,6 +196,16 @@ def search_item_payload(item: dict[str, Any], score: float | None) -> dict[str, 
         "confidence": item["confidence"],
         "createdAt": item["created_at"],
     }
+
+
+def parse_json_object(raw_json: str, *, error_code: str) -> tuple[dict[str, Any] | None, dict[str, Any] | None]:
+    try:
+        value = json.loads(raw_json)
+    except json.JSONDecodeError:
+        return None, error_response(error_code, "Value must be a JSON object.")
+    if not isinstance(value, dict):
+        return None, error_response(error_code, "Value must be a JSON object.")
+    return value, None
 
 
 def index_report(store: MemoryStore) -> dict[str, Any]:
@@ -459,6 +498,48 @@ def handle_reindex(args: argparse.Namespace) -> tuple[int, dict[str, Any]]:
         store.close()
 
 
+def validate_memory_fields(
+    *,
+    content: str,
+    scope: str,
+    source_type: str | None,
+    source_ref: str | None,
+    confidence: float,
+    metadata: dict[str, Any] | None = None,
+) -> tuple[dict[str, Any] | None, int]:
+    durable_scopes = {"workspace", "project", "role", "user"}
+    source_ref_required_scopes = {"workspace", "project", "role"}
+
+    if scope not in durable_scopes:
+        return error_response("unsupported_scope", "Memory scope is not supported for durable storage."), EXIT_USER_CONFIG
+
+    if not source_type:
+        return error_response("missing_source_type", "Durable memories require source-type."), EXIT_USER_CONFIG
+
+    if scope in source_ref_required_scopes and not source_ref:
+        return error_response("missing_source_ref", "Durable workspace, project, and role memories require source-ref."), EXIT_USER_CONFIG
+
+    if scope == "user" and source_type != "user" and not source_ref:
+        return error_response("missing_source_ref", "User memories without file evidence require source-type user."), EXIT_USER_CONFIG
+
+    if not 0 <= confidence <= 1:
+        return error_response("invalid_confidence", "Confidence must be between 0 and 1."), EXIT_USER_CONFIG
+
+    safety = check_memory_content(content, durable=True)
+    if not safety.ok:
+        return response(
+            ok=False,
+            status="unsafe_save_blocked",
+            error={
+                "code": "unsafe_save_blocked",
+                "message": "Memory content was blocked by safety checks.",
+                "reasons": [issue.code for issue in safety.issues],
+            },
+        ), EXIT_UNSAFE_SAVE
+
+    return {"metadata": metadata or {}}, EXIT_OK
+
+
 def parse_metadata(raw_metadata: str | None) -> tuple[dict[str, Any] | None, dict[str, Any] | None]:
     if raw_metadata is None:
         return {}, None
@@ -472,38 +553,17 @@ def parse_metadata(raw_metadata: str | None) -> tuple[dict[str, Any] | None, dic
 
 
 def validate_remember_args(args: argparse.Namespace) -> tuple[dict[str, Any] | None, int]:
-    durable_scopes = {"workspace", "project", "role", "user"}
-    source_ref_required_scopes = {"workspace", "project", "role"}
-
-    if args.scope not in durable_scopes:
-        return error_response("unsupported_scope", "Memory scope is not supported for durable storage."), EXIT_USER_CONFIG
-
-    if args.scope in source_ref_required_scopes and not args.source_ref:
-        return error_response("missing_source_ref", "Durable workspace, project, and role memories require source-ref."), EXIT_USER_CONFIG
-
-    if args.scope == "user" and args.source_type != "user" and not args.source_ref:
-        return error_response("missing_source_ref", "User memories without file evidence require source-type user."), EXIT_USER_CONFIG
-
-    if not 0 <= args.confidence <= 1:
-        return error_response("invalid_confidence", "Confidence must be between 0 and 1."), EXIT_USER_CONFIG
-
     metadata, metadata_error = parse_metadata(args.metadata_json)
     if metadata_error is not None:
         return metadata_error, EXIT_USER_CONFIG
-
-    safety = check_memory_content(args.content, durable=True)
-    if not safety.ok:
-        return response(
-            ok=False,
-            status="unsafe_save_blocked",
-            error={
-                "code": "unsafe_save_blocked",
-                "message": "Memory content was blocked by safety checks.",
-                "reasons": [issue.code for issue in safety.issues],
-            },
-        ), EXIT_UNSAFE_SAVE
-
-    return {"metadata": metadata or {}}, EXIT_OK
+    return validate_memory_fields(
+        content=args.content,
+        scope=args.scope,
+        source_type=args.source_type,
+        source_ref=args.source_ref,
+        confidence=args.confidence,
+        metadata=metadata,
+    )
 
 
 def handle_remember(args: argparse.Namespace) -> tuple[int, dict[str, Any]]:
@@ -577,6 +637,240 @@ def handle_forget(args: argparse.Namespace) -> tuple[int, dict[str, Any]]:
         store.close()
 
 
+def handle_export(args: argparse.Namespace) -> tuple[int, dict[str, Any]]:
+    store, error, exit_code = open_existing_store(args)
+    if error is not None or store is None:
+        return exit_code, error or error_response("storage_error", "Unable to open memory storage.")
+
+    try:
+        rows = store.live_memory_export_rows()
+        jsonl = "".join(json.dumps(row, sort_keys=True) + "\n" for row in rows)
+        if args.output:
+            Path(args.output).write_text(jsonl, encoding="utf-8")
+        store.audit("export", payload={"format": args.format, "count": len(rows)})
+        return EXIT_OK, response(
+            ok=True,
+            status="exported",
+            workspaceId=store.identity.id,
+            format=args.format,
+            count=len(rows),
+            output=args.output,
+            jsonl=None if args.output else jsonl,
+            warnings=["export_contains_sensitive_accepted_memory"],
+        )
+    except (OSError, sqlite3.Error):
+        return EXIT_STORAGE, error_response("storage_error", "Unable to export memory.")
+    finally:
+        store.close()
+
+
+def normalized_import_record(record: dict[str, Any]) -> dict[str, Any]:
+    metadata = record.get("metadata")
+    if not isinstance(metadata, dict):
+        metadata = {}
+    return {
+        "scope": record.get("scope"),
+        "type": record.get("type"),
+        "role": record.get("role"),
+        "content": record.get("content"),
+        "summary": record.get("summary"),
+        "metadata": metadata,
+        "confidence": record.get("confidence", 0.70),
+        "source_type": record.get("sourceType") or record.get("source_type"),
+        "source_ref": record.get("sourceRef") or record.get("source_ref"),
+        "ttl_at": record.get("ttlAt") or record.get("ttl_at"),
+    }
+
+
+def validate_import_jsonl(raw_jsonl: str) -> tuple[list[dict[str, Any]], list[dict[str, Any]], bool]:
+    records: list[dict[str, Any]] = []
+    errors: list[dict[str, Any]] = []
+    unsafe = False
+    for index, line in enumerate(raw_jsonl.splitlines(), start=1):
+        if not line.strip():
+            continue
+        try:
+            raw_record = json.loads(line)
+        except json.JSONDecodeError:
+            errors.append({"line": index, "code": "invalid_json", "message": "Line is not valid JSON."})
+            continue
+        if not isinstance(raw_record, dict):
+            errors.append({"line": index, "code": "invalid_record", "message": "Line must be a JSON object."})
+            continue
+        record = normalized_import_record(raw_record)
+        if not isinstance(record["content"], str) or not isinstance(record["scope"], str) or not isinstance(record["type"], str):
+            errors.append({"line": index, "code": "invalid_record", "message": "Required memory fields are missing."})
+            continue
+        if record["role"] is not None and not isinstance(record["role"], str):
+            errors.append({"line": index, "code": "invalid_record", "message": "Role must be a string."})
+            continue
+        try:
+            confidence = float(record["confidence"])
+        except (TypeError, ValueError):
+            errors.append({"line": index, "code": "invalid_confidence", "message": "Confidence must be a number."})
+            continue
+        record["confidence"] = confidence
+        validation, validation_exit = validate_memory_fields(
+            content=record["content"],
+            scope=record["scope"],
+            source_type=record["source_type"],
+            source_ref=record["source_ref"],
+            confidence=record["confidence"],
+            metadata=record["metadata"],
+        )
+        if validation_exit != EXIT_OK:
+            error = validation.get("error", {}) if validation else {}
+            errors.append(
+                {
+                    "line": index,
+                    "code": error.get("code", "invalid_memory"),
+                    "message": error.get("message", "Memory row is invalid."),
+                    "reasons": error.get("reasons", []),
+                }
+            )
+            if validation_exit == EXIT_UNSAFE_SAVE:
+                unsafe = True
+            continue
+        records.append(record)
+    return records, errors, unsafe
+
+
+def handle_import(args: argparse.Namespace) -> tuple[int, dict[str, Any]]:
+    try:
+        raw_jsonl = Path(args.input).read_text(encoding="utf-8")
+    except OSError:
+        return EXIT_USER_CONFIG, error_response("input_not_found", "Import input could not be read.")
+
+    records, errors, unsafe = validate_import_jsonl(raw_jsonl)
+    if errors:
+        return_code = EXIT_UNSAFE_SAVE if unsafe else EXIT_USER_CONFIG
+        return return_code, response(
+            ok=False,
+            status="import_rejected",
+            format=args.format,
+            apply=args.apply,
+            validRecords=len(records),
+            errors=errors,
+        )
+
+    if not args.apply:
+        return EXIT_OK, response(
+            ok=True,
+            status="dry_run",
+            format=args.format,
+            apply=False,
+            validRecords=len(records),
+            written=0,
+        )
+
+    store = MemoryStore(args.workspace, args.storage_root)
+    try:
+        store.initialize()
+        written_ids: list[str] = []
+        for record in records:
+            memory_id = store.create_memory_item(
+                scope=record["scope"],
+                type=record["type"],
+                role=record["role"],
+                content=record["content"].strip(),
+                summary=record["summary"] if isinstance(record["summary"], str) else None,
+                metadata=record["metadata"],
+                confidence=record["confidence"],
+                source_type=record["source_type"],
+                source_ref=record["source_ref"],
+                ttl_at=record["ttl_at"] if isinstance(record["ttl_at"], str) else None,
+            )
+            store.add_evidence(memory_id, source_type=record["source_type"], source_ref=record["source_ref"])
+            written_ids.append(memory_id)
+        store.audit("import", payload={"format": args.format, "count": len(written_ids)})
+        return EXIT_OK, response(
+            ok=True,
+            status="imported",
+            workspaceId=store.identity.id,
+            format=args.format,
+            apply=True,
+            written=len(written_ids),
+            ids=written_ids,
+        )
+    except sqlite3.Error:
+        return EXIT_STORAGE, error_response("storage_error", "Unable to import memory.")
+    finally:
+        store.close()
+
+
+def handle_session_get(args: argparse.Namespace) -> tuple[int, dict[str, Any]]:
+    store, error, exit_code = open_existing_store(args)
+    if error is not None or store is None:
+        return exit_code, error or error_response("storage_error", "Unable to open memory storage.")
+    try:
+        record = store.get_session_record(args.id)
+        if record is None:
+            return EXIT_USER_CONFIG, error_response("not_found", "Session state was not found.")
+        return EXIT_OK, response(
+            ok=True,
+            status="ready",
+            workspaceId=store.identity.id,
+            id=args.id,
+            state=record["state"],
+            expiresAt=record["expiresAt"],
+        )
+    finally:
+        store.close()
+
+
+def handle_session_set(args: argparse.Namespace) -> tuple[int, dict[str, Any]]:
+    if len(args.state_json.encode("utf-8")) > SESSION_STATE_MAX_BYTES:
+        return EXIT_USER_CONFIG, error_response("session_too_large", "Session state exceeds the size limit.")
+    if args.ttl_seconds < 1:
+        return EXIT_USER_CONFIG, error_response("invalid_ttl", "Session TTL must be greater than zero.")
+    state, state_error = parse_json_object(args.state_json, error_code="invalid_session_json")
+    if state_error is not None or state is None:
+        return EXIT_USER_CONFIG, state_error or error_response("invalid_session_json", "Session state must be JSON.")
+
+    store = MemoryStore(args.workspace, args.storage_root)
+    try:
+        store.initialize()
+        expires_at = store.set_session_record(args.id, state, ttl_seconds=args.ttl_seconds)
+        return EXIT_OK, response(
+            ok=True,
+            status="session_saved",
+            workspaceId=store.identity.id,
+            id=args.id,
+            expiresAt=expires_at,
+            sizeBytes=len(args.state_json.encode("utf-8")),
+        )
+    except sqlite3.Error:
+        return EXIT_STORAGE, error_response("storage_error", "Unable to save session state.")
+    finally:
+        store.close()
+
+
+def handle_benchmark(args: argparse.Namespace) -> tuple[int, dict[str, Any]]:
+    modes = [args.mode] if args.mode else ["wiki-only", "memory-only", "memory-plus-wiki"]
+    metrics = [
+        "correctness",
+        "completeness",
+        "irrelevantStaleRecalls",
+        "filesRead",
+        "latencyMs",
+        "safety",
+    ]
+    return EXIT_OK, response(
+        ok=True,
+        status="benchmark_harness",
+        workspaceId=workspace_identity(args.workspace).id,
+        modes=[
+            {
+                "mode": mode,
+                "metrics": {metric: None for metric in metrics},
+            }
+            for mode in modes
+        ],
+        seedFromWiki="deferred",
+        sourceBoundary="does_not_read_sources",
+    )
+
+
 def handle_placeholder(args: argparse.Namespace) -> tuple[int, dict[str, Any]]:
     return EXIT_USER_CONFIG, error_response(
         "not_implemented",
@@ -602,6 +896,16 @@ def run(args: argparse.Namespace) -> tuple[int, dict[str, Any]]:
         return handle_remember(args)
     if args.command == "forget":
         return handle_forget(args)
+    if args.command == "export":
+        return handle_export(args)
+    if args.command == "import":
+        return handle_import(args)
+    if args.command == "session" and args.session_command == "get":
+        return handle_session_get(args)
+    if args.command == "session" and args.session_command == "set":
+        return handle_session_set(args)
+    if args.command == "benchmark":
+        return handle_benchmark(args)
     if args.command in PLACEHOLDER_COMMANDS:
         return handle_placeholder(args)
     return EXIT_USER_CONFIG, error_response("unknown_command", "Unknown command.")

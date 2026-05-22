@@ -87,7 +87,7 @@ class CliTests(unittest.TestCase):
             self.assertFalse(payload["ok"])
             self.assertEqual(payload["error"]["code"], "not_found")
 
-    def test_placeholder_command_returns_not_implemented(self) -> None:
+    def test_export_requires_initialized_store(self) -> None:
         with tempfile.TemporaryDirectory() as raw_tmp:
             tmp_path = Path(raw_tmp)
             workspace = tmp_path / "workspace"
@@ -98,9 +98,9 @@ class CliTests(unittest.TestCase):
                 ["export", "--workspace", str(workspace), "--storage-root", str(storage), "--json"]
             )
 
-            self.assertEqual(exit_code, 1)
-            self.assertEqual(payload["status"], "not_implemented")
-            self.assertEqual(payload["error"]["code"], "not_implemented")
+            self.assertEqual(exit_code, 3)
+            self.assertEqual(payload["status"], "not_initialized")
+            self.assertEqual(payload["error"]["code"], "not_initialized")
 
 
 if __name__ == "__main__":
