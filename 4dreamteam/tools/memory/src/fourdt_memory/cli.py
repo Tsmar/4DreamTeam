@@ -7,6 +7,7 @@ import sys
 from pathlib import Path
 from typing import Any, Sequence
 
+from .benchmark import retrieval_quality_benchmark
 from .embedder import cosine_similarity, lexical_score, provider_from_args, provider_key
 from .lance_index import LanceIndex
 from .migrations import migrate, schema_version
@@ -135,6 +136,7 @@ def build_parser() -> argparse.ArgumentParser:
     benchmark_parser = subparsers.add_parser("benchmark")
     add_common_arguments(benchmark_parser)
     benchmark_parser.add_argument("--mode", choices=["wiki-only", "memory-only", "memory-plus-wiki"])
+    benchmark_parser.add_argument("--profile", choices=["harness", "retrieval-quality"], default="harness")
 
     get_parser = subparsers.add_parser("get")
     add_common_arguments(get_parser)
@@ -846,6 +848,14 @@ def handle_session_set(args: argparse.Namespace) -> tuple[int, dict[str, Any]]:
 
 
 def handle_benchmark(args: argparse.Namespace) -> tuple[int, dict[str, Any]]:
+    if args.profile == "retrieval-quality":
+        return EXIT_OK, response(
+            ok=True,
+            status="benchmark_complete",
+            workspaceId=workspace_identity(args.workspace).id,
+            **retrieval_quality_benchmark(),
+        )
+
     modes = [args.mode] if args.mode else ["wiki-only", "memory-only", "memory-plus-wiki"]
     metrics = [
         "correctness",

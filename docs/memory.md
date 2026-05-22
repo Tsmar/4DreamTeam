@@ -93,9 +93,12 @@ Benchmark harness:
 
 ```txt
 4dt-memory benchmark --workspace . --json
+4dt-memory benchmark --workspace . --profile retrieval-quality --json
 ```
 
 The benchmark covers wiki-only, memory-only, and memory-plus-wiki modes, with metrics for correctness, completeness, irrelevant or stale recalls, files read, latency, and safety.
+
+The retrieval-quality profile uses a safe local fixture to compare lexical fallback and deterministic hash smoke mode. It reports `top1`, `top3`, `top5`, MRR, false negatives, and irrelevant/stale recalls. Hash mode is a deterministic smoke provider, not semantic-quality search.
 
 ## Safety
 
@@ -130,3 +133,13 @@ The deterministic `hash` provider exists for smoke tests and reproducible local 
 4DT Memory must not read workspace `sources/` by itself. Import/export/session/benchmark commands do not grant source access and do not replace source-boundary first-touch confirmation.
 
 Memory recalls can help navigation, but any important claim should be verified against current tasks, reports, managed wiki pages, or approved source files before changing behavior.
+
+## Tests
+
+The canonical required memory test runner is:
+
+```txt
+python3 -m unittest discover -s 4dreamteam/tools/memory/tests
+```
+
+The memory test suite is intentionally dependency-free. `pytest` is optional compatibility only when it is installed or when a future task explicitly adds it as a dependency.
