@@ -11,6 +11,8 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
 from fourdt_memory.cli import main
+from fourdt_memory.lance_index import LanceIndex
+from fourdt_memory.sqlite_store import MemoryStore
 
 
 def run_cli(args: list[str]) -> tuple[int, dict[str, object]]:
@@ -37,6 +39,43 @@ class DoctorTests(unittest.TestCase):
             self.assertEqual(payload["status"], "not_initialized")
             self.assertIn("memory_store_not_initialized", payload["warnings"])
             self.assertFalse(storage.exists())
+
+    def test_doctor_reports_index_counts_and_mismatch_warning(self) -> None:
+        with tempfile.TemporaryDirectory() as raw_tmp:
+            tmp_path = Path(raw_tmp)
+            workspace = tmp_path / "workspace"
+            storage = tmp_path / "storage"
+            workspace.mkdir()
+            store = MemoryStore(workspace, storage)
+            store.initialize()
+            try:
+                memory_id = store.create_memory_item(
+                    scope="workspace",
+                    type="decision",
+                    content="Use SQLite validation for search results.",
+                    source_type="task",
+                    source_ref="tasks/example.md",
+                )
+                store.update_index_metadata([memory_id], embedding_model="hash:sha256-16")
+                index = LanceIndex(store.paths.lancedb_dir)
+                index.rebuild(
+                    provider_model="hash:sha256-16",
+                    items=[
+                        {"id": memory_id, "vector": [1.0], "providerModel": "hash:sha256-16"},
+                        {"id": "mem_missing", "vector": [0.0], "providerModel": "hash:sha256-16"},
+                    ],
+                )
+            finally:
+                store.close()
+
+            exit_code, payload = run_cli(
+                ["doctor", "--workspace", str(workspace), "--storage-root", str(storage), "--json"]
+            )
+
+            self.assertEqual(exit_code, 3)
+            self.assertEqual(payload["status"], "degraded")
+            self.assertEqual(payload["lancedb"]["indexedItems"], 2)
+            self.assertIn("index_missing_sqlite_rows", payload["warnings"])
 
 
 if __name__ == "__main__":

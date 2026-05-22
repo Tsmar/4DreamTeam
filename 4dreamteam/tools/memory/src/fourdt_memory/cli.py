@@ -7,6 +7,8 @@ import sys
 from pathlib import Path
 from typing import Any, Sequence
 
+from .embedder import cosine_similarity, lexical_score, provider_from_args, provider_key
+from .lance_index import LanceIndex
 from .migrations import migrate, schema_version
 from .paths import workspace_identity, workspace_paths
 from .redaction import check_memory_content
@@ -20,8 +22,6 @@ EXIT_DEGRADED = 3
 EXIT_UNSAFE_SAVE = 4
 
 PLACEHOLDER_COMMANDS = {
-    "search",
-    "reindex",
     "export",
     "import",
     "session",
@@ -92,6 +92,21 @@ def build_parser() -> argparse.ArgumentParser:
     list_parser.add_argument("--type")
     list_parser.add_argument("--role")
 
+    search_parser = subparsers.add_parser("search")
+    add_common_arguments(search_parser)
+    search_parser.add_argument("query")
+    search_parser.add_argument("--limit", type=int, default=5)
+    search_parser.add_argument("--scope")
+    search_parser.add_argument("--type")
+    search_parser.add_argument("--role")
+    search_parser.add_argument("--embedding-provider", default="none", choices=["none", "hash"])
+    search_parser.add_argument("--embedding-model")
+
+    reindex_parser = subparsers.add_parser("reindex")
+    add_common_arguments(reindex_parser)
+    reindex_parser.add_argument("--embedding-provider", default="none", choices=["none", "hash"])
+    reindex_parser.add_argument("--embedding-model")
+
     get_parser = subparsers.add_parser("get")
     add_common_arguments(get_parser)
     get_parser.add_argument("id")
@@ -129,6 +144,58 @@ def sqlite_info(sqlite_path: Path) -> tuple[int, bool]:
         return version, True
     finally:
         connection.close()
+
+
+def preview_text(item: dict[str, Any], limit: int = 160) -> str:
+    text = item.get("summary") or item.get("content") or ""
+    compact = " ".join(str(text).split())
+    if len(compact) <= limit:
+        return compact
+    return compact[: limit - 3].rstrip() + "..."
+
+
+def search_item_payload(item: dict[str, Any], score: float | None) -> dict[str, Any]:
+    return {
+        "id": item["id"],
+        "score": score,
+        "scope": item["scope"],
+        "type": item["type"],
+        "role": item["role"],
+        "preview": preview_text(item),
+        "sourceType": item["source_type"],
+        "sourceRef": item["source_ref"],
+        "confidence": item["confidence"],
+        "createdAt": item["created_at"],
+    }
+
+
+def index_report(store: MemoryStore) -> dict[str, Any]:
+    index = LanceIndex(store.paths.lancedb_dir)
+    live_ids = set(store.list_live_memory_ids())
+    indexed_ids = set(index.ids())
+    missing_sqlite_ids = sorted(indexed_ids - live_ids)
+    rows = store.list_live_memory_items()
+    sqlite_indexed = [row for row in rows if row.get("indexed_at") is not None]
+    warnings: list[str] = []
+    if not index.available:
+        warnings.append("semantic_index_unavailable")
+    if missing_sqlite_ids:
+        warnings.append("index_missing_sqlite_rows")
+    if indexed_ids and len(indexed_ids & live_ids) != len(sqlite_indexed):
+        warnings.append("indexed_item_count_mismatch")
+    data = index.read()
+    if data.get("corrupt"):
+        warnings.append("semantic_index_corrupt")
+    return {
+        "ok": index.available and not warnings,
+        "path": str(store.paths.lancedb_dir),
+        "available": index.available,
+        "indexedItems": len(indexed_ids) if indexed_ids else len(sqlite_indexed),
+        "sqliteIndexedItems": len(sqlite_indexed),
+        "providerModel": data.get("providerModel"),
+        "missingSqliteIds": missing_sqlite_ids,
+        "warnings": warnings,
+    }
 
 
 def handle_init(args: argparse.Namespace) -> tuple[int, dict[str, Any]]:
@@ -178,14 +245,38 @@ def handle_doctor(args: argparse.Namespace) -> tuple[int, dict[str, Any]]:
             warnings=["sqlite_unreadable"],
         )
 
-    return EXIT_OK, response(
+    store = MemoryStore(args.workspace, args.storage_root)
+    try:
+        connection = store.connect()
+        migrate(connection)
+        lancedb = index_report(store)
+    except sqlite3.Error:
+        store.close()
+        return EXIT_STORAGE, response(
+            ok=False,
+            status="storage_error",
+            workspaceId=identity.id,
+            storageRoot=str(paths.storage_root),
+            sqlitePath=str(paths.sqlite_path),
+            sqlite={"ok": False, "path": str(paths.sqlite_path), "schemaVersion": None},
+            lancedb={"ok": False, "path": str(paths.lancedb_dir), "indexedItems": None},
+            warnings=["sqlite_unreadable"],
+        )
+    finally:
+        store.close()
+
+    warnings = lancedb.pop("warnings")
+    status = "ready" if not warnings else "degraded"
+    exit_code = EXIT_OK if not warnings else EXIT_DEGRADED
+    return exit_code, response(
         ok=True,
-        status="ready",
+        status=status,
         workspaceId=identity.id,
         storageRoot=str(paths.storage_root),
         sqlitePath=str(paths.sqlite_path),
         sqlite={"ok": sqlite_ok, "path": str(paths.sqlite_path), "schemaVersion": version},
-        lancedb={"ok": paths.lancedb_dir.exists(), "path": str(paths.lancedb_dir), "indexedItems": None},
+        lancedb=lancedb,
+        warnings=warnings,
     )
 
 
@@ -237,6 +328,132 @@ def handle_get(args: argparse.Namespace) -> tuple[int, dict[str, Any]]:
             status="ready",
             workspaceId=store.identity.id,
             item=item,
+        )
+    finally:
+        store.close()
+
+
+def handle_search(args: argparse.Namespace) -> tuple[int, dict[str, Any]]:
+    if args.limit is not None and args.limit < 1:
+        return EXIT_USER_CONFIG, error_response("invalid_limit", "Search limit must be greater than zero.")
+
+    store, error, exit_code = open_existing_store(args)
+    if error is not None or store is None:
+        return exit_code, error or error_response("storage_error", "Unable to open memory storage.")
+
+    try:
+        provider = provider_from_args(args.embedding_provider, args.embedding_model)
+    except ValueError:
+        store.close()
+        return EXIT_USER_CONFIG, error_response("unsupported_embedding_provider", "Embedding provider is not supported.")
+
+    try:
+        rows = store.list_live_memory_items(scope=args.scope, type=args.type, role=args.role)
+        live_by_id = {row["id"]: row for row in rows}
+        scored_rows: list[tuple[float, dict[str, Any]]] = []
+        index = LanceIndex(store.paths.lancedb_dir)
+        index_data = index.read()
+        warnings: list[str] = []
+
+        if not index.available:
+            warnings.append("semantic_index_unavailable")
+
+        expected_provider_model = provider_key(provider)
+        provider_mismatch = provider.supports_vectors and index_data.get("providerModel") not in (
+            None,
+            expected_provider_model,
+        )
+        if provider_mismatch:
+            warnings.append("embedding_provider_mismatch")
+
+        if provider.supports_vectors and index.exists() and not provider_mismatch:
+            query_vector = provider.embed(args.query)
+            for item in index.vector_search(query_vector, provider_model=expected_provider_model, limit=args.limit * 3):
+                if not isinstance(item, dict) or item.get("providerModel") != expected_provider_model:
+                    continue
+                memory_id = item.get("id")
+                if not isinstance(memory_id, str):
+                    continue
+                row = live_by_id.get(memory_id)
+                if row is None:
+                    continue
+                if "score" in item and isinstance(item["score"], (float, int)):
+                    score = float(item["score"])
+                else:
+                    vector = item.get("vector")
+                    if not isinstance(vector, list):
+                        continue
+                    score = cosine_similarity(query_vector, [float(value) for value in vector])
+                scored_rows.append((score, row))
+        else:
+            warnings.append("using_lexical_fallback")
+            for row in rows:
+                score = lexical_score(args.query, " ".join([row.get("summary") or "", row.get("content") or ""]))
+                if score > 0:
+                    scored_rows.append((score, row))
+
+        if not scored_rows and rows:
+            scored_rows = [(0.0, row) for row in rows]
+
+        scored_rows.sort(key=lambda pair: (-pair[0], pair[1]["created_at"]))
+        items = [search_item_payload(row, score) for score, row in scored_rows[: args.limit]]
+        status = "degraded" if warnings else "ready"
+        exit_code = EXIT_DEGRADED if warnings else EXIT_OK
+        return exit_code, response(
+            ok=True,
+            status=status,
+            workspaceId=store.identity.id,
+            query=args.query,
+            items=items,
+            warnings=warnings,
+        )
+    finally:
+        store.close()
+
+
+def handle_reindex(args: argparse.Namespace) -> tuple[int, dict[str, Any]]:
+    store, error, exit_code = open_existing_store(args)
+    if error is not None or store is None:
+        return exit_code, error or error_response("storage_error", "Unable to open memory storage.")
+
+    try:
+        provider = provider_from_args(args.embedding_provider, args.embedding_model)
+    except ValueError:
+        store.close()
+        return EXIT_USER_CONFIG, error_response("unsupported_embedding_provider", "Embedding provider is not supported.")
+
+    try:
+        rows = store.list_live_memory_items()
+        provider_model = provider_key(provider)
+        index_items: list[dict[str, Any]] = []
+        if provider.supports_vectors:
+            for row in rows:
+                index_items.append(
+                    {
+                        "id": row["id"],
+                        "vector": provider.embed(" ".join([row.get("summary") or "", row.get("content") or ""])),
+                        "providerModel": provider_model,
+                    }
+                )
+
+        index = LanceIndex(store.paths.lancedb_dir)
+        if provider.supports_vectors:
+            index.rebuild(provider_model=provider_model, items=index_items)
+        store.update_index_metadata([row["id"] for row in rows], embedding_model=provider_model)
+        warnings = []
+        if not index.available:
+            warnings.append("semantic_index_unavailable")
+        if not provider.supports_vectors:
+            warnings.append("using_lexical_fallback")
+        return EXIT_OK, response(
+            ok=True,
+            status="reindexed",
+            workspaceId=store.identity.id,
+            indexedItems=len(rows),
+            provider=provider.name,
+            embeddingModel=provider_model,
+            lancedb={"ok": index.available, "path": str(store.paths.lancedb_dir), "indexedItems": len(index_items)},
+            warnings=warnings,
         )
     finally:
         store.close()
@@ -375,6 +592,10 @@ def run(args: argparse.Namespace) -> tuple[int, dict[str, Any]]:
         return handle_doctor(args)
     if args.command == "list":
         return handle_list(args)
+    if args.command == "search":
+        return handle_search(args)
+    if args.command == "reindex":
+        return handle_reindex(args)
     if args.command == "get":
         return handle_get(args)
     if args.command == "remember":

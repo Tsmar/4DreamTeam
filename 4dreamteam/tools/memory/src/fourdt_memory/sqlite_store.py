@@ -207,6 +207,28 @@ class MemoryStore:
         ).fetchall()
         return [dict(row) for row in rows]
 
+    def list_live_memory_ids(self, *, now: str | None = None) -> list[str]:
+        return [row["id"] for row in self.list_live_memory_items(now=now)]
+
+    def update_index_metadata(self, memory_ids: list[str], *, embedding_model: str | None) -> None:
+        if not memory_ids:
+            return
+        now = utc_now()
+        placeholders = ", ".join("?" for _ in memory_ids)
+        self.connect().execute(
+            f"""
+            UPDATE memory_items
+            SET embedding_model = ?, indexed_at = ?, updated_at = ?
+            WHERE workspace_id = ? AND id IN ({placeholders})
+            """,
+            [embedding_model, now, now, self.identity.id, *memory_ids],
+        )
+        self.connect().commit()
+        self.audit(
+            "reindex",
+            payload={"count": len(memory_ids), "embeddingModel": embedding_model},
+        )
+
     def soft_delete_memory_item(self, memory_id: str, reason: str) -> bool:
         now = utc_now()
         cursor = self.connect().execute(
