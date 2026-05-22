@@ -52,6 +52,40 @@ class JsonContractTests(unittest.TestCase):
             self.assertEqual(payload["error"]["code"], "not_initialized")
             self.assertEqual(payload["warnings"], [])
 
+    def test_unsafe_save_error_shape_is_stable(self) -> None:
+        with tempfile.TemporaryDirectory() as raw_tmp:
+            tmp_path = Path(raw_tmp)
+            workspace = tmp_path / "workspace"
+            storage = tmp_path / "storage"
+            workspace.mkdir()
+
+            exit_code, payload = run_cli(
+                [
+                    "remember",
+                    "api_key = sk_test_12345678901234567890",
+                    "--workspace",
+                    str(workspace),
+                    "--storage-root",
+                    str(storage),
+                    "--scope",
+                    "workspace",
+                    "--type",
+                    "constraint",
+                    "--source-type",
+                    "task",
+                    "--source-ref",
+                    "tasks/example.md",
+                    "--json",
+                ]
+            )
+
+            self.assertEqual(exit_code, 4)
+            self.assertFalse(payload["ok"])
+            self.assertEqual(payload["status"], "unsafe_save_blocked")
+            self.assertEqual(payload["error"]["code"], "unsafe_save_blocked")
+            self.assertIn("reasons", payload["error"])
+            self.assertEqual(payload["warnings"], [])
+
 
 if __name__ == "__main__":
     unittest.main()
