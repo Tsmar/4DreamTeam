@@ -25,7 +25,7 @@ Read these files only when needed:
 - `references/lead/lifecycle.md` - role board, task lifecycle state machine, internal artifact policy, and file contract.
 - `references/lead/contracts.md` - mandatory output contracts, role instruction quality checklist, and instruction/template boundary.
 - `references/lead/safety.md` - safety invariants, execution modes, small safe task fast path, human-in-the-loop gates, blocking questions, and role blockers.
-- `references/lead/memory.md` - optional `agentmemory` recall/save policy, wiki fallback, and memory effectiveness benchmark.
+- `references/lead/memory.md` - optional local 4DT Memory recall/save policy, wiki fallback, and memory effectiveness benchmark.
 - `references/lead/read-only.md` - direct project questions, status/continuation, and workspace validation.
 - `references/lead/self-maintenance.md` - workspace self-update and skill self-improvement workflows.
 

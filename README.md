@@ -72,7 +72,7 @@ Prepare the accepted work for release.
 - Implements scoped changes through a developer workflow.
 - Runs independent quality review before work is accepted.
 - Maintains source-backed project wikis with source maps and local indexes.
-- Uses optional `agentmemory` for continuity while keeping wiki/tasks/reports as the source of truth.
+- Uses optional local 4DT Memory for continuity while keeping wiki/tasks/reports as the source of truth.
 - Prepares README positioning, launch copy, release narratives, and claim audits from confirmed sources.
 - Documents infrastructure facts and runbooks with DevOps safety gates.
 - Packages accepted work into changelog entries and commit plans after explicit approval.
@@ -156,7 +156,7 @@ Detailed documentation lives in [docs/](docs/):
 - [Workflows](docs/workflows.md) - product, task, quality, wiki, release, DevOps, marketing, and self-improvement flows.
 - [Workspace](docs/workspace.md) - workspace shape, role board, reports, and safety gates.
 - [Wiki Index](docs/wiki-index.md) - source maps, generated indexes, and source-boundary navigation.
-- [Agentmemory](docs/agentmemory.md) - what memory adds, what it must not replace, and the 0.1.5 benchmark.
+- [4DT Memory](docs/memory.md) - local memory storage, recall, safety, degraded mode, and benchmark behavior.
 - [Development](docs/development.md) - repository structure and contribution notes.
 
 ## Safety Guarantees
@@ -174,6 +174,6 @@ Detailed documentation lives in [docs/](docs/):
 
 ## Status
 
-Current documented version: `0.1.8`.
+Current documented version: `0.2.0`.
 
 See [CHANGELOG.md](CHANGELOG.md) for release history.

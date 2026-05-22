@@ -72,7 +72,7 @@ $4DreamTeam
 - Реализует scoped changes через developer workflow.
 - Запускает independent quality review до приемки.
 - Поддерживает source-backed project wikis с source maps и local indexes.
-- Использует optional `agentmemory` для continuity, но оставляет wiki/tasks/reports источником истины.
+- Использует optional local 4DT Memory для continuity, но оставляет wiki/tasks/reports источником истины.
 - Готовит README positioning, launch copy, release narratives и claim audits из confirmed sources.
 - Документирует infrastructure facts и runbooks с DevOps safety gates.
 - Упаковывает accepted work в changelog entries и commit plans после explicit approval.
@@ -152,7 +152,7 @@ $4DreamTeam improve 4DreamTeam itself from your local checkout of https://github
 - [Workflows](docs/workflows.md) - product, task, quality, wiki, release, DevOps, marketing и self-improvement flows.
 - [Workspace](docs/workspace.md) - workspace shape, role board, reports и safety gates.
 - [Wiki Index](docs/wiki-index.md) - source maps, generated indexes и source-boundary navigation.
-- [Agentmemory](docs/agentmemory.md) - зачем нужна memory, что она не заменяет, и benchmark 0.1.5.
+- [4DT Memory](docs/memory.md) - local memory storage, recall, safety, degraded mode и benchmark behavior.
 - [Development](docs/development.md) - структура репозитория и заметки для разработки.
 
 ## Гарантии безопасности
@@ -168,6 +168,6 @@ $4DreamTeam improve 4DreamTeam itself from your local checkout of https://github
 
 ## Статус
 
-Текущая документированная версия: `0.1.6`.
+Текущая документированная версия: `0.2.0`.
 
 История изменений: [CHANGELOG.md](CHANGELOG.md).

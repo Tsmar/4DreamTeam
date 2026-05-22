@@ -4,7 +4,7 @@ description: Coordinate the 4DreamTeam file-based agent framework for Codex. Use
 license: MIT
 metadata:
   author: Tsmar
-  version: 0.1.8
+  version: 0.2.0
   repository: https://github.com/Tsmar/4DreamTeam
 ---
 
@@ -78,7 +78,7 @@ Use route-specific references to reduce unnecessary context:
 
 - Read `references/lead.md` as the compact entrypoint and module map.
 - Follow the context budget policy in `references/lead/context-budget.md` when a route may require broad reading, staged expansion, or artifact handoff.
-- Read `references/lead/memory.md` only when prior session context, saved decisions, user preferences, wiki fallback, or memory effectiveness is relevant.
+- Read `references/lead/memory.md` only when prior session context, saved decisions, user preferences, local memory fallback, or memory effectiveness is relevant.
 - Read `references/lead/read-only.md` only for status, continuation, validation, or direct project questions.
 - Read `references/lead/self-maintenance.md` only for self-update or self-improvement.
 - Read `references/lead/lifecycle.md`, `references/lead/contracts.md`, or `references/lead/safety.md` when their gates or artifacts apply.

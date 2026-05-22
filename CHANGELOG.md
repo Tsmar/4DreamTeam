@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.2.0 - 2026-05-22
+
+- Added bundled local 4DT Memory tooling with `4dt-memory` CLI commands for SQLite-backed memory storage, safe `remember`/`forget`, search/reindex, JSONL import/export, session state, and benchmark harness output.
+- Documented SQLite as the authoritative memory store and LanceDB as a rebuildable optional index with degraded lexical fallback.
+- Replaced primary memory documentation with `docs/memory.md` and removed the legacy memory page.
+- Updated lead memory policy to preserve source-of-truth order, source-boundary rules, no-secret save rules, preview-first search, and no-memory/degraded fallback behavior.
+- Updated README and README.ru to describe optional local 4DT Memory instead of external memory tooling.
+- Bumped skill and memory package version metadata to `0.2.0`.
+
 ## 0.1.8 - 2026-05-21
 
 - Added a lead context budget policy for route-first loading, staged expansion, pointer-over-payload behavior, artifact handoff, and bulk-load guardrails.
