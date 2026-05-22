@@ -45,6 +45,33 @@ Fallback order:
 
 If 4DT Memory is unavailable, uninitialized, degraded, empty, low-signal, or contradictory, continue with local wiki index-first navigation and workspace artifacts. Do not fail the workflow because memory is unavailable.
 
+## English-First Memory Search Protocol
+
+4DreamTeam managed knowledge artifacts are written in English for agents. When the user asks in another language, translate the search intent into English before searching memory, wiki pages, tasks, reports, or accepted quality artifacts.
+
+Do not rely on a single literal memory query for conceptual, architectural, continuation, decision-history, or cross-artifact questions. Use a bounded query plan:
+
+1. Search or read exact task ids, file paths, commands, titles, and known artifact pointers first.
+2. Identify the user's intent, project or framework name, source type, and important entities.
+3. Preserve technical terms while translating: commands, CLI names, filenames, package names, class names, task ids, source-map terms, `4dt-memory`, SQLite, LanceDB, MCP, hooks, and other project-specific identifiers.
+4. Generate 4-8 typed English query variants, selected from normalized technical wording, architecture/workflow, implementation/file, decision/history, task/report/wiki artifact, and benchmark/process queries.
+5. Use the user's original-language wording only as a fallback when English queries are thin or when the target source is known to contain that language.
+6. Prefer results supported by exact pointers, multiple query variants, or current wiki/task/report evidence.
+7. Verify memory hits against the authority order before making strong claims or changing behavior.
+8. Answer in the user's language, while preserving artifact ids, file paths, commands, and technical terms exactly.
+
+Example for `как работает память в dreamteam`:
+
+```txt
+4DreamTeam memory architecture
+4DreamTeam memory recall workflow
+4DreamTeam local memory runtime
+4DT Memory SQLite LanceDB search reindex
+4DreamTeam memory policy wiki fallback tasks reports
+4DT Memory retrieval quality benchmark
+references lead memory context budget source map
+```
+
 ## Wiki Fallback
 
 The local wiki is the authoritative project memory fallback.
@@ -117,3 +144,5 @@ Measure:
 6. Safety: no secret exposure, no source-boundary bypass, and no unsupported claims.
 
 Report whether memory should be used by default, used only on continuation tasks, or skipped for that project.
+
+For retrieval-quality checks, compare a raw user query against the English-first agent protocol query set. The protocol is successful when it improves `top3`/MRR or reduces false negatives for bilingual and conceptual prompts without materially increasing irrelevant or stale recalls.

@@ -10,7 +10,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
-from fourdt_memory.benchmark import MEMORY_FIXTURE, QUERY_FIXTURE, retrieval_quality_benchmark
+from fourdt_memory.benchmark import AGENT_PROTOCOL_QUERY_FIXTURE, MEMORY_FIXTURE, QUERY_FIXTURE, retrieval_quality_benchmark
 from fourdt_memory.cli import main
 
 
@@ -25,6 +25,7 @@ class RetrievalQualityBenchmarkTests(unittest.TestCase):
     def test_retrieval_quality_fixture_is_realistic_and_safe(self) -> None:
         self.assertGreaterEqual(len(MEMORY_FIXTURE), 20)
         self.assertGreaterEqual(len(QUERY_FIXTURE), 20)
+        self.assertGreaterEqual(len(AGENT_PROTOCOL_QUERY_FIXTURE), 5)
         categories = {memory.category for memory in MEMORY_FIXTURE}
         for expected in (
             "accepted_decision",
@@ -44,6 +45,14 @@ class RetrievalQualityBenchmarkTests(unittest.TestCase):
             for term in forbidden_terms:
                 self.assertNotIn(term, lowered)
 
+        for query in AGENT_PROTOCOL_QUERY_FIXTURE:
+            self.assertTrue(query.raw_query)
+            self.assertGreaterEqual(len(query.english_queries), 2)
+            self.assertLessEqual(len(query.english_queries), 8)
+            for english_query in query.english_queries:
+                self.assertTrue(english_query)
+                self.assertTrue(english_query.isascii())
+
     def test_retrieval_quality_benchmark_reports_required_metrics(self) -> None:
         payload = retrieval_quality_benchmark()
 
@@ -51,6 +60,7 @@ class RetrievalQualityBenchmarkTests(unittest.TestCase):
         self.assertEqual(payload["fixture"]["sourceBoundary"], "does_not_read_sources")
         self.assertTrue(payload["fixture"]["safeFixture"])
         self.assertGreaterEqual(payload["fixture"]["queryCount"], 20)
+        self.assertGreaterEqual(payload["fixture"]["agentProtocolQueryCount"], 5)
 
         modes = {mode["mode"]: mode for mode in payload["modes"]}
         self.assertEqual(set(modes), {"none-lexical", "hash-smoke"})
@@ -61,6 +71,33 @@ class RetrievalQualityBenchmarkTests(unittest.TestCase):
             self.assertEqual(len(mode["queries"]), payload["fixture"]["queryCount"])
 
         self.assertIn("not semantic-quality search", payload["interpretation"]["hashMode"])
+        self.assertIn("runtime search behavior", payload["interpretation"]["agentProtocol"])
+
+    def test_agent_protocol_comparison_improves_bilingual_conceptual_recall(self) -> None:
+        payload = retrieval_quality_benchmark()
+        comparison = payload["agentProtocolComparison"]
+        modes = {mode["mode"]: mode for mode in comparison["modes"]}
+        self.assertEqual(set(modes), {"raw-user-query-lexical", "english-first-agent-protocol"})
+
+        raw = modes["raw-user-query-lexical"]
+        protocol = modes["english-first-agent-protocol"]
+        self.assertEqual(raw["queryCount"], payload["fixture"]["agentProtocolQueryCount"])
+        self.assertEqual(protocol["queryCount"], payload["fixture"]["agentProtocolQueryCount"])
+        for metric in ("top1", "top3", "top5", "mrr", "falseNegatives", "irrelevantStaleRecalls"):
+            self.assertIn(metric, raw)
+            self.assertIn(metric, protocol)
+
+        self.assertGreater(protocol["top3"], raw["top3"])
+        self.assertGreater(protocol["mrr"], raw["mrr"])
+        self.assertLess(protocol["falseNegatives"], raw["falseNegatives"])
+        self.assertTrue(comparison["result"]["top3Improved"])
+        self.assertTrue(comparison["result"]["mrrImproved"])
+        self.assertTrue(comparison["result"]["falseNegativesReduced"])
+
+        first_query = protocol["queries"][0]
+        self.assertIn("rawQuery", first_query)
+        self.assertIn("englishQueries", first_query)
+        self.assertGreaterEqual(len(first_query["englishQueries"]), 2)
 
     def test_cli_retrieval_quality_profile_is_machine_readable_and_non_mutating(self) -> None:
         with tempfile.TemporaryDirectory() as raw_tmp:

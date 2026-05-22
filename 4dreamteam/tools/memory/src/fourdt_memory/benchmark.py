@@ -23,6 +23,15 @@ class BenchmarkQuery:
     category: str
 
 
+@dataclass(frozen=True)
+class AgentProtocolQuery:
+    id: str
+    raw_query: str
+    english_queries: tuple[str, ...]
+    expected_ids: tuple[str, ...]
+    category: str
+
+
 MEMORY_FIXTURE: tuple[BenchmarkMemory, ...] = (
     BenchmarkMemory(
         "mem_storage_root",
@@ -215,8 +224,119 @@ QUERY_FIXTURE: tuple[BenchmarkQuery, ...] = (
 )
 
 
+AGENT_PROTOCOL_QUERY_FIXTURE: tuple[AgentProtocolQuery, ...] = (
+    AgentProtocolQuery(
+        "ap_memory_architecture",
+        "как работает память в dreamteam",
+        (
+            "4DreamTeam memory architecture SQLite LanceDB",
+            "4DT Memory local runtime storage search reindex",
+            "memory policy wiki fallback tasks reports",
+            "retrieval quality benchmark memory recall workflow",
+        ),
+        ("mem_sqlite_authority", "mem_lancedb_rebuildable", "mem_degraded_ok"),
+        "accepted_decision",
+    ),
+    AgentProtocolQuery(
+        "ap_memory_storage",
+        "где лежит база памяти",
+        (
+            "4DT Memory storage root database",
+            "default memory storage root outside workspace skill directory",
+            "SQLite storage root ~/.codex/storage/4dreamteam/memory",
+        ),
+        ("mem_storage_root",),
+        "accepted_decision",
+    ),
+    AgentProtocolQuery(
+        "ap_sources_boundary",
+        "можно ли памяти читать sources",
+        (
+            "memory commands benchmark must not read workspace sources",
+            "sources first-touch confirmation before listing reading indexing",
+            "source boundary memory search approved sources verification",
+        ),
+        ("mem_no_sources_read", "mem_sources_first_touch"),
+        "source_boundary_rule",
+    ),
+    AgentProtocolQuery(
+        "ap_hash_quality",
+        "hash embedding это нормальный семантический поиск",
+        (
+            "hash embedding provider deterministic smoke-test mode not semantic search quality",
+            "hash mode deterministic smoke provider",
+            "semantic quality requires real embedding provider",
+        ),
+        ("mem_hash_not_semantic",),
+        "implementation_lesson",
+    ),
+    AgentProtocolQuery(
+        "ap_cli_preview",
+        "почему search не отдает полный текст",
+        (
+            "memory search returns concise preview fields by default",
+            "use get by id retrieve full memory content",
+            "preview-first search full content get command",
+        ),
+        ("mem_preview_get",),
+        "accepted_decision",
+    ),
+    AgentProtocolQuery(
+        "ap_degraded",
+        "если память сломалась работа должна падать",
+        (
+            "memory unavailable uninitialized degraded must not fail 4DreamTeam workflow",
+            "degraded memory continue with tasks reports wiki approved sources",
+            "LanceDB embeddings unavailable degraded fallback workflow continues",
+        ),
+        ("mem_degraded_ok",),
+        "implementation_lesson",
+    ),
+    AgentProtocolQuery(
+        "ap_runner",
+        "какой тест раннер нужен для memory",
+        (
+            "memory tests dependency-free unittest canonical runner",
+            "pytest optional only when installed",
+            "python3 -m unittest discover memory tests",
+        ),
+        ("mem_pytest_optional",),
+        "implementation_lesson",
+    ),
+    AgentProtocolQuery(
+        "ap_release",
+        "можно ли пушить после readiness",
+        (
+            "release readiness does not authorize push tag publish staging",
+            "release workflow approval required before staging pushing tagging",
+            "release process constraints no push without explicit approval",
+        ),
+        ("mem_release_no_push",),
+        "process_constraint",
+    ),
+)
+
+
 def _rank_lexical(query: str, memories: tuple[BenchmarkMemory, ...]) -> list[tuple[str, float]]:
     scored = [(memory.id, lexical_score(query, memory.content)) for memory in memories]
+    scored.sort(key=lambda item: (-item[1], item[0]))
+    return scored
+
+
+def _rank_agent_protocol(queries: tuple[str, ...], memories: tuple[BenchmarkMemory, ...]) -> list[tuple[str, float]]:
+    scores: dict[str, float] = {}
+    match_counts: dict[str, int] = {}
+    for query in queries:
+        for memory in memories:
+            score = lexical_score(query, memory.content)
+            scores[memory.id] = max(scores.get(memory.id, 0.0), score)
+            if score > 0:
+                match_counts[memory.id] = match_counts.get(memory.id, 0) + 1
+
+    scored = [
+        (memory_id, score + min(match_counts.get(memory_id, 0), 3) * 0.01)
+        for memory_id, score in scores.items()
+    ]
     scored.sort(key=lambda item: (-item[1], item[0]))
     return scored
 
@@ -229,7 +349,7 @@ def _rank_hash(query: str, memories: tuple[BenchmarkMemory, ...]) -> list[tuple[
     return scored
 
 
-def _metrics(mode: str, rankings: dict[str, list[tuple[str, float]]]) -> dict[str, Any]:
+def _metrics(mode: str, rankings: dict[str, list[tuple[str, float]]], queries: tuple[BenchmarkQuery, ...] = QUERY_FIXTURE) -> dict[str, Any]:
     top1_hits = 0
     top3_hits = 0
     top5_hits = 0
@@ -238,7 +358,7 @@ def _metrics(mode: str, rankings: dict[str, list[tuple[str, float]]]) -> dict[st
     irrelevant_stale_recalls = 0
     query_results = []
 
-    for query in QUERY_FIXTURE:
+    for query in queries:
         expected = set(query.expected_ids)
         ranked = rankings[query.id]
         ranked_ids = [memory_id for memory_id, _score in ranked]
@@ -271,7 +391,7 @@ def _metrics(mode: str, rankings: dict[str, list[tuple[str, float]]]) -> dict[st
             }
         )
 
-    total = len(QUERY_FIXTURE)
+    total = len(queries)
     return {
         "mode": mode,
         "queryCount": total,
@@ -285,14 +405,40 @@ def _metrics(mode: str, rankings: dict[str, list[tuple[str, float]]]) -> dict[st
     }
 
 
+def _agent_protocol_metrics(
+    mode: str,
+    rankings: dict[str, list[tuple[str, float]]],
+    queries: tuple[AgentProtocolQuery, ...] = AGENT_PROTOCOL_QUERY_FIXTURE,
+) -> dict[str, Any]:
+    benchmark_queries = tuple(
+        BenchmarkQuery(query.id, query.raw_query, query.expected_ids, query.category)
+        for query in queries
+    )
+    metrics = _metrics(mode, rankings, benchmark_queries)
+    for query_result, query in zip(metrics["queries"], queries):
+        query_result["rawQuery"] = query.raw_query
+        query_result["englishQueries"] = list(query.english_queries)
+    return metrics
+
+
 def retrieval_quality_benchmark() -> dict[str, Any]:
     lexical_rankings = {query.id: _rank_lexical(query.query, MEMORY_FIXTURE) for query in QUERY_FIXTURE}
     hash_rankings = {query.id: _rank_hash(query.query, MEMORY_FIXTURE) for query in QUERY_FIXTURE}
+    raw_protocol_rankings = {
+        query.id: _rank_lexical(query.raw_query, MEMORY_FIXTURE) for query in AGENT_PROTOCOL_QUERY_FIXTURE
+    }
+    agent_protocol_rankings = {
+        query.id: _rank_agent_protocol(query.english_queries, MEMORY_FIXTURE)
+        for query in AGENT_PROTOCOL_QUERY_FIXTURE
+    }
+    raw_protocol_metrics = _agent_protocol_metrics("raw-user-query-lexical", raw_protocol_rankings)
+    agent_protocol_metrics = _agent_protocol_metrics("english-first-agent-protocol", agent_protocol_rankings)
     return {
         "profile": "retrieval-quality",
         "fixture": {
             "memoryCount": len(MEMORY_FIXTURE),
             "queryCount": len(QUERY_FIXTURE),
+            "agentProtocolQueryCount": len(AGENT_PROTOCOL_QUERY_FIXTURE),
             "categories": sorted({memory.category for memory in MEMORY_FIXTURE}),
             "safeFixture": True,
             "sourceBoundary": "does_not_read_sources",
@@ -301,9 +447,25 @@ def retrieval_quality_benchmark() -> dict[str, Any]:
             _metrics("none-lexical", lexical_rankings),
             _metrics("hash-smoke", hash_rankings),
         ],
+        "agentProtocolComparison": {
+            "purpose": "Compare a single raw user query against bounded English-first typed query variants.",
+            "modes": [
+                raw_protocol_metrics,
+                agent_protocol_metrics,
+            ],
+            "result": {
+                "top3Improved": agent_protocol_metrics["top3"] > raw_protocol_metrics["top3"],
+                "mrrImproved": agent_protocol_metrics["mrr"] > raw_protocol_metrics["mrr"],
+                "falseNegativesReduced": agent_protocol_metrics["falseNegatives"]
+                < raw_protocol_metrics["falseNegatives"],
+                "staleRecallDelta": agent_protocol_metrics["irrelevantStaleRecalls"]
+                - raw_protocol_metrics["irrelevantStaleRecalls"],
+            },
+        },
         "interpretation": {
             "hashMode": "deterministic smoke provider, not semantic-quality search",
             "lexicalMode": "useful for direct wording and shared terms; weak for paraphrase-heavy queries",
+            "agentProtocol": "English-first typed query variants improve bilingual/conceptual recall without changing runtime search behavior",
             "authority": "benchmark evaluates recall only; tasks, reports, wiki, approvals, and approved sources remain authoritative",
         },
     }

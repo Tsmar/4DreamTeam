@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+- Added an English-first agent memory search protocol for 4DT Memory recall, including bounded typed query variants and artifact verification guidance.
+- Extended the retrieval-quality benchmark with a raw user query vs English-first agent protocol comparison without changing `4dt-memory search` runtime behavior.
+
 ## 0.2.0 - 2026-05-22
 
 - Added bundled local 4DT Memory tooling with `4dt-memory` CLI commands for SQLite-backed memory storage, safe `remember`/`forget`, search/reindex, JSONL import/export, session state, and benchmark harness output.
