@@ -2,169 +2,175 @@
 
 Языки: [English](README.md) | [Русский](README.ru.md)
 
-4DreamTeam - это навык для Codex, который помогает превращать сырые идеи, незавершенную работу, устаревшую документацию и давление перед релизом в понятный и проверяемый workflow.
+4DreamTeam - это волшебная палочка для тех, кто хочет работать с реальными проектами с AI-суперсилами, но не хочет превращать каждый проект в один бесконечный хрупкий чат.
 
-Вместо того чтобы просить одного AI-агента держать все в одном длинном чате, 4DreamTeam дает Codex небольшую команду ролей: product, analytic, developer, quality, wiki, marketing, devops и release. Работа становится видимой в файлах: epics, tasks, developer reports, quality reports, source-backed docs и release plans.
+Скажите Codex, что вы хотите построить, исправить, проверить, задокументировать или выпустить. 4DreamTeam превращает этот запрос в маленькую рабочую команду: product думает о цели, analytic формирует задачу, developer меняет код, quality проверяет результат, wiki хранит память проекта, а release помогает безопасно довести изменения до выпуска.
 
-Смысл не в бюрократии. Смысл в непрерывности: можно вернуться позже, увидеть что произошло, понять что принято, и выбрать следующий безопасный шаг.
+Вы приносите идею, хаос, недоделанную фичу или ощущение "а это вообще правда готово?". 4DreamTeam дает работе маршрут, записывает что произошло, поддерживает документацию живой и спрашивает перед опасными действиями.
 
-## Главное обещание
+## Когда Это Полезно
+
+- У вас есть идея, но нет ТЗ.
+- Вы открыли старый проект и забыли, что дальше.
+- Вы хотите, чтобы Codex изменил код, но еще хотите отдельную проверку, действительно ли работа готова.
+- Документация устарела, и ей уже никто не доверяет.
+- Вы близко к релизу и хотите чистый план до любых действий с git.
+- Вы хотите AI-помощь, которая ощущается не как один перегруженный чат, а как аккуратная проектная команда.
+
+## Простое Обещание
 
 ```txt
-idea -> epic -> task -> implementation -> quality review -> documentation -> release
+idea -> plan -> implementation -> quality -> wiki -> release
 ```
 
-Главная точка входа:
+4DreamTeam не заставляет запоминать процесс. Вы начинаете с:
 
 ```txt
 $4DreamTeam
 ```
 
-Не нужно запоминать имена ролей. Lead сам выбирает маршрут.
+Lead сам направляет работу к нужной роли и держит следующий шаг видимым.
 
-## Реальные ситуации
+## Почему Это Ощущается Иначе
 
-### Есть идея, но нет ТЗ
+### У Codex появляется проектная память
+
+Работа живет не только в прокрутке чата. 4DreamTeam хранит tasks, decisions, reports, quality results, docs и release plans в workspace, чтобы проект можно было продолжить позже.
+
+### Выполнение отделено от проверки
+
+Роль developer реализует scoped work. Роль quality независимо принимает или отклоняет результат по задаче. Так "готово" меньше зависит от ощущения на глаз.
+
+### Документация остается рядом с реальностью
+
+Роль wiki поддерживает source-backed project knowledge base. Подробную документацию можно экспортировать в `docs/` через `4dt-wiki export`, поэтому README остается простым, а проектная документация - полезной.
+
+### Управление остается у вас
+
+4DreamTeam спрашивает перед рискованными переходами, file writes, release steps, infrastructure changes, destructive commands, commits, pushes, tags и publication. Можно двигаться быстро, не отдавая руль.
+
+## Реальные Ситуации
+
+### "Есть идея, но нет ТЗ."
 
 ```txt
 Я хочу систему записи для маленькой йога-студии.
 Сейчас все ведется в WhatsApp, и изменения теряются.
 ```
 
-4DreamTeam превращает сырую идею в epic с пользователями, объемом работ, non-goals, task candidates и acceptance criteria до того, как Codex прыгнет в код.
+4DreamTeam превращает идею в users, goals, scope, non-goals, task candidates и acceptance criteria до того, как Codex прыгнет в код.
 
-### Вы вернулись через неделю
+### "Я вернулся через неделю."
 
 ```txt
 Продолжи проект. Что дальше?
 ```
 
-4DreamTeam читает role board, reports, wiki и optional memory, а затем предлагает следующий безопасный шаг вместо того, чтобы притворяться, что весь прошлый контекст все еще в чате.
+4DreamTeam читает board, timeline evidence, wiki и memory, когда она доступна, а затем говорит следующий безопасный шаг.
 
-### Нужно понять, готова ли работа
+### "Нужно понять, правда ли это готово."
 
 ```txt
 Фича реализована, но я не уверен, что она действительно готова.
 ```
 
-4DreamTeam отправляет работу в `quality`, проверяет результат по acceptance criteria и сохраняет accepted или rejected quality report.
+4DreamTeam отправляет работу в quality, проверяет ее по acceptance criteria и сохраняет accepted или rejected result.
 
-### Документация, вероятно, устарела
+### "Документация, наверное, устарела."
 
 ```txt
 Приложение изменилось, а документация, скорее всего, уже неправильная.
 ```
 
-4DreamTeam может проверить или синхронизировать source-backed wiki из явно approved source paths, не читая лишние файлы и не выдумывая недостающие факты.
+4DreamTeam может audit, sync, deepen и export source-backed docs, не читая лишние файлы и не выдумывая недостающие факты.
 
-### Нужно безопасно выпустить изменения
+### "Нужно выпустить без хаоса."
 
 ```txt
 Подготовь принятую работу к релизу.
 ```
 
-4DreamTeam проверяет accepted evidence, dirty files, changelog needs и предлагает точный staging plan до любого git commit.
+4DreamTeam проверяет accepted evidence, смотрит changed files, обновляет release documentation когда нужно и предлагает точный план до любых git actions.
 
-## Что он делает
+## Что Вы Получаете
 
-- Превращает продуктовую идею в scoped epic и task candidates.
-- Делает из approved work технические задачи, готовые к реализации.
-- Реализует scoped changes через developer workflow.
-- Запускает independent quality review до приемки.
-- Поддерживает source-backed project wikis с source maps и local indexes.
-- Использует optional local 4DT Memory для continuity, но оставляет wiki/tasks/reports источником истины.
-- Готовит README positioning, launch copy, release narratives и claim audits из confirmed sources.
-- Документирует infrastructure facts и runbooks с DevOps safety gates.
-- Упаковывает accepted work в changelog entries и commit plans после explicit approval.
-- Улучшает сам 4DreamTeam через тот же controlled workflow.
+- Product shaping для сырых идей.
+- Technical task planning перед реализацией.
+- Developer work с видимыми evidence.
+- Independent quality review.
+- Source-backed project wiki.
+- Экспортированную документацию в `docs/`.
+- README positioning, launch copy, release narratives и claim audits.
+- DevOps notes и runbooks с safety gates.
+- Release plans и changelog preparation после explicit approval.
+- Способ улучшать сам 4DreamTeam через тот же controlled workflow.
 
-## Роли
+## Быстрый Старт
 
-| Роль | Задача |
-|---|---|
-| `product` | Уточняет пользователей, цели, scope, non-goals и product acceptance. |
-| `analytic` | Превращает intent в implementation-ready tasks с risks и checks. |
-| `developer` | Реализует approved tasks и записывает developer evidence. |
-| `quality` | Независимо принимает или отклоняет работу по criteria. |
-| `wiki` | Создает и поддерживает source-backed project knowledge bases. |
-| `marketing` | Делает source-backed public messaging и claim reviews. |
-| `devops` | Документирует servers, deployments, diagnostics и operational facts. |
-| `release` | Готовит changelogs, commit plans и approved git commits. |
+Установите skill из [Tsmar/4DreamTeam](https://github.com/Tsmar/4DreamTeam/tree/main/4dreamteam).
 
-## Почему файлы важны
-
-4DreamTeam хранит состояние workspace в файлах:
-
-```txt
-tasks/
-reports/
-docs/
-```
-
-Это значит:
-
-- решения и assumptions живут дольше одного чата;
-- задачи можно продолжить без угадывания;
-- developer work и quality review разделены;
-- rejected work имеет понятный путь исправления;
-- знания проекта хранятся в Markdown;
-- release plans показывают, что будет staged, до git changes.
-
-## Быстрый старт
-
-Откройте новый чат и напишите: установи скилл из [Tsmar/4DreamTeam](https://github.com/Tsmar/4DreamTeam/tree/main/4dreamteam).
-
-Перезапустите Codex и проверьте, что skill доступен:
+Перезапустите Codex, затем спросите:
 
 ```txt
 Is the 4DreamTeam skill available?
 ```
 
-Из любой папки:
+Из любой папки проекта:
 
 ```txt
 Run $4DreamTeam.
 ```
 
-Если папка пустая или еще не является 4DreamTeam workspace, skill сначала спросит разрешение перед созданием файлов.
+Если папка еще не является 4DreamTeam workspace, skill спросит перед созданием workspace files.
 
-## Частые команды
+### Работа С Существующим Проектом
+
+Сложная настройка не нужна. Создайте чистую папку для 4DreamTeam workspace, положите репозиторий проекта внутрь `sources/`, затем запустите `$4DreamTeam`.
 
 ```txt
-$4DreamTeam init workspace
+my-4dt-workspace/
+  sources/
+    your-project/
+```
+
+После инициализации 4DreamTeam может построить project knowledge base из approved source folder, и вы готовы работать: попросите его понять проект, спланировать изменения, проверить работу, обновить документацию или подготовить принятый релиз.
+
+## Полезные Запросы
+
+```txt
 $4DreamTeam status
 $4DreamTeam continue
 $4DreamTeam validate workspace
-$4DreamTeam connect project <project-name> from <source-path>
-$4DreamTeam check docs for <project-name>
-$4DreamTeam search docs for <project-name> <query>
-$4DreamTeam prepare release for <project-name>
-$4DreamTeam improve 4DreamTeam itself from your local checkout of https://github.com/Tsmar/4DreamTeam, for example /Users/Tsmar/Projects/4DreamTeam
+$4DreamTeam turn this idea into a plan
+$4DreamTeam check whether this feature is really done
+$4DreamTeam update the project docs from source
+$4DreamTeam prepare this accepted work for release
 ```
 
-`status`, `continue` и `validate workspace` по умолчанию работают read-only. Release staging, commits, pushes, tags, deploys, migrations и destructive actions требуют explicit approval.
+Read-only status и validation безопасны по умолчанию. Release staging, commits, pushes, tags, deployments, migrations и destructive actions требуют explicit approval.
 
 ## Документация
 
-Подробная документация находится в [docs/](docs/) и ведется на английском:
+Этот README - landing page. Он объясняет, почему стоит попробовать 4DreamTeam.
 
-- [Examples](docs/examples.md) - реалистичные end-to-end ситуации.
-- [Workflows](docs/workflows.md) - product, task, quality, wiki, release, DevOps, marketing и self-improvement flows.
-- [Workspace](docs/workspace.md) - workspace shape, role board, reports и safety gates.
-- [Wiki Index](docs/wiki-index.md) - source maps, generated indexes и source-boundary navigation.
-- [4DT Memory](docs/memory.md) - local memory storage, recall, safety, degraded mode и benchmark behavior.
-- [Development](docs/development.md) - структура репозитория и заметки для разработки.
+Подробная документация живет в [docs/](docs/) и экспортируется из managed 4DreamTeam wiki:
 
-## Гарантии безопасности
+- [Workspace Overview](docs/overview.md)
+- [Product Overview](docs/product/overview.md)
+- [Task Lifecycle Flow](docs/flows/task-lifecycle.md)
+- [Wiki Workflow](docs/flows/wiki-workflow.md)
+- [Workspace Tools Contract](docs/contracts/workspace-tools.md)
+- [Source Boundaries Domain](docs/domains/source-boundaries.md)
 
-4DreamTeam специально устроен консервативно:
+## Безопасность Простыми Словами
 
-- он не обходит framework workflow, когда запрос относится к 4DreamTeam;
-- он не пропускает independent quality review для implementation work;
+4DreamTeam устроен так, чтобы быть полезным без лишней безрассудности:
+
+- он не пропускает quality review для implementation work;
 - approved source paths считаются жесткими границами;
-- secrets, credentials, `.env` contents и private keys не раскрываются;
-- destructive, infrastructure, release и publication actions требуют explicit approval;
-- marketing или DevOps claims не выдумываются без confirmed sources.
+- он не раскрывает `.env` files, secrets, credentials или private keys;
+- он спрашивает перед risky file writes, infrastructure changes, release actions и publication;
+- он не выдумывает marketing, DevOps или security claims без confirmed sources.
 
 ## Статус
 
