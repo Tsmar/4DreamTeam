@@ -95,5 +95,5 @@ Use route-specific references to reduce unnecessary context:
 15. Release commits require accepted quality or product acceptance, a visible commit plan, and explicit user approval before staging or committing.
 16. The old multi-project wiki registry, source-map workflow, generated source inventory files, and standalone report files are legacy. Do not migrate or preserve them; create current artifacts through the tools.
 17. When a current `4dt-wiki` or `4dt-sources` index exists, use tool search/get commands before broad wiki or approved-source reading.
-18. At the start of a new session, run onboarding checks and recall memory for project rules, operator preferences, active modes, and workflow constraints when memory is ready.
+18. At the start of a new session, run startup checks and load contract memory defaults for project rules, operator preferences, active modes, and workflow constraints when memory is ready. Ask onboarding questions only when defaults are incomplete or invalid.
 19. Report created and changed files at the end.

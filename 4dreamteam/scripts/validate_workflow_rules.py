@@ -56,6 +56,11 @@ RULES = [
         re.compile(r"(?<!script-managed `)tasks/(?:backlog|analytic|developer|quality|wiki|release|released|done|rejected)/"),
         "Agent-facing instructions must route board access through 4dt-board instead of direct task paths.",
     ),
+    Rule(
+        "contract_rules_via_semantic_search",
+        re.compile(r'4dt-memory search "project rules operator preferences active modes workflow constraints"'),
+        "Startup project rules must come from contract memory defaults, not semantic search.",
+    ),
 ]
 
 
@@ -63,8 +68,14 @@ REQUIRED_TEXT = [
     (
         "new_session_memory_recall",
         "4dreamteam/references/lead/preflight.md",
-        '4dt-memory search "project rules operator preferences active modes workflow constraints"',
-        "New-session onboarding must immediately recall memory for project rules and working modes when memory is ready.",
+        "4dt-memory defaults load --workspace . --json",
+        "New-session startup must load contract memory defaults when memory is ready.",
+    ),
+    (
+        "new_session_memory_questions",
+        "4dreamteam/references/lead/preflight.md",
+        "4dt-memory onboarding questions --workspace . --json",
+        "New-session startup must ask suggested operator questions when defaults are incomplete or invalid.",
     ),
     (
         "new_session_board_check",

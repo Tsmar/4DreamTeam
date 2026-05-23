@@ -42,6 +42,18 @@ class WorkflowRulesValidationTests(unittest.TestCase):
             codes = {issue["code"] for issue in issues}
             self.assertIn("new_session_memory_recall", codes)
 
+    def test_contract_rules_via_semantic_search_is_rejected(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            path = root / "rule.md"
+            path.write_text(
+                '4dt-memory search "project rules operator preferences active modes workflow constraints" --workspace . --json\n',
+                encoding="utf-8",
+            )
+            result = validate_workflow_rules.run(["rule.md"], root=root)
+            self.assertFalse(result["ok"])
+            self.assertEqual(result["issues"][0]["code"], "contract_rules_via_semantic_search")
+
 
 if __name__ == "__main__":
     unittest.main()

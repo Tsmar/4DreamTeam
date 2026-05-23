@@ -4,8 +4,23 @@ import sqlite3
 from pathlib import Path
 
 
-SCHEMA_VERSION = 1
+SCHEMA_VERSION = 2
 SCHEMA_PATH = Path(__file__).with_name("schema.sql")
+
+CONTRACT_SCHEMA_SQL = """
+CREATE TABLE IF NOT EXISTS memory_contract_entries (
+  workspace_id TEXT NOT NULL REFERENCES workspaces(id),
+  key TEXT NOT NULL,
+  value_json TEXT NOT NULL,
+  value_type TEXT NOT NULL,
+  created_at TEXT NOT NULL,
+  updated_at TEXT NOT NULL,
+  PRIMARY KEY (workspace_id, key)
+);
+
+CREATE INDEX IF NOT EXISTS idx_memory_contract_entries_workspace
+  ON memory_contract_entries(workspace_id);
+"""
 
 
 def schema_sql() -> str:
@@ -26,6 +41,9 @@ def migrate(connection: sqlite3.Connection) -> None:
     if current_version == SCHEMA_VERSION:
         return
 
-    connection.executescript(schema_sql())
+    if current_version == 0:
+        connection.executescript(schema_sql())
+    elif current_version == 1:
+        connection.executescript(CONTRACT_SCHEMA_SQL)
     connection.execute(f"PRAGMA user_version = {SCHEMA_VERSION}")
     connection.commit()

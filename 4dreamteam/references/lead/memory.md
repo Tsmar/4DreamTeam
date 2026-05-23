@@ -17,16 +17,16 @@ If memory conflicts with workspace artifacts, approved source files, or the curr
 
 ## Recall Flow
 
-At the start of a new session, always check memory readiness and recall project rules when memory is ready:
+At the start of a new session, always check memory readiness and load contract defaults when memory is ready:
 
 ```txt
 4dt-memory doctor --workspace . --json
-4dt-memory search "project rules operator preferences active modes workflow constraints" --workspace . --json
+4dt-memory defaults load --workspace . --json
 ```
 
-Apply recalled project rules, operator preferences, active modes, and workflow constraints before proposing actions. If memory is degraded, empty, low-signal, or unavailable, report that state and continue from current workspace instructions without inventing remembered rules.
+Apply contract project rules, operator preferences, active modes, and workflow constraints before proposing actions. If defaults load as `ready`, do not ask the operator to repeat context. If defaults are incomplete or invalid, run `4dt-memory onboarding questions --workspace . --json` and ask only the returned repair or setup questions before treating a mode or rule as active. If memory is degraded, empty, low-signal, or unavailable, report that state and continue from current workspace instructions without inventing remembered rules.
 
-Use additional local 4DT Memory searches when they are likely to reduce context loss:
+Use additional local 4DT Memory searches only as supplemental recall when they are likely to reduce context loss:
 
 1. Continuing work from a previous session.
 2. Looking for prior accepted decisions, user preferences, implementation lessons, or recurring project constraints.

@@ -27,6 +27,38 @@ PLACEHOLDER_COMMANDS = {
 
 SESSION_STATE_MAX_BYTES = 8192
 DEFAULT_SESSION_TTL_SECONDS = 24 * 60 * 60
+CONTRACT_KEYS = {
+    "project.rules": "Project-specific durable operating rules.",
+    "project.workflow.current_mode": "Current project working mode name.",
+    "project.workflow.modes": "Named project working mode definitions.",
+    "project.operator.preferences": "Operator preferences for project work.",
+    "project.operator.approval_policy": "Actions that require operator approval.",
+    "project.sources.policy": "Project-specific source access policy.",
+    "project.delivery.git_policy": "Commit, push, and release packaging preferences.",
+    "project.quality.validation_policy": "Required validation checks and quality gates.",
+    "project.communication.style": "Preferred operator-facing communication style.",
+}
+CONTRACT_KEY_ORDER = tuple(CONTRACT_KEYS)
+MODE_DEFINITION_FIELDS = {
+    "description",
+    "autonomy",
+    "approval_gates",
+    "reporting_style",
+    "commit_policy",
+    "push_policy",
+    "validation_expectations",
+}
+ONBOARDING_QUESTIONS = {
+    "project.rules": "What should every new session remember before proposing work?",
+    "project.workflow.current_mode": "What is the default working mode for this project?",
+    "project.workflow.modes": "What does each working mode allow the agent to do without stopping?",
+    "project.operator.preferences": "What operator preferences should guide this project's work?",
+    "project.operator.approval_policy": "Which actions always require operator approval?",
+    "project.sources.policy": "Are there project-specific source access rules outside the default workspace sources policy?",
+    "project.delivery.git_policy": "How should git commits and pushes be handled?",
+    "project.quality.validation_policy": "Which validation checks are mandatory before commit or handoff?",
+    "project.communication.style": "How detailed should reports to the operator be?",
+}
 
 
 def response(
@@ -165,6 +197,45 @@ def build_parser() -> argparse.ArgumentParser:
     session_set.add_argument("id")
     session_set.add_argument("state_json")
     session_set.add_argument("--ttl-seconds", type=int, default=DEFAULT_SESSION_TTL_SECONDS)
+
+    defaults_parser = subparsers.add_parser("defaults")
+    defaults_subparsers = defaults_parser.add_subparsers(dest="defaults_command", required=True)
+    defaults_load = defaults_subparsers.add_parser("load")
+    add_common_arguments(defaults_load)
+
+    keys_parser = subparsers.add_parser("keys")
+    keys_subparsers = keys_parser.add_subparsers(dest="keys_command", required=True)
+    keys_list = keys_subparsers.add_parser("list")
+    add_common_arguments(keys_list)
+    keys_list.add_argument("--include-values", action="store_true")
+    keys_get = keys_subparsers.add_parser("get")
+    add_common_arguments(keys_get)
+    keys_get.add_argument("key")
+    keys_set = keys_subparsers.add_parser("set")
+    add_common_arguments(keys_set)
+    keys_set.add_argument("key")
+    keys_set.add_argument("--value", required=True)
+    keys_delete = keys_subparsers.add_parser("delete")
+    add_common_arguments(keys_delete)
+    keys_delete.add_argument("key")
+
+    mode_parser = subparsers.add_parser("mode")
+    mode_subparsers = mode_parser.add_subparsers(dest="mode_command", required=True)
+    mode_list = mode_subparsers.add_parser("list")
+    add_common_arguments(mode_list)
+    mode_get = mode_subparsers.add_parser("get")
+    add_common_arguments(mode_get)
+    mode_get.add_argument("mode")
+    mode_set_current = mode_subparsers.add_parser("set-current")
+    add_common_arguments(mode_set_current)
+    mode_set_current.add_argument("mode")
+
+    onboarding_parser = subparsers.add_parser("onboarding")
+    onboarding_subparsers = onboarding_parser.add_subparsers(dest="onboarding_command", required=True)
+    onboarding_rules = onboarding_subparsers.add_parser("rules")
+    add_common_arguments(onboarding_rules)
+    onboarding_questions = onboarding_subparsers.add_parser("questions")
+    add_common_arguments(onboarding_questions)
 
     benchmark_parser = subparsers.add_parser("benchmark")
     add_common_arguments(benchmark_parser)
@@ -605,6 +676,130 @@ def parse_metadata(raw_metadata: str | None) -> tuple[dict[str, Any] | None, dic
     return metadata, None
 
 
+def contract_key_meta(key: str) -> dict[str, Any]:
+    return {
+        "key": key,
+        "description": CONTRACT_KEYS[key],
+        "required": True,
+    }
+
+
+def validate_contract_key(key: str) -> dict[str, Any] | None:
+    if key in CONTRACT_KEYS:
+        return None
+    return error_response("invalid_key", f"Unsupported contract key: {key}.")
+
+
+def parse_contract_value(raw_value: str) -> tuple[Any, str]:
+    try:
+        value = json.loads(raw_value)
+    except json.JSONDecodeError:
+        return raw_value.strip(), "text"
+    return value, "json"
+
+
+def contract_content_for_safety(value: Any) -> str:
+    if isinstance(value, str):
+        return value
+    return json.dumps(value, sort_keys=True, ensure_ascii=False)
+
+
+def validate_contract_value(key: str, value: Any) -> dict[str, Any] | None:
+    if key == "project.workflow.current_mode":
+        if not isinstance(value, str) or not value.strip():
+            return error_response("invalid_value", "Current mode must be a non-empty string.")
+    if key == "project.workflow.modes":
+        if not isinstance(value, dict):
+            return error_response("invalid_value", "Workflow modes must be a JSON object.")
+        for mode_name, definition in value.items():
+            if not isinstance(mode_name, str) or not mode_name.strip():
+                return error_response("invalid_value", "Workflow mode names must be non-empty strings.")
+            if not isinstance(definition, dict):
+                return error_response("invalid_value", "Each workflow mode definition must be a JSON object.")
+            missing_fields = sorted(MODE_DEFINITION_FIELDS - set(definition))
+            if missing_fields:
+                return response(
+                    ok=False,
+                    status="invalid_value",
+                    error={
+                        "code": "invalid_value",
+                        "message": "Workflow mode definitions must include the fixed mode contract fields.",
+                        "mode": mode_name,
+                        "missingFields": missing_fields,
+                    },
+                )
+
+    safety = check_memory_content(contract_content_for_safety(value), durable=True)
+    if not safety.ok:
+        return response(
+            ok=False,
+            status="unsafe_save_blocked",
+            error={
+                "code": "unsafe_save_blocked",
+                "message": "Contract memory content was blocked by safety checks.",
+                "reasons": [issue.code for issue in safety.issues],
+            },
+        )
+    return None
+
+
+def contract_entry_payload(entry: dict[str, Any] | None) -> dict[str, Any] | None:
+    if entry is None:
+        return None
+    return {
+        "key": entry["key"],
+        "value": entry["value"],
+        "valueType": entry["value_type"],
+        "createdAt": entry["created_at"],
+        "updatedAt": entry["updated_at"],
+    }
+
+
+def contract_key_state(store: MemoryStore, key: str, *, include_value: bool = True) -> dict[str, Any]:
+    entry = store.get_contract_entry(key)
+    state = {
+        **contract_key_meta(key),
+        "configured": entry is not None,
+        "missing": entry is None,
+    }
+    if include_value:
+        state["entry"] = contract_entry_payload(entry)
+    return state
+
+
+def workflow_modes(store: MemoryStore) -> tuple[dict[str, Any], list[str]]:
+    entry = store.get_contract_entry("project.workflow.modes")
+    if entry is None:
+        return {}, ["workflow_modes_missing"]
+    value = entry["value"]
+    if not isinstance(value, dict):
+        return {}, ["workflow_modes_invalid"]
+    return value, []
+
+
+def onboarding_questions_for(missing_keys: list[str], warnings: list[str]) -> list[dict[str, str]]:
+    questions = [
+        {"key": key, "question": ONBOARDING_QUESTIONS[key]}
+        for key in missing_keys
+        if key in ONBOARDING_QUESTIONS
+    ]
+    if "current_mode_undefined" in warnings:
+        questions.append(
+            {
+                "key": "project.workflow.current_mode",
+                "question": "The current mode is not defined in project.workflow.modes. What should this mode allow and require?",
+            }
+        )
+    if "current_mode_missing" in warnings and "project.workflow.current_mode" not in missing_keys:
+        questions.append(
+            {
+                "key": "project.workflow.current_mode",
+                "question": ONBOARDING_QUESTIONS["project.workflow.current_mode"],
+            }
+        )
+    return questions
+
+
 def validate_remember_args(args: argparse.Namespace) -> tuple[dict[str, Any] | None, int]:
     metadata, metadata_error = parse_metadata(args.metadata_json)
     if metadata_error is not None:
@@ -898,6 +1093,254 @@ def handle_session_set(args: argparse.Namespace) -> tuple[int, dict[str, Any]]:
         store.close()
 
 
+def handle_keys_list(args: argparse.Namespace) -> tuple[int, dict[str, Any]]:
+    store = MemoryStore(args.workspace, args.storage_root)
+    try:
+        store.initialize()
+        keys = [contract_key_state(store, key, include_value=args.include_values) for key in CONTRACT_KEY_ORDER]
+        return EXIT_OK, response(
+            ok=True,
+            status="ready",
+            workspaceId=store.identity.id,
+            keys=keys,
+        )
+    except sqlite3.Error:
+        return EXIT_STORAGE, error_response("storage_error", "Unable to list contract keys.")
+    finally:
+        store.close()
+
+
+def handle_defaults_load(args: argparse.Namespace) -> tuple[int, dict[str, Any]]:
+    store = MemoryStore(args.workspace, args.storage_root)
+    try:
+        store.initialize()
+        data = onboarding_rules_payload(store)
+        incomplete = bool(data["warnings"])
+        return EXIT_OK, response(
+            ok=True,
+            status="defaults_incomplete" if incomplete else "ready",
+            workspaceId=store.identity.id,
+            onboardingRequired=incomplete,
+            onboardingCommand="4dt-memory onboarding questions --workspace . --json" if incomplete else None,
+            **data,
+        )
+    except sqlite3.Error:
+        return EXIT_STORAGE, error_response("storage_error", "Unable to load memory defaults.")
+    finally:
+        store.close()
+
+
+def handle_keys_get(args: argparse.Namespace) -> tuple[int, dict[str, Any]]:
+    invalid_key = validate_contract_key(args.key)
+    if invalid_key is not None:
+        return EXIT_USER_CONFIG, invalid_key
+
+    store = MemoryStore(args.workspace, args.storage_root)
+    try:
+        store.initialize()
+        state = contract_key_state(store, args.key, include_value=True)
+        return EXIT_OK, response(
+            ok=True,
+            status="missing" if state["missing"] else "ready",
+            workspaceId=store.identity.id,
+            key=state,
+        )
+    except sqlite3.Error:
+        return EXIT_STORAGE, error_response("storage_error", "Unable to read contract key.")
+    finally:
+        store.close()
+
+
+def handle_keys_set(args: argparse.Namespace) -> tuple[int, dict[str, Any]]:
+    invalid_key = validate_contract_key(args.key)
+    if invalid_key is not None:
+        return EXIT_USER_CONFIG, invalid_key
+    value, value_type = parse_contract_value(args.value)
+    invalid_value = validate_contract_value(args.key, value)
+    if invalid_value is not None:
+        exit_code = EXIT_UNSAFE_SAVE if invalid_value.get("status") == "unsafe_save_blocked" else EXIT_USER_CONFIG
+        return exit_code, invalid_value
+
+    store = MemoryStore(args.workspace, args.storage_root)
+    try:
+        store.initialize()
+        entry = store.set_contract_entry(args.key, value, value_type=value_type)
+        return EXIT_OK, response(
+            ok=True,
+            status="contract_saved",
+            workspaceId=store.identity.id,
+            key=contract_entry_payload(entry),
+        )
+    except sqlite3.Error:
+        return EXIT_STORAGE, error_response("storage_error", "Unable to save contract key.")
+    finally:
+        store.close()
+
+
+def handle_keys_delete(args: argparse.Namespace) -> tuple[int, dict[str, Any]]:
+    invalid_key = validate_contract_key(args.key)
+    if invalid_key is not None:
+        return EXIT_USER_CONFIG, invalid_key
+
+    store = MemoryStore(args.workspace, args.storage_root)
+    try:
+        store.initialize()
+        deleted = store.delete_contract_entry(args.key)
+        return EXIT_OK, response(
+            ok=True,
+            status="contract_deleted" if deleted else "missing",
+            workspaceId=store.identity.id,
+            key=args.key,
+            deleted=deleted,
+        )
+    except sqlite3.Error:
+        return EXIT_STORAGE, error_response("storage_error", "Unable to delete contract key.")
+    finally:
+        store.close()
+
+
+def handle_mode_list(args: argparse.Namespace) -> tuple[int, dict[str, Any]]:
+    store = MemoryStore(args.workspace, args.storage_root)
+    try:
+        store.initialize()
+        modes, warnings = workflow_modes(store)
+        current_entry = store.get_contract_entry("project.workflow.current_mode")
+        current_mode = current_entry["value"] if current_entry and isinstance(current_entry["value"], str) else None
+        return EXIT_OK, response(
+            ok=True,
+            status="ready" if not warnings else "missing",
+            workspaceId=store.identity.id,
+            currentMode=current_mode,
+            modes=[{"name": name, "definition": definition} for name, definition in sorted(modes.items())],
+            warnings=warnings,
+        )
+    except sqlite3.Error:
+        return EXIT_STORAGE, error_response("storage_error", "Unable to list workflow modes.")
+    finally:
+        store.close()
+
+
+def handle_mode_get(args: argparse.Namespace) -> tuple[int, dict[str, Any]]:
+    store = MemoryStore(args.workspace, args.storage_root)
+    try:
+        store.initialize()
+        modes, warnings = workflow_modes(store)
+        definition = modes.get(args.mode)
+        return EXIT_OK, response(
+            ok=True,
+            status="ready" if definition is not None else "missing",
+            workspaceId=store.identity.id,
+            mode=args.mode,
+            defined=definition is not None,
+            definition=definition,
+            warnings=warnings,
+        )
+    except sqlite3.Error:
+        return EXIT_STORAGE, error_response("storage_error", "Unable to read workflow mode.")
+    finally:
+        store.close()
+
+
+def handle_mode_set_current(args: argparse.Namespace) -> tuple[int, dict[str, Any]]:
+    store = MemoryStore(args.workspace, args.storage_root)
+    try:
+        store.initialize()
+        modes, warnings = workflow_modes(store)
+        definition = modes.get(args.mode)
+        if definition is None:
+            return EXIT_USER_CONFIG, response(
+                ok=False,
+                status="undefined_mode",
+                workspaceId=store.identity.id,
+                mode=args.mode,
+                warnings=[*warnings, "current_mode_undefined"],
+                questions=onboarding_questions_for([], ["current_mode_undefined"]),
+                error={
+                    "code": "undefined_mode",
+                    "message": "Workflow mode is not defined. Define it in project.workflow.modes before setting it current.",
+                },
+            )
+        entry = store.set_contract_entry("project.workflow.current_mode", args.mode, value_type="text")
+        return EXIT_OK, response(
+            ok=True,
+            status="current_mode_set",
+            workspaceId=store.identity.id,
+            currentMode=args.mode,
+            definition=definition,
+            key=contract_entry_payload(entry),
+        )
+    except sqlite3.Error:
+        return EXIT_STORAGE, error_response("storage_error", "Unable to set current workflow mode.")
+    finally:
+        store.close()
+
+
+def onboarding_rules_payload(store: MemoryStore) -> dict[str, Any]:
+    keys = [contract_key_state(store, key, include_value=True) for key in CONTRACT_KEY_ORDER]
+    missing_keys = [item["key"] for item in keys if item["missing"]]
+    warnings: list[str] = []
+    if missing_keys:
+        warnings.append("contract_keys_missing")
+
+    modes, mode_warnings = workflow_modes(store)
+    warnings.extend(mode_warnings)
+    current_entry = store.get_contract_entry("project.workflow.current_mode")
+    current_mode = current_entry["value"] if current_entry and isinstance(current_entry["value"], str) else None
+    if current_mode is None:
+        warnings.append("current_mode_missing")
+    current_definition = modes.get(current_mode) if current_mode else None
+    if current_mode and current_definition is None:
+        warnings.append("current_mode_undefined")
+
+    return {
+        "keys": keys,
+        "missingKeys": missing_keys,
+        "currentMode": current_mode,
+        "currentModeDefinition": current_definition,
+        "modeDefinitionFields": sorted(MODE_DEFINITION_FIELDS),
+        "questions": onboarding_questions_for(missing_keys, warnings),
+        "warnings": warnings,
+    }
+
+
+def handle_onboarding_rules(args: argparse.Namespace) -> tuple[int, dict[str, Any]]:
+    store = MemoryStore(args.workspace, args.storage_root)
+    try:
+        store.initialize()
+        data = onboarding_rules_payload(store)
+        status = "ready" if not data["warnings"] else "missing_contract"
+        return EXIT_OK, response(
+            ok=True,
+            status=status,
+            workspaceId=store.identity.id,
+            **data,
+        )
+    except sqlite3.Error:
+        return EXIT_STORAGE, error_response("storage_error", "Unable to read onboarding rules.")
+    finally:
+        store.close()
+
+
+def handle_onboarding_questions(args: argparse.Namespace) -> tuple[int, dict[str, Any]]:
+    store = MemoryStore(args.workspace, args.storage_root)
+    try:
+        store.initialize()
+        data = onboarding_rules_payload(store)
+        return EXIT_OK, response(
+            ok=True,
+            status="ready" if not data["questions"] else "questions_available",
+            workspaceId=store.identity.id,
+            questions=data["questions"],
+            missingKeys=data["missingKeys"],
+            currentMode=data["currentMode"],
+            warnings=data["warnings"],
+        )
+    except sqlite3.Error:
+        return EXIT_STORAGE, error_response("storage_error", "Unable to build onboarding questions.")
+    finally:
+        store.close()
+
+
 def handle_benchmark(args: argparse.Namespace) -> tuple[int, dict[str, Any]]:
     if args.profile == "retrieval-quality":
         return EXIT_OK, response(
@@ -965,6 +1408,26 @@ def run(args: argparse.Namespace) -> tuple[int, dict[str, Any]]:
         return handle_session_get(args)
     if args.command == "session" and args.session_command == "set":
         return handle_session_set(args)
+    if args.command == "defaults" and args.defaults_command == "load":
+        return handle_defaults_load(args)
+    if args.command == "keys" and args.keys_command == "list":
+        return handle_keys_list(args)
+    if args.command == "keys" and args.keys_command == "get":
+        return handle_keys_get(args)
+    if args.command == "keys" and args.keys_command == "set":
+        return handle_keys_set(args)
+    if args.command == "keys" and args.keys_command == "delete":
+        return handle_keys_delete(args)
+    if args.command == "mode" and args.mode_command == "list":
+        return handle_mode_list(args)
+    if args.command == "mode" and args.mode_command == "get":
+        return handle_mode_get(args)
+    if args.command == "mode" and args.mode_command == "set-current":
+        return handle_mode_set_current(args)
+    if args.command == "onboarding" and args.onboarding_command == "rules":
+        return handle_onboarding_rules(args)
+    if args.command == "onboarding" and args.onboarding_command == "questions":
+        return handle_onboarding_questions(args)
     if args.command == "benchmark":
         return handle_benchmark(args)
     if args.command in PLACEHOLDER_COMMANDS:

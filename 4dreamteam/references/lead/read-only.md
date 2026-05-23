@@ -32,7 +32,7 @@ Use this workflow when the user asks for workspace status, asks what is next, or
 
 For continuation across sessions, read `references/lead/memory.md` and optionally recall prior context from `4dt-memory`. If memory is unavailable, slow, empty, or low-signal, use `4dt-board`, `4dt-wiki`, and `4dt-sources` without stopping.
 
-For a new session or continuation, first follow `references/lead/preflight.md` onboarding. Then run status queries as needed:
+For a new session or continuation, first follow `references/lead/preflight.md` startup checks. Then run status queries as needed:
 
 1. `4dt-board status`
 2. `4dt-board list`

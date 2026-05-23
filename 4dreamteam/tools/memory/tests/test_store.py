@@ -49,9 +49,52 @@ class StoreTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as raw_tmp:
             store, _workspace, _storage = make_store(Path(raw_tmp))
             try:
-                self.assertEqual(store.schema_version(), 1)
+                self.assertEqual(store.schema_version(), 2)
             finally:
                 store.close()
+
+    def test_v1_database_migrates_contract_entries(self) -> None:
+        with tempfile.TemporaryDirectory() as raw_tmp:
+            tmp_path = Path(raw_tmp)
+            workspace = tmp_path / "workspace"
+            storage = tmp_path / "storage"
+            workspace.mkdir()
+
+            store = MemoryStore(workspace, storage)
+            connection = store.connect()
+            connection.executescript(
+                """
+                CREATE TABLE workspaces (
+                  id TEXT PRIMARY KEY,
+                  display_label TEXT NOT NULL,
+                  root_hash TEXT NOT NULL,
+                  git_remote_hash TEXT,
+                  created_at TEXT NOT NULL,
+                  updated_at TEXT NOT NULL
+                );
+
+                CREATE TABLE memory_audit_log (
+                  id TEXT PRIMARY KEY,
+                  workspace_id TEXT NOT NULL REFERENCES workspaces(id),
+                  action TEXT NOT NULL,
+                  memory_id TEXT,
+                  payload_json TEXT,
+                  created_at TEXT NOT NULL
+                );
+
+                PRAGMA user_version = 1;
+                """
+            )
+            store.close()
+
+            migrated = MemoryStore(workspace, storage)
+            try:
+                migrated.initialize()
+                self.assertEqual(migrated.schema_version(), 2)
+                entry = migrated.set_contract_entry("project.rules", "Use contract onboarding.", value_type="text")
+                self.assertEqual(entry["value"], "Use contract onboarding.")
+            finally:
+                migrated.close()
 
     def test_memory_crud_live_filtering_and_soft_delete(self) -> None:
         with tempfile.TemporaryDirectory() as raw_tmp:

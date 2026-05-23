@@ -271,6 +271,70 @@ class MemoryStore:
         self.connect().commit()
         return evidence_id
 
+    def get_contract_entry(self, key: str) -> dict[str, Any] | None:
+        row = self.connect().execute(
+            """
+            SELECT * FROM memory_contract_entries
+            WHERE workspace_id = ? AND key = ?
+            """,
+            (self.identity.id, key),
+        ).fetchone()
+        if row is None:
+            return None
+        entry = dict(row)
+        entry["value"] = json.loads(entry["value_json"])
+        return entry
+
+    def list_contract_entries(self) -> list[dict[str, Any]]:
+        rows = self.connect().execute(
+            """
+            SELECT * FROM memory_contract_entries
+            WHERE workspace_id = ?
+            ORDER BY key ASC
+            """,
+            (self.identity.id,),
+        ).fetchall()
+        entries = []
+        for row in rows:
+            entry = dict(row)
+            entry["value"] = json.loads(entry["value_json"])
+            entries.append(entry)
+        return entries
+
+    def set_contract_entry(self, key: str, value: Any, *, value_type: str) -> dict[str, Any]:
+        now = utc_now()
+        value_json = json.dumps(value, sort_keys=True, ensure_ascii=False)
+        self.connect().execute(
+            """
+            INSERT INTO memory_contract_entries (workspace_id, key, value_json, value_type, created_at, updated_at)
+            VALUES (?, ?, ?, ?, ?, ?)
+            ON CONFLICT(workspace_id, key) DO UPDATE SET
+              value_json = excluded.value_json,
+              value_type = excluded.value_type,
+              updated_at = excluded.updated_at
+            """,
+            (self.identity.id, key, value_json, value_type, now, now),
+        )
+        self.connect().commit()
+        self.audit("contract_set", payload={"key": key, "valueType": value_type})
+        entry = self.get_contract_entry(key)
+        if entry is None:
+            raise RuntimeError(f"Contract entry was not saved: {key}")
+        return entry
+
+    def delete_contract_entry(self, key: str) -> bool:
+        cursor = self.connect().execute(
+            """
+            DELETE FROM memory_contract_entries
+            WHERE workspace_id = ? AND key = ?
+            """,
+            (self.identity.id, key),
+        )
+        self.connect().commit()
+        deleted = cursor.rowcount > 0
+        self.audit("contract_delete", payload={"key": key, "deleted": deleted})
+        return deleted
+
     def evidence_for(self, memory_id: str) -> list[dict[str, Any]]:
         rows = self.connect().execute(
             "SELECT * FROM memory_evidence WHERE memory_id = ? ORDER BY created_at ASC",

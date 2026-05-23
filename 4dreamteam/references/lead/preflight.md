@@ -2,9 +2,9 @@
 
 Use this file at the start of a new session and before writing files in a workspace.
 
-## New Session Onboarding
+## New Session Startup
 
-Start every new session with command-based onboarding. Do not inspect managed storage folders directly.
+Start every new session with command-based startup checks. Do not inspect managed storage folders directly.
 
 1. Read `AGENTS.md` if present.
 2. Run memory readiness:
@@ -13,15 +13,15 @@ Start every new session with command-based onboarding. Do not inspect managed st
 4dt-memory doctor --workspace . --json
 ```
 
-3. If memory is `ready`, immediately recall project rules, operator preferences, active modes, and workflow constraints:
+3. If memory is `ready`, immediately load default project rules, operator preferences, active modes, and workflow constraints from contract memory:
 
 ```bash
-4dt-memory search "project rules operator preferences active modes workflow constraints" --workspace . --json
+4dt-memory defaults load --workspace . --json
 ```
 
-If memory is degraded, unavailable, empty, or low-signal, report that state and continue from current workspace instructions. Do not invent remembered rules.
+If defaults load as `ready`, apply them without asking the operator to repeat context. If defaults are incomplete or invalid, run `4dt-memory onboarding questions --workspace . --json` and ask only the returned repair or setup questions before treating a mode or rule as active. If memory is degraded, unavailable, empty, or low-signal, report that state and continue from current workspace instructions. Do not invent remembered rules.
 
-4. Run the four onboarding checks:
+4. Run the four startup checks:
 
 ```bash
 4dt-board --workspace . --json validate

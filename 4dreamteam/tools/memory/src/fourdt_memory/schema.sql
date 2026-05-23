@@ -59,6 +59,16 @@ CREATE TABLE IF NOT EXISTS memory_audit_log (
   created_at TEXT NOT NULL
 );
 
+CREATE TABLE IF NOT EXISTS memory_contract_entries (
+  workspace_id TEXT NOT NULL REFERENCES workspaces(id),
+  key TEXT NOT NULL,
+  value_json TEXT NOT NULL,
+  value_type TEXT NOT NULL,
+  created_at TEXT NOT NULL,
+  updated_at TEXT NOT NULL,
+  PRIMARY KEY (workspace_id, key)
+);
+
 CREATE INDEX IF NOT EXISTS idx_memory_items_workspace_live
   ON memory_items(workspace_id, deleted_at, ttl_at);
 
@@ -73,3 +83,6 @@ CREATE INDEX IF NOT EXISTS idx_agent_sessions_workspace
 
 CREATE INDEX IF NOT EXISTS idx_memory_audit_log_workspace_action
   ON memory_audit_log(workspace_id, action);
+
+CREATE INDEX IF NOT EXISTS idx_memory_contract_entries_workspace
+  ON memory_contract_entries(workspace_id);

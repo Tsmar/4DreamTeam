@@ -20,14 +20,50 @@ The CLI supports `--storage-root <path>` for tests, debugging, and controlled ma
 
 ## Commands
 
-At the start of a new session, check memory and recall project rules when memory is ready:
+At the start of a new session, check memory and load contract defaults when memory is ready:
 
 ```txt
 4dt-memory doctor --workspace . --json
-4dt-memory search "project rules operator preferences active modes workflow constraints" --workspace . --json
+4dt-memory defaults load --workspace . --json
 ```
 
-If memory is degraded or empty, report that state and continue from current workspace instructions without inventing remembered rules.
+If defaults load as `ready`, apply them without asking the operator to repeat context. If defaults are incomplete or invalid, run `4dt-memory onboarding questions --workspace . --json` and ask only the returned setup or repair questions before treating a mode or rule as active. If memory is degraded or empty, report that state and continue from current workspace instructions without inventing remembered rules.
+
+Contract keys are operator-managed memory. They define current project rules and working modes more strictly than semantic recall:
+
+```txt
+4dt-memory keys list --workspace . --json
+4dt-memory keys get project.workflow.current_mode --workspace . --json
+4dt-memory keys set project.operator.approval_policy --value '{"push":"ask every time"}' --workspace . --json
+4dt-memory mode list --workspace . --json
+4dt-memory mode get simple --workspace . --json
+4dt-memory mode set-current simple --workspace . --json
+4dt-memory onboarding questions --workspace . --json
+```
+
+The fixed contract key set is:
+
+- `project.rules`
+- `project.workflow.current_mode`
+- `project.workflow.modes`
+- `project.operator.preferences`
+- `project.operator.approval_policy`
+- `project.sources.policy`
+- `project.delivery.git_policy`
+- `project.quality.validation_policy`
+- `project.communication.style`
+
+Each `project.workflow.modes` entry must include these fixed fields:
+
+- `description`
+- `autonomy`
+- `approval_gates`
+- `reporting_style`
+- `commit_policy`
+- `push_policy`
+- `validation_expectations`
+
+If a requested mode is undefined, define it in `project.workflow.modes` before making it current. Semantic `search` remains supplemental recall and must not be used as the primary source for active project rules.
 
 Initialize storage:
 

@@ -37,20 +37,20 @@ Agents use scripts for managed workspace artifacts:
 
 Agents do not read or write board or wiki storage directly.
 
-## New Session Onboarding
+## New Session Startup
 
-At the start of a new session, 4DreamTeam runs command-based onboarding:
+At the start of a new session, 4DreamTeam runs command-based startup checks:
 
 ```txt
 4dt-memory doctor --workspace . --json
-4dt-memory search "project rules operator preferences active modes workflow constraints" --workspace . --json
+4dt-memory defaults load --workspace . --json
 4dt-board --workspace . --json validate
 4dt-sources --workspace . --json registry validate
 4dt-wiki --workspace . --json validate
 4dt-memory doctor --workspace . --json
 ```
 
-Memory recall runs only when memory is ready. If memory is degraded or empty, 4DreamTeam reports that and continues from current workspace instructions.
+Contract defaults load only when memory is ready. If defaults are ready, 4DreamTeam applies the current rules and mode without asking the operator to repeat context. If defaults are incomplete or invalid, it runs `4dt-memory onboarding questions --workspace . --json` and asks only the returned setup or repair questions. If memory is degraded or empty, 4DreamTeam reports that and continues from current workspace instructions.
 
 The startup response shows one status line for each tool:
 

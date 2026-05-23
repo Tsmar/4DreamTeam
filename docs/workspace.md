@@ -30,7 +30,7 @@ A new session is classified from tool checks, not from folder inspection:
 - `degraded_tooling`
 - `ready`
 
-The startup summary reports `4dt-board`, `4dt-sources`, `4dt-wiki`, and `4dt-memory` separately. Repair actions require explicit operator confirmation.
+The startup summary reports `4dt-board`, `4dt-sources`, `4dt-wiki`, and `4dt-memory` separately. Memory startup loads contract defaults for project rules and active modes before any supplemental semantic recall. Repair actions require explicit operator confirmation.
 
 ## Board
 
