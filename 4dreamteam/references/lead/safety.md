@@ -35,9 +35,10 @@ In `controlled` mode, the orchestrator stops:
 
 1. After `product` if an epic was created or materially changed.
 2. After `analytic`.
-3. After the `developer -> quality` pair.
-4. Before `wiki` if documentation should be updated.
-5. Before product acceptance if the user did not explicitly request it.
+3. After the developer writes an implementation plan and before the first patch, unless scoped auto implementation was explicitly approved.
+4. After the `developer -> quality` pair.
+5. Before `wiki` writes in controlled mode; accepted quality still routes to `wiki` for post-acceptance documentation review.
+6. Before product acceptance if the user did not explicitly request it.
 
 Do not stop between `developer` and `quality`. These roles work as a pair.
 
@@ -60,10 +61,10 @@ A small safe task must meet all conditions:
 Fast path flow:
 
 ```txt
-analytic compact task -> developer -> quality
+analytic compact task -> developer plan approval -> developer -> quality -> wiki
 ```
 
-Never skip `quality` on the fast path.
+Never skip `quality` or post-acceptance `wiki` review on the fast path.
 
 ## Operator Gates
 
@@ -72,7 +73,7 @@ Operator approval is required at these gates unless a stricter role rule stops e
 Approval gate taxonomy:
 
 - Automatic - safe read-only work, status summaries, exact-file inspection inside approved sources after source access is confirmed, safe stop states, and developer-to-quality handoff after an approved task.
-- Approval-required - workspace bootstrap, first-touch `sources/` confirmation, product-to-delivery handoff in controlled mode, implementation after analytic in controlled mode, wiki writes in controlled mode, release staging/commit/push/tag/publication steps, DevOps state changes, self-update writes, and self-improvement developer changes.
+- Approval-required - workspace bootstrap, first-touch `sources/` confirmation, product-to-delivery handoff in controlled mode, implementation after analytic in controlled mode, developer implementation plan approval before patching, wiki writes in controlled mode, release staging/commit/push/tag/publication steps, DevOps state changes, self-update writes, and self-improvement developer changes.
 - Forbidden without explicit approval - destructive commands, secrets access, production data access, deploys, migrations, restarts, DNS/firewall/nginx/systemd/Docker/database changes, branch push, tag push, GitHub Release publication, broad staging, force push, amend, rebase, and safety-rule weakening.
 
 If approval was not received, stop with the current artifact state and report the next approval needed.
@@ -85,16 +86,17 @@ Record meaningful approvals in the relevant task, report, release plan, or DevOp
 4. Product intake and backlog formation - before handing epic tasks to `analytic` or `developer` in controlled mode.
 5. `product -> analytic` and `analytic -> developer` - before continuing into those responsibility phases, unless scoped auto mode explicitly covers that exact transition.
 6. Analytic - before implementation in controlled mode, except approved small safe fast path. Analytic must also stop for framework-user or operator confirmation, depending on whether the decision is product meaning or execution permission, before accepting decisions that change managed documentation, public behavior, APIs/contracts, architecture, or operational behavior.
-7. Developer -> Quality - no operator gate between these roles.
-8. Quality rejection - controlled mode stops; auto mode allows at most one safe retry only when scoped retry approval exists.
-9. `quality -> wiki`, `quality -> release`, `wiki -> product acceptance`, `product acceptance -> release`, and `rejected -> developer rework` - ask the operator before continuing.
-10. Wiki bootstrap, blueprint, and deepening - before writing docs unless the operator explicitly accepts defaults or scoped auto.
-11. Wiki post-acceptance - before docs updates in controlled mode.
-12. DevOps - before moving from read-only/planning to server state changes, deploys, restarts, migrations, firewall/DNS/nginx/systemd/Docker/env/database changes, or secret use.
-13. Release - before each step: release plan -> staging, staging -> commit, and commit -> push/tag/publication.
-14. Workspace self-update - after diff or summary, before replacing root `AGENTS.md`.
-15. Self-improvement - after product scope, before developer changes; product acceptance before optional release.
-16. Destructive commands, secrets, production data, external access, or irreversible actions - always require explicit operator approval.
+7. Developer plan - after the developer timeline implementation plan and before the first patch, stop for operator comparison/approval unless the operator explicitly allowed scoped auto implementation.
+8. Developer -> Quality - no operator gate between these roles after implementation is approved.
+9. Quality rejection - controlled mode stops; auto mode allows at most one safe retry only when scoped retry approval exists.
+10. `quality -> wiki`, `quality -> release`, `wiki -> product acceptance`, `product acceptance -> release`, and `rejected -> developer rework` - ask the operator before continuing when the transition would perform writes or release work.
+11. Wiki bootstrap, blueprint, and deepening - before writing docs unless the operator explicitly accepts defaults or scoped auto.
+12. Wiki post-acceptance - accepted quality routes to `wiki`; before docs updates in controlled mode, stop for operator approval unless scoped auto wiki was approved.
+13. DevOps - before moving from read-only/planning to server state changes, deploys, restarts, migrations, firewall/DNS/nginx/systemd/Docker/env/database changes, or secret use.
+14. Release - before each step: release plan -> staging, staging -> commit, and commit -> push/tag/publication.
+15. Workspace self-update - after diff or summary, before replacing root `AGENTS.md`.
+16. Self-improvement - after product scope, before developer changes; product acceptance before optional release.
+17. Destructive commands, secrets, production data, external access, or irreversible actions - always require explicit operator approval.
 
 Safe stops do not require auto-mode confirmation because they stop work rather than continue it:
 

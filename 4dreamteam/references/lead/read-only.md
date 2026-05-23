@@ -60,7 +60,7 @@ Do not change files during status or continuation unless the user explicitly app
 If the next action is obvious, use the task column reported by `4dt-board`:
 
 1. `rejected` -> explain rejection and offer developer correction;
-2. `developer` -> ask for approval to start or continue developer -> quality;
+2. `developer` -> ask for approval to compare/approve the developer plan before patching, then continue developer -> quality;
 3. `quality` -> run quality if the user approves or execution mode allows it;
 4. `wiki` -> ask for approval before wiki in controlled mode;
 5. `release` -> prepare release plan if the user approves;

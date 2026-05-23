@@ -2,171 +2,178 @@
 
 Languages: [English](README.md) | [Russian](README.ru.md)
 
-4DreamTeam is a Codex skill for turning rough ideas, half-finished work, stale documentation, and release pressure into a traceable workflow.
+4DreamTeam is a magic wand for people who want to work on real projects with AI superpowers, without turning every project into one endless fragile chat.
 
-Instead of asking one AI agent to keep everything in one long chat, 4DreamTeam gives Codex a small team of roles: product, analytic, developer, quality, wiki, marketing, devops, and release. An operator sits above the workflow and controls source access, role-transition gates, auto mode, file writes, git, infrastructure, and publication. Work becomes visible in files: epics, tasks, developer reports, quality reports, source-backed docs, release plans, and epic handoffs.
+Tell Codex what you want to build, fix, check, document, or ship. 4DreamTeam turns that request into a small working team: product thinks about the goal, analytic shapes the task, developer changes the code, quality checks the result, wiki keeps the project memory, and release helps you ship safely.
 
-The result is not ceremony. It is continuity: you can come back later, see what happened, understand what is accepted, and decide the next safe step.
+You bring the idea, the mess, the half-finished feature, or the "is this actually done?" feeling. 4DreamTeam gives the work a path, writes down what happened, keeps the documentation alive, and asks before dangerous actions.
 
-## The Promise
+## Try It When
+
+- You have an idea, but not a spec.
+- You opened an old project and forgot what was next.
+- You want Codex to change code, but also want a second pass that checks whether the work is really done.
+- Your docs are stale and nobody trusts them anymore.
+- You are close to release and want a clean plan before touching git.
+- You want AI help that feels less like a single overworked chat and more like a careful project team.
+
+## The Simple Promise
 
 ```txt
-idea -> epic -> task -> implementation -> quality review -> documentation -> release
+idea -> plan -> implementation -> quality -> wiki -> release
 ```
 
-Use the main entrypoint:
+4DreamTeam does not try to make you memorize a process. You start with:
 
 ```txt
 $4DreamTeam
 ```
 
-You do not need to remember role names. The lead role routes the request.
+The lead role routes the work to the right role and keeps the next step visible.
+
+## Why It Feels Different
+
+### It gives Codex a project brain
+
+Work does not live only in the chat scroll. 4DreamTeam stores tasks, decisions, reports, quality results, docs, and release plans in the workspace so the project can be resumed later.
+
+### It separates doing from checking
+
+The developer role implements scoped work. The quality role independently accepts or rejects it against the task. That makes "done" less vibes-based.
+
+### It keeps docs close to reality
+
+The wiki role maintains a source-backed project knowledge base. Detailed documentation can be exported into `docs/` with `4dt-wiki export`, so the README can stay simple while the project docs stay useful.
+
+### It keeps you in control
+
+4DreamTeam asks before risky transitions, file writes, release steps, infrastructure changes, destructive commands, commits, pushes, tags, and publication. You can work fast without handing over the steering wheel.
 
 ## Real Situations
 
-### You Have An Idea, Not A Spec
+### "I have an idea, not a spec."
 
 ```txt
 I want a booking system for a small yoga studio.
 Right now everything is handled in WhatsApp and changes get lost.
 ```
 
-4DreamTeam turns the messy idea into an epic with users, scope, non-goals, task candidates, and acceptance criteria before Codex jumps into code.
+4DreamTeam turns the idea into users, goals, scope, non-goals, task candidates, and acceptance criteria before Codex jumps into code.
 
-### You Came Back A Week Later
+### "I came back after a week."
 
 ```txt
 Continue the project. What is next?
 ```
 
-4DreamTeam reads the role board, reports, wiki, and optional memory, then recommends the next safe action instead of pretending the previous chat context still exists.
+4DreamTeam reads the board, timeline evidence, wiki, and memory when available, then tells you the next safe action.
 
-### You Need To Know If Work Is Really Done
+### "I need to know if this is really done."
 
 ```txt
 This feature is implemented, but I am not sure it is actually finished.
 ```
 
-4DreamTeam routes to `quality`, checks the result against acceptance criteria, and records an accepted or rejected quality report.
+4DreamTeam routes to quality, checks the work against acceptance criteria, and records an accepted or rejected result.
 
-### The Docs Are Probably Stale
+### "The docs are probably stale."
 
 ```txt
 The app changed, but the docs are probably wrong.
 ```
 
-4DreamTeam can audit or sync a source-backed wiki from approved source paths without reading unrelated files or inventing missing facts.
+4DreamTeam can audit, sync, deepen, and export source-backed docs without reading unrelated files or inventing missing facts.
 
-### You Need To Ship Safely
+### "I need to ship without making a mess."
 
 ```txt
 Prepare the accepted work for release.
 ```
 
-4DreamTeam checks accepted evidence, reviews dirty files, updates changelogs when appropriate, and proposes an exact staging plan before any git commit.
+4DreamTeam checks accepted evidence, reviews changed files, updates release documentation when needed, and proposes an exact plan before any git action.
 
-## What It Does
+## What You Get
 
-- Turns raw product intent into scoped epics and task candidates.
-- Converts approved work into implementation-ready technical tasks.
-- Implements scoped changes through a developer workflow.
-- Runs independent quality review before work is accepted.
-- Maintains source-backed project wikis through `4dt-wiki` and source access through `4dt-sources`.
-- Uses local 4DT Memory for continuity while keeping current workspace instructions, tool-managed artifacts, and approved sources as the source of truth.
-- Prepares README positioning, launch copy, release narratives, and claim audits from confirmed sources.
-- Documents infrastructure facts and runbooks with DevOps safety gates.
-- Packages accepted work into changelog entries and commit plans after explicit approval.
-- Improves 4DreamTeam itself through the same controlled workflow.
-
-## Roles
-
-| Role | Job |
-|---|---|
-| `product` | Clarifies users, goals, scope, non-goals, and product acceptance. |
-| `analytic` | Turns intent into implementation-ready tasks with risks and checks. |
-| `developer` | Implements approved tasks and records developer evidence. |
-| `quality` | Independently accepts or rejects work against criteria. |
-| `wiki` | Builds and maintains source-backed project knowledge bases. |
-| `marketing` | Creates source-backed public messaging and claim reviews. |
-| `devops` | Documents servers, deployments, diagnostics, and operational facts. |
-| `release` | Prepares changelogs, commit plans, and approved git commits. |
-
-## Why Files Matter
-
-4DreamTeam stores state in the workspace through its tools.
-
-That means:
-
-- decisions and assumptions survive beyond one chat;
-- tasks can be resumed without guessing;
-- developer work and quality review are separate;
-- a workspace is a local working area for 4DreamTeam coordination;
-- `sources/` stages source materials and is readable by default inside the workspace;
-- rejected work has a clear correction path;
-- project knowledge lives in Markdown;
-- completed epics leave handoff notes for the next session, next agent, or next epic;
-- release plans show what will be staged before approved git changes happen when release packaging is requested.
+- Product shaping for raw ideas.
+- Technical task planning before implementation.
+- Developer work with visible evidence.
+- Independent quality review.
+- A source-backed project wiki.
+- Exported documentation in `docs/`.
+- README positioning, launch copy, release narratives, and claim audits.
+- DevOps notes and runbooks with safety gates.
+- Release plans and changelog preparation after explicit approval.
+- A way to improve 4DreamTeam itself through the same controlled workflow.
 
 ## Quick Start
 
-Open a new chat and write: install the skill from [Tsmar/4DreamTeam](https://github.com/Tsmar/4DreamTeam/tree/main/4dreamteam).
+Install the skill from [Tsmar/4DreamTeam](https://github.com/Tsmar/4DreamTeam/tree/main/4dreamteam).
 
-Restart Codex, then check that the skill is available:
+Restart Codex, then ask:
 
 ```txt
 Is the 4DreamTeam skill available?
 ```
 
-From any folder:
+From any project folder:
 
 ```txt
 Run $4DreamTeam.
 ```
 
-If the folder is empty or not yet a 4DreamTeam workspace, the skill asks before creating workspace files.
+If the folder is not yet a 4DreamTeam workspace, the skill asks before creating workspace files.
 
-## Common Commands
+### Working With An Existing Project
+
+You do not need a complicated setup. Create a clean folder for the 4DreamTeam workspace, put your project repository inside `sources/`, then run `$4DreamTeam`.
 
 ```txt
-$4DreamTeam init workspace
+my-4dt-workspace/
+  sources/
+    your-project/
+```
+
+After initialization, 4DreamTeam can build the project knowledge base from the approved source folder and you are ready to work: ask it to understand the project, plan changes, check work, update docs, or prepare an accepted release.
+
+## Useful Prompts
+
+```txt
 $4DreamTeam status
 $4DreamTeam continue
 $4DreamTeam validate workspace
-$4DreamTeam connect project <project-name> from <source-path>
-$4DreamTeam check docs for <project-name>
-$4DreamTeam search docs for <project-name> <query>
-$4DreamTeam prepare release for <project-name>
-$4DreamTeam improve 4DreamTeam itself from your local checkout of https://github.com/Tsmar/4DreamTeam, for example /Users/Tsmar/Projects/4DreamTeam
+$4DreamTeam turn this idea into a plan
+$4DreamTeam check whether this feature is really done
+$4DreamTeam update the project docs from source
+$4DreamTeam prepare this accepted work for release
 ```
 
-`status`, `continue`, and `validate workspace` are read-only by default. Release staging, commits, pushes, tags, deployments, migrations, and destructive actions require explicit approval.
+Read-only status and validation are safe by default. Release staging, commits, pushes, tags, deployments, migrations, and destructive actions require explicit approval.
 
 ## Documentation
 
-Detailed documentation lives in [docs/](docs/):
+This README is the landing page. It explains why you might want to try 4DreamTeam.
 
-- [Examples](docs/examples.md) - realistic end-to-end situations.
-- [Workflows](docs/workflows.md) - product, task, quality, wiki, release, DevOps, marketing, and self-improvement flows.
-- [Workspace](docs/workspace.md) - workspace tool contract, role board, and safety gates.
-- [Wiki Index](docs/wiki-index.md) - wiki and source search tooling.
-- [4DT Memory](docs/memory.md) - local memory storage, recall, safety, degraded mode, and benchmark behavior.
-- [Development](docs/development.md) - repository structure and contribution notes.
+Detailed documentation lives in [docs/](docs/) and is exported from the managed 4DreamTeam wiki:
 
-## Safety Guarantees
+- [Workspace Overview](docs/overview.md)
+- [Product Overview](docs/product/overview.md)
+- [Task Lifecycle Flow](docs/flows/task-lifecycle.md)
+- [Wiki Workflow](docs/flows/wiki-workflow.md)
+- [Workspace Tools Contract](docs/contracts/workspace-tools.md)
+- [Source Boundaries Domain](docs/domains/source-boundaries.md)
 
-4DreamTeam is conservative by design:
+## Safety In Plain English
 
-- it does not bypass the framework workflow when a 4DreamTeam route applies;
-- it does not skip independent quality review for implementation work;
+4DreamTeam is designed to be useful without being reckless:
+
+- it does not skip quality review for implementation work;
 - it treats approved source paths as hard boundaries;
-- it treats confirmed workspace `sources/` descendants as hard boundaries only after operator first-touch confirmation;
-- it asks the operator before scoped auto-mode transitions such as `lead -> product`, `product -> analytic`, `analytic -> developer`, and `quality -> wiki`;
-- it does not expose secrets, credentials, `.env` contents, or private keys;
-- it does not run destructive, infrastructure, release, or publication actions without explicit approval;
-- it does not invent marketing or DevOps claims that are not backed by confirmed sources.
+- it does not expose `.env` files, secrets, credentials, or private keys;
+- it asks before risky file writes, infrastructure changes, release actions, and publication;
+- it does not invent marketing, DevOps, or security claims that are not backed by confirmed sources.
 
 ## Status
 
-Current documented version: `0.3.0`.
+Current documented version: `0.4.0`.
 
 See [CHANGELOG.md](CHANGELOG.md) for release history.

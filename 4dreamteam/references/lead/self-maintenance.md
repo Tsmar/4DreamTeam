@@ -68,17 +68,17 @@ When the approved source repository differs from the installed skill copy, use t
 Self-improvement follows this lifecycle by default:
 
 ```txt
-product -> developer -> quality -> wiki when needed -> product acceptance -> release when the user wants a commit
+product -> developer plan approval -> developer -> quality -> wiki -> product acceptance -> release when the user wants a commit
 ```
 
 Rules:
 
 1. Use `product` to define the improvement goal, audience, scope, product acceptance criteria, and the exact developer task scope.
 2. Stop after `product` and ask the framework user to approve product meaning and task scope, then ask the operator to approve the `product -> analytic` or `product -> developer` transition unless that exact transition is already approved.
-3. Use `developer` to edit only approved skill source files within the approved task scope.
+3. Use `developer` to create an implementation plan, stop for operator comparison/approval, and then edit only approved skill source files within the approved task scope.
 4. Use `quality` after `developer` for independent review before wiki, product acceptance, or release packaging.
-5. Use `wiki` after accepted quality only if workspace knowledge base documentation needs to reflect the accepted skill behavior.
-6. Use `product` after accepted quality and optional `wiki` to confirm that the resulting skill behavior matches what the product role wanted to see.
+5. Use `wiki` after every accepted quality result to review post-acceptance documentation; the wiki role records updates or explicitly records that no docs change is needed.
+6. Use `product` after accepted quality and wiki review to confirm that the resulting skill behavior matches what the product role wanted to see.
 7. Use `release` after product acceptance only when the user asks to prepare or create a commit for the accepted change.
 8. A lightweight self-improvement quality review is mandatory for any change to safety rules, lifecycle rules, role routing, approval gates, release behavior, DevOps behavior, source-boundary behavior, role output contracts, or templates used by implementation and quality workflows.
 9. A narrowly scoped copyedit or typo fix may use product acceptance without a full quality report only when it does not affect behavior, templates, safety, routing, gates, source boundaries, or release/devops behavior.
@@ -98,12 +98,13 @@ After receiving a high-level user task:
 7. If this is a task workflow or the epic tasks are approved for technical analysis, run `analytic`.
 8. If `analytic` created blocking questions, stop and ask the user.
 9. In `controlled` mode, stop after the task is created and ask the operator to approve `analytic -> developer` unless the user explicitly allowed the small safe task fast path or approved the task in advance.
-10. If the task is approved, run `developer -> quality` without stopping between the roles.
-11. If `quality` returns `rejected`, stop in `controlled` mode and show the user the rejection reason. In `auto` mode, return the task to `developer` at most once only if the fix is safe and does not require a user decision.
-12. If `quality` returns `accepted`, use the wiki post-acceptance decision table to determine whether documentation is needed. Stop before `quality -> wiki` in `controlled` mode if documentation should be updated.
-13. If `quality` returns `accepted`, run `wiki` if documentation needs to be updated and the execution mode allows it.
-14. If the user requested product acceptance of the result or wiki, run `product` after `wiki`.
-15. In the final response, report created and changed file paths.
+10. If the task is approved, developer writes an implementation plan and stops for operator comparison before patching unless scoped auto implementation was explicitly approved.
+11. After approved implementation starts, run `developer -> quality` without stopping between the roles.
+12. If `quality` returns `rejected`, stop in `controlled` mode and show the user the rejection reason. In `auto` mode, return the task to `developer` at most once only if the fix is safe and does not require a user decision.
+13. If `quality` returns `accepted`, move to `wiki` for post-acceptance documentation review. Stop before wiki writes in `controlled` mode unless scoped auto wiki was approved.
+14. The `wiki` role records whether documentation was updated or explicitly not needed.
+15. If the user requested product acceptance of the result or wiki, run `product` after `wiki`.
+16. In the final response, report created and changed file paths.
 
 Do not skip `quality`.
 

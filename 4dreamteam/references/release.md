@@ -31,13 +31,14 @@ If accepted evidence is missing, stop and explain which acceptance artifact is r
 4. Update or create the workspace wiki changelog through `4dt-wiki`.
 5. Update approved source `CHANGELOG.md` when it already exists and the accepted change belongs in source history.
 6. For `skill-development` projects, require approved source `CHANGELOG.md` updates when accepted changes affect skill behavior, metadata, templates, references, or user-facing documentation.
-7. Move selected accepted tasks from `done` to `release` through `4dt-board` when release packaging begins.
-8. Append a `release_plan` timeline entry with branch, files, changelog entries, proposed commit message, tag/release plan, and excluded dirty files.
-9. Ask for explicit user approval before staging or committing.
-10. After approval, stage only the approved files and create the commit.
-11. Ask for separate explicit approval before pushing the branch.
-12. Ask for explicit approval before creating or pushing a release tag and before publishing a GitHub Release.
-13. After the branch push and chosen release publication step succeed, move included tasks from `release` to `released` through `4dt-board`.
+7. Run `4dt-wiki export --target <source-docs-path>` before packaging when the release should include the managed wiki as source-shipped documentation.
+8. Move selected accepted tasks from `done` to `release` through `4dt-board` when release packaging begins.
+9. Append a `release_plan` timeline entry with branch, files, changelog entries, wiki export target when used, proposed commit message, tag/release plan, and excluded dirty files.
+10. Ask for explicit user approval before staging or committing.
+11. After approval, stage only the approved files and create the commit.
+12. Ask for separate explicit approval before pushing the branch.
+13. Ask for explicit approval before creating or pushing a release tag and before publishing a GitHub Release.
+14. After the branch push and chosen release publication step succeed, move included tasks from `release` to `released` through `4dt-board`.
 
 ## Changelog Policy
 
@@ -71,9 +72,10 @@ Before staging, show a release plan that includes:
 6. excluded dirty files;
 7. workspace changelog entry;
 8. source changelog entry when applicable;
-9. proposed commit message;
-10. tag and GitHub Release plan: none, tag only, draft GitHub Release, or published GitHub Release;
-11. commands that will run after approval.
+9. wiki export target and exported files when applicable;
+10. proposed commit message;
+11. tag and GitHub Release plan: none, tag only, draft GitHub Release, or published GitHub Release;
+12. commands that will run after approval.
 
 Stop after the plan unless the user already gave direct permission to continue without confirmation for the full lifecycle.
 

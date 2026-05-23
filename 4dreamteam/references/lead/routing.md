@@ -10,8 +10,8 @@ Route requests as follows:
 - validate workspace, check workspace structure, find inconsistent task/report/doc state -> workspace validation workflow in `references/lead/read-only.md`;
 - update this workspace to the current 4DreamTeam skill version, refresh workspace rules, self-update workspace -> self-update workflow in `references/lead/self-maintenance.md`;
 - improve the `4DreamTeam` skill itself from a workspace with an approved skill source -> self-improvement workflow in `references/lead/self-maintenance.md`;
-- clear engineering work such as bugfix, refactor, tests, small docs, or concrete code/config changes -> analytic, then developer -> quality;
-- small safe engineering task with explicit `auto` or direct "go ahead" permission -> analytic compact task, then developer -> quality;
+- clear engineering work such as bugfix, refactor, tests, small docs, or concrete code/config changes -> analytic, then developer plan approval -> developer -> quality -> wiki;
+- small safe engineering task with explicit `auto` or direct "go ahead" permission -> analytic compact task, then developer plan approval -> developer -> quality -> wiki;
 - raw business request, product idea, roadmap, product development, backlog formation, epic planning, or feature decomposition -> product, then after approval analytic or developer;
 - product backlog, epic shaping, discovery, product questions, or feature ideas -> product;
 - continue an existing task or epic -> the role matching the artifact's board column;
@@ -33,9 +33,9 @@ Do not create an epic for a clear standalone engineering task unless the user ex
 | Request shape | Route | Required gate |
 |---|---|---|
 | Raw idea, product direction, roadmap, feature decomposition, audience/value/scope question | `product` | Stop after epic changes in controlled mode. |
-| Clear engineering change that still needs technical shaping | `analytic -> developer -> quality` | Stop after analytic in controlled mode unless the user approved auto. |
-| Small safe localized engineering change with explicit go-ahead | `analytic compact task -> developer -> quality` | Never skip quality. |
-| Already implementation-ready task in the `developer` board column | `developer -> quality` | Developer must follow task scope and timeline evidence checks. |
+| Clear engineering change that still needs technical shaping | `analytic -> developer plan approval -> developer -> quality -> wiki` | Stop after analytic in controlled mode unless the user approved auto; developer still stops after its plan unless scoped auto implementation was approved. |
+| Small safe localized engineering change with explicit go-ahead | `analytic compact task -> developer plan approval -> developer -> quality -> wiki` | Never skip quality or post-acceptance wiki review. |
+| Already implementation-ready task in the `developer` board column | `developer plan approval -> developer -> quality -> wiki` | Developer must follow task scope and timeline evidence checks. |
 | Completed implementation awaiting review | `quality` | Reject if any criterion is failed or not verified. |
 | Accepted behavior needs docs | `wiki post-acceptance` | Requires accepted quality report, task, and developer report. |
 | Existing docs need source-backed check without writes | `wiki audit/check` | Read-only unless a later update is approved. |
@@ -53,8 +53,9 @@ If multiple routes seem plausible, choose the route that preserves safety and au
 1. product before analytic when product meaning or scope is unclear;
 2. analytic before developer when technical impact, validation, or affected files are unclear;
 3. quality before wiki/release for implementation or framework behavior changes;
-4. devops before developer when server state or operational risk is involved;
-5. release only after accepted evidence exists.
+4. accepted quality always routes to wiki post-acceptance review before done/release.
+5. devops before developer when server state or operational risk is involved;
+6. release only after accepted evidence exists.
 
 ## Marketing Route Rules
 

@@ -168,6 +168,6 @@ $4DreamTeam improve 4DreamTeam itself from your local checkout of https://github
 
 ## Статус
 
-Текущая документированная версия: `0.3.0`.
+Текущая документированная версия: `0.4.0`.
 
 История изменений: [CHANGELOG.md](CHANGELOG.md).

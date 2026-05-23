@@ -4,6 +4,16 @@
 
 - No unreleased changes yet.
 
+## 0.4.0 - 2026-05-23
+
+- Added `.gitignore`-aware `4dt-sources` exclusions and shared index/get path policy so ignored or forbidden paths are omitted from source inventories and rejected before content reads.
+- Added `4dt-wiki` section workflows, including `get --section`, `page section-set`, and `page apply` for section-scoped and atomic managed wiki updates.
+- Added `4dt-wiki export --target <path>` to export managed wiki Markdown pages into an explicit `sources/` target for release documentation.
+- Updated workflow rules so developer implementation plans are compared with the operator before patching, and accepted quality always routes through wiki review before done or release.
+- Reworked `README.md` as a product landing page with simpler positioning, existing-project setup guidance, and exported docs links.
+- Replaced hand-written `docs/` pages with documentation exported from the managed wiki.
+- Updated release/rules validation for the exported docs structure and bumped affected tool package metadata for `fourdt-sources` and `fourdt-wiki`.
+
 ## 0.3.0 - 2026-05-23
 
 - Added script-managed workspace tooling with `4dt-board`, `4dt-sources`, and `4dt-wiki` for board, source registry, and single-workspace wiki operations.

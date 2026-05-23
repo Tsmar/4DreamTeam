@@ -94,8 +94,8 @@ Allowed writes:
 If all acceptance criteria are met:
 
 1. Append `quality_accepted` through `4dt-board comment add`.
-2. Decide whether wiki documentation is needed using the wiki post-acceptance decision table.
-3. Move the task to `wiki` when docs are needed, otherwise to `done`.
+2. Move the task to `wiki` for post-acceptance documentation review.
+3. The `wiki` role decides whether managed wiki updates are needed, records `wiki_update` evidence, and then moves the task onward.
 4. Provide evidence for each pin test.
 
 ## Documentation Quality

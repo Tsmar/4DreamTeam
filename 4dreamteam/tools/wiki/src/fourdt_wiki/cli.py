@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import json
 import re
+import shutil
 import sys
 from dataclasses import dataclass
 from datetime import datetime, timezone
@@ -280,6 +281,32 @@ def section_body(page: WikiPage, section_key: str) -> str:
     return page.body[start:end].strip()
 
 
+def normalized_refs(raw: str | None, *, field: str) -> str | None:
+    if raw is None:
+        return None
+    try:
+        value = json.loads(raw)
+    except json.JSONDecodeError as exc:
+        raise UserError("invalid_refs", f"{field} must be a JSON array of strings.") from exc
+    if not isinstance(value, list) or not all(isinstance(item, str) for item in value):
+        raise UserError("invalid_refs", f"{field} must be a JSON array of strings.")
+    return json.dumps(value, ensure_ascii=False)
+
+
+def replace_section_body(body: str, section_key: str, content: str) -> str:
+    if section_key not in SECTION_KEYS:
+        raise UserError("invalid_section", f"Unknown section key: {section_key}")
+    heading = SECTION_KEYS[section_key]
+    match = re.search(rf"^## {re.escape(heading)}\s*$", body, re.MULTILINE)
+    if not match:
+        raise UserError("missing_section", f"Missing section: {section_key}")
+    start = match.end()
+    next_match = re.search(r"^## .+$", body[start:], re.MULTILINE)
+    end = start + next_match.start() if next_match else len(body)
+    replacement = "\n\n" + content.strip() + "\n\n"
+    return body[:start] + replacement + body[end:].lstrip("\n")
+
+
 def create_page(workspace: Path, relpath: str, title: str, kind: str) -> dict[str, Any]:
     if kind not in PAGE_KINDS:
         raise UserError("invalid_kind", f"Invalid page kind: {kind}")
@@ -300,15 +327,90 @@ def create_page(workspace: Path, relpath: str, title: str, kind: str) -> dict[st
     return {"page": item_from_page(read_page(workspace, path)), "index": {"pageCount": index["pageCount"], "issues": index["issues"]}}
 
 
-def update_page(workspace: Path, page_or_id: str, status: str | None) -> dict[str, Any]:
+def write_page(page: WikiPage, meta: dict[str, str], body: str) -> None:
+    meta["updated_at"] = iso_now()
+    page.path.write_text(dump_frontmatter(meta) + body.rstrip() + "\n", encoding="utf-8")
+
+
+def update_page(
+    workspace: Path,
+    page_or_id: str,
+    status: str | None,
+    source_refs: str | None,
+    task_refs: str | None,
+) -> dict[str, Any]:
     page = find_page(workspace, page_or_id)
     if status and status not in PAGE_STATUSES:
         raise UserError("invalid_status", f"Invalid status: {status}")
     meta = dict(page.frontmatter)
     if status:
         meta["status"] = status
-    meta["updated_at"] = iso_now()
-    page.path.write_text(dump_frontmatter(meta) + page.body.rstrip() + "\n", encoding="utf-8")
+    normalized_source_refs = normalized_refs(source_refs, field="source_refs")
+    normalized_task_refs = normalized_refs(task_refs, field="task_refs")
+    if normalized_source_refs is not None:
+        meta["source_refs"] = normalized_source_refs
+    if normalized_task_refs is not None:
+        meta["task_refs"] = normalized_task_refs
+    write_page(page, meta, page.body)
+    build_index(workspace)
+    return {"page": item_from_page(read_page(workspace, page.path))}
+
+
+def update_page_section(workspace: Path, page_or_id: str, section_key: str, content: str) -> dict[str, Any]:
+    page = find_page(workspace, page_or_id)
+    body = replace_section_body(page.body, section_key, content)
+    write_page(page, dict(page.frontmatter), body)
+    build_index(workspace)
+    updated = read_page(workspace, page.path)
+    return {"page": item_from_page(updated), "section": section_key, "content": section_body(updated, section_key)}
+
+
+def page_payload_refs(value: Any, *, field: str) -> str | None:
+    if value is None:
+        return None
+    if not isinstance(value, list) or not all(isinstance(item, str) for item in value):
+        raise UserError("invalid_refs", f"{field} must be a JSON array of strings.")
+    return json.dumps(value, ensure_ascii=False)
+
+
+def apply_page_payload(workspace: Path, page_or_id: str, raw_payload: str) -> dict[str, Any]:
+    try:
+        value = json.loads(raw_payload)
+    except json.JSONDecodeError as exc:
+        raise UserError("invalid_payload", "Page payload must be a JSON object.") from exc
+    if not isinstance(value, dict):
+        raise UserError("invalid_payload", "Page payload must be a JSON object.")
+
+    page = find_page(workspace, page_or_id)
+    meta = dict(page.frontmatter)
+    status = value.get("status")
+    if status is not None:
+        if not isinstance(status, str) or status not in PAGE_STATUSES:
+            raise UserError("invalid_status", f"Invalid status: {status}.")
+        meta["status"] = status
+    source_refs = page_payload_refs(value.get("source_refs"), field="source_refs")
+    task_refs = page_payload_refs(value.get("task_refs"), field="task_refs")
+    if source_refs is not None:
+        meta["source_refs"] = source_refs
+    if task_refs is not None:
+        meta["task_refs"] = task_refs
+
+    body = page.body
+    sections = value.get("sections", {})
+    if not isinstance(sections, dict):
+        raise UserError("invalid_sections", "sections must be a JSON object.")
+    for section_key, content in sections.items():
+        if section_key not in SECTION_KEYS:
+            raise UserError("invalid_section", f"Unknown section key: {section_key}")
+        if isinstance(content, list) and all(isinstance(item, str) for item in content):
+            section_content = "\n".join(content)
+        elif isinstance(content, str):
+            section_content = content
+        else:
+            raise UserError("invalid_section", f"Section content must be a string or string array: {section_key}")
+        body = replace_section_body(body, section_key, section_content)
+
+    write_page(page, meta, body)
     build_index(workspace)
     return {"page": item_from_page(read_page(workspace, page.path))}
 
@@ -327,6 +429,43 @@ def status_payload(workspace: Path) -> dict[str, Any]:
     index = build_index(workspace)
     status = "ready" if not any(issue["severity"] == "error" for issue in index["issues"]) else "issues"
     return {"wiki": {"root": "docs", "pageCount": index["pageCount"]}, "issues": index["issues"], "status": status}
+
+
+def resolve_export_target(workspace: Path, raw_target: str | None) -> Path:
+    if not raw_target:
+        raise UserError("target_required", "Export target is required.")
+    target = Path(raw_target).expanduser()
+    if not target.is_absolute():
+        target = (workspace / target).resolve(strict=False)
+    else:
+        target = target.resolve(strict=False)
+    sources_root = (workspace / "sources").resolve(strict=False)
+    try:
+        target.relative_to(sources_root)
+    except ValueError as exc:
+        raise UserError("target_not_allowed", "Export target must be inside workspace sources/.") from exc
+    return target
+
+
+def export_wiki_pages(workspace: Path, raw_target: str | None) -> dict[str, Any]:
+    result = status_payload(workspace)
+    if result["status"] != "ready":
+        return {"target": raw_target or "", "exported_count": 0, "exported": [], "issues": result["issues"]}
+
+    source_root = docs_dir(workspace)
+    target_root = resolve_export_target(workspace, raw_target)
+    exported: list[str] = []
+    for source_path in sorted(source_root.rglob("*")):
+        if not source_path.is_file():
+            continue
+        if source_path.suffix.lower() != ".md":
+            continue
+        relpath = source_path.relative_to(source_root)
+        target_path = target_root / relpath
+        target_path.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(source_path, target_path)
+        exported.append(relpath.as_posix())
+    return {"target": target_root.as_posix(), "exported_count": len(exported), "exported": exported, "issues": []}
 
 
 def payload(ok: bool, status: str, **extra: Any) -> dict[str, Any]:
@@ -356,6 +495,10 @@ def command(args: argparse.Namespace) -> tuple[int, dict[str, Any]]:
         index = load_index(workspace)
         status = "ready" if not any(issue["severity"] == "error" for issue in index["issues"]) else "issues"
         return (0 if status == "ready" else 2), payload(True, status, issues=index["issues"])
+    if args.action == "export":
+        result = export_wiki_pages(workspace, args.target)
+        status = "ready" if not result["issues"] else "issues"
+        return (0 if status == "ready" else 2), payload(True, status, export=result)
     if args.action == "search":
         return 0, payload(True, "ready", matches=search_pages(workspace, args.query, args.limit), limit=args.limit)
     if args.action == "get":
@@ -366,7 +509,17 @@ def command(args: argparse.Namespace) -> tuple[int, dict[str, Any]]:
     if args.action == "page-create":
         return 0, payload(True, "ready", **create_page(workspace, args.path, args.title, args.type))
     if args.action == "page-update":
-        return 0, payload(True, "ready", **update_page(workspace, args.page, args.status_value))
+        return 0, payload(
+            True,
+            "ready",
+            **update_page(workspace, args.page, args.status_value, args.source_refs_json, args.task_refs_json),
+        )
+    if args.action == "page-section-set":
+        content = args.content if args.content is not None else sys.stdin.read()
+        return 0, payload(True, "ready", **update_page_section(workspace, args.page, args.section, content))
+    if args.action == "page-apply":
+        raw_payload = Path(args.file).read_text(encoding="utf-8") if args.file else sys.stdin.read()
+        return 0, payload(True, "ready", **apply_page_payload(workspace, args.page, raw_payload))
     if args.action == "adr-create":
         relpath = f"decisions/{datetime.now(timezone.utc).strftime('%Y%m%d')}-{kebab(args.title)}.md"
         return 0, payload(True, "ready", **create_page(workspace, relpath, args.title, "decision"))
@@ -381,6 +534,9 @@ def build_parser() -> argparse.ArgumentParser:
     sub.add_parser("init")
     sub.add_parser("status")
     sub.add_parser("validate")
+    export = sub.add_parser("export")
+    export.add_argument("--target")
+    export.set_defaults(action="export")
     index = sub.add_parser("index")
     index_sub = index.add_subparsers(dest="index_action", required=True)
     index_build = index_sub.add_parser("build")
@@ -403,7 +559,18 @@ def build_parser() -> argparse.ArgumentParser:
     page_update = page_sub.add_parser("update")
     page_update.add_argument("page")
     page_update.add_argument("--status", dest="status_value", choices=sorted(PAGE_STATUSES))
+    page_update.add_argument("--source-refs-json")
+    page_update.add_argument("--task-refs-json")
     page_update.set_defaults(action="page-update")
+    page_section_set = page_sub.add_parser("section-set")
+    page_section_set.add_argument("page")
+    page_section_set.add_argument("section", choices=sorted(SECTION_KEYS))
+    page_section_set.add_argument("--content")
+    page_section_set.set_defaults(action="page-section-set")
+    page_apply = page_sub.add_parser("apply")
+    page_apply.add_argument("page")
+    page_apply.add_argument("--file")
+    page_apply.set_defaults(action="page-apply")
     adr = sub.add_parser("adr")
     adr_sub = adr.add_subparsers(dest="adr_action", required=True)
     adr_create = adr_sub.add_parser("create")

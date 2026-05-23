@@ -8,6 +8,7 @@ import re
 import sys
 from dataclasses import dataclass
 from datetime import datetime, timezone
+from fnmatch import fnmatch
 from pathlib import Path
 from typing import Any
 
@@ -48,6 +49,15 @@ class Source:
     label: str
     kind: str
     added_at: str
+
+
+@dataclass
+class IgnoreRule:
+    pattern: str
+    negated: bool
+    directory_only: bool
+    anchored: bool
+    has_slash: bool
 
 
 class UserError(Exception):
@@ -204,6 +214,103 @@ def source_status(path: Path) -> tuple[str, str]:
     return "active", ""
 
 
+def parse_gitignore_line(raw_line: str) -> IgnoreRule | None:
+    line = raw_line.rstrip("\n")
+    if not line.strip() or line.lstrip().startswith("#"):
+        return None
+    negated = line.startswith("!")
+    if negated:
+        line = line[1:]
+    if line.startswith("\\#") or line.startswith("\\!"):
+        line = line[1:]
+    line = line.strip()
+    if not line:
+        return None
+    directory_only = line.endswith("/")
+    if directory_only:
+        line = line.rstrip("/")
+    anchored = line.startswith("/")
+    if anchored:
+        line = line.lstrip("/")
+    if not line:
+        return None
+    return IgnoreRule(
+        pattern=line,
+        negated=negated,
+        directory_only=directory_only,
+        anchored=anchored,
+        has_slash="/" in line,
+    )
+
+
+def load_gitignore_rules(root: Path) -> list[IgnoreRule]:
+    if not root.is_dir():
+        return []
+    gitignore = root / ".gitignore"
+    if not gitignore.is_file():
+        return []
+    try:
+        lines = gitignore.read_text(encoding="utf-8", errors="replace").splitlines()
+    except OSError:
+        return []
+    return [rule for line in lines if (rule := parse_gitignore_line(line))]
+
+
+def rule_matches(rule: IgnoreRule, relative_path: str, kind: str) -> bool:
+    relative_path = relative_path.strip("/")
+    if not relative_path or relative_path == ".":
+        return False
+    parts = relative_path.split("/")
+    pattern = rule.pattern
+
+    if rule.directory_only:
+        directories = parts if kind == "directory" else parts[:-1]
+        if rule.has_slash or rule.anchored:
+            candidates = ["/".join(parts[: index + 1]) for index in range(len(directories))]
+            return any(candidate == pattern or candidate.startswith(f"{pattern}/") for candidate in candidates)
+        return any(fnmatch(part, pattern) for part in directories)
+
+    if rule.has_slash or rule.anchored:
+        if fnmatch(relative_path, pattern):
+            return True
+        if rule.anchored:
+            return False
+        return any(fnmatch("/".join(parts[index:]), pattern) for index in range(1, len(parts)))
+    return any(fnmatch(part, pattern) for part in parts)
+
+
+def gitignore_status(root: Path, path: Path, kind: str, rules: list[IgnoreRule]) -> tuple[str, str]:
+    if not rules:
+        return "active", ""
+    try:
+        relative = "." if path == root else path.relative_to(root).as_posix()
+    except ValueError:
+        return "active", ""
+    ignored = False
+    for rule in rules:
+        if rule_matches(rule, relative, kind):
+            ignored = not rule.negated
+    if ignored:
+        return "ignored", "gitignore"
+    return "active", ""
+
+
+def path_policy_status(root: Path, path: Path, kind: str, gitignore_rules: list[IgnoreRule]) -> tuple[str, str]:
+    direct_status, direct_reason = source_status(path)
+    if direct_status != "active":
+        return direct_status, direct_reason
+    try:
+        relative = path.relative_to(root)
+    except ValueError:
+        return gitignore_status(root, path, kind, gitignore_rules)
+    ancestors = [root / partial for partial in reversed([relative, *relative.parents]) if partial != Path(".")]
+    for ancestor in ancestors:
+        status, reason = source_status(ancestor)
+        if status != "active":
+            return status, reason
+    return gitignore_status(root, path, kind, gitignore_rules)
+
+
 def validate_registry(workspace: Path) -> tuple[list[dict[str, str]], list[dict[str, str]]]:
     errors: list[dict[str, str]] = []
     warnings: list[dict[str, str]] = []
@@ -263,8 +370,17 @@ def remove_source(workspace: Path, source_id_or_path: str) -> dict[str, Any]:
     return {"removed": source_id_or_path}
 
 
-def entry_for_path(workspace: Path, source: Source, path: Path) -> dict[str, Any]:
-    status, reason = source_status(path)
+def entry_for_path(
+    workspace: Path,
+    source: Source,
+    path: Path,
+    root: Path | None = None,
+    gitignore_rules: list[IgnoreRule] | None = None,
+) -> dict[str, Any]:
+    root = root or resolve_source_path(workspace, source)
+    gitignore_rules = gitignore_rules or []
+    kind = source_kind(path)
+    status, reason = path_policy_status(root, path, kind, gitignore_rules)
     try:
         stat_value = path.stat()
         size = stat_value.st_size
@@ -274,7 +390,6 @@ def entry_for_path(workspace: Path, source: Source, path: Path) -> dict[str, Any
         mtime = None
         status = "unreadable"
         reason = "stat-error"
-    root = resolve_source_path(workspace, source)
     try:
         relative = "." if path == root else path.relative_to(root).as_posix()
     except ValueError:
@@ -284,7 +399,7 @@ def entry_for_path(workspace: Path, source: Source, path: Path) -> dict[str, Any
         "source_path": source.path,
         "path": path.as_posix(),
         "relative_path": relative,
-        "kind": source_kind(path),
+        "kind": kind,
         "status": status,
         "reason": reason,
         "size": size,
@@ -294,10 +409,13 @@ def entry_for_path(workspace: Path, source: Source, path: Path) -> dict[str, Any
 
 def walk_entries(workspace: Path, source: Source) -> list[dict[str, Any]]:
     root = resolve_source_path(workspace, source)
+    gitignore_rules = load_gitignore_rules(root)
     entries: list[dict[str, Any]] = []
 
     def visit(path: Path) -> None:
-        entry = entry_for_path(workspace, source, path)
+        entry = entry_for_path(workspace, source, path, root, gitignore_rules)
+        if entry["status"] in {"forbidden", "ignored"}:
+            return
         entries.append(entry)
         if entry["kind"] != "directory" or entry["status"] != "active":
             return
@@ -312,7 +430,7 @@ def walk_entries(workspace: Path, source: Source) -> list[dict[str, Any]]:
     if root.exists():
         visit(root)
     else:
-        entries.append(entry_for_path(workspace, source, root))
+        entries.append(entry_for_path(workspace, source, root, root, gitignore_rules))
     return entries
 
 
@@ -419,6 +537,12 @@ def get_path(workspace: Path, raw_path: str, range_value: str | None) -> dict[st
     path = Path(raw_path).expanduser()
     if not path.is_absolute():
         path = (workspace / path).resolve(strict=False)
+    else:
+        path = path.resolve(strict=False)
+    root = resolve_source_path(workspace, source)
+    status, reason = path_policy_status(root, path, source_kind(path), load_gitignore_rules(root))
+    if status in {"forbidden", "ignored"}:
+        raise UserError("source_path_excluded", f"Path is excluded from source access: {reason}.")
     if not path.is_file():
         raise UserError("not_file", f"Path is not a readable file: {raw_path}")
     size = path.stat().st_size

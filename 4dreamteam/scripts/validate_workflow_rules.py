@@ -109,14 +109,14 @@ REQUIRED_TEXT = [
     ),
     (
         "startup_tool_status",
-        "docs/workflows.md",
-        "one status line for each tool",
+        "docs/architecture/runtime-entrypoint.md",
+        "reports each tool status",
         "Operator-facing startup docs must require per-tool status output.",
     ),
     (
         "lancedb_experimental",
-        "docs/memory.md",
-        "LanceDB should be presented to the operator as an experimental memory quality enhancement",
+        "docs/domains/memory.md",
+        "LanceDB is an experimental rebuildable index",
         "Memory docs must describe LanceDB as an experimental quality enhancement, not mandatory baseline behavior.",
     ),
 ]

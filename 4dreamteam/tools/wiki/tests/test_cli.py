@@ -66,10 +66,86 @@ class WikiCliTests(unittest.TestCase):
             self.assertEqual(payload["page"]["id"], "domains-payments")
 
             exit_code, payload, _stderr = run_cli(
-                ["--workspace", str(workspace), "--json", "page", "update", "domains-payments", "--status", "actual"]
+                [
+                    "--workspace",
+                    str(workspace),
+                    "--json",
+                    "page",
+                    "update",
+                    "domains-payments",
+                    "--status",
+                    "actual",
+                    "--source-refs-json",
+                    '["sources/app.py"]',
+                ]
             )
             self.assertEqual(exit_code, 0)
             self.assertEqual(payload["page"]["status"], "actual")
+
+            exit_code, payload, _stderr = run_cli(
+                [
+                    "--workspace",
+                    str(workspace),
+                    "--json",
+                    "page",
+                    "section-set",
+                    "domains-payments",
+                    "summary",
+                    "--content",
+                    "Payments handles billing context.",
+                ]
+            )
+            self.assertEqual(exit_code, 0)
+            self.assertEqual(payload["content"], "Payments handles billing context.")
+
+            exit_code, payload, _stderr = run_cli(["--workspace", str(workspace), "--json", "get", "domains-payments"])
+            self.assertEqual(exit_code, 0)
+            self.assertEqual(payload["frontmatter"]["source_refs"], '["sources/app.py"]')
+            self.assertIn("Payments handles billing context.", payload["body"])
+
+            exit_code, payload, _stderr = run_cli(
+                [
+                    "--workspace",
+                    str(workspace),
+                    "--json",
+                    "page",
+                    "apply",
+                    "domains-payments",
+                ]
+            )
+            self.assertEqual(exit_code, 1)
+            self.assertEqual(payload["error"]["code"], "invalid_payload")
+
+            with tempfile.NamedTemporaryFile("w", encoding="utf-8") as payload_file:
+                json.dump(
+                    {
+                        "status": "accepted",
+                        "source_refs": ["sources/billing.py"],
+                        "sections": {
+                            "content": ["Payments now describes billing behavior.", "", "- It supports line arrays."],
+                            "evidence": ["- `sources/billing.py`"],
+                        },
+                    },
+                    payload_file,
+                )
+                payload_file.flush()
+                exit_code, payload, _stderr = run_cli(
+                    [
+                        "--workspace",
+                        str(workspace),
+                        "--json",
+                        "page",
+                        "apply",
+                        "domains-payments",
+                        "--file",
+                        payload_file.name,
+                    ]
+            )
+            self.assertEqual(exit_code, 0)
+            self.assertEqual(payload["page"]["status"], "accepted")
+            exit_code, payload, _stderr = run_cli(["--workspace", str(workspace), "--json", "get", "domains-payments"])
+            self.assertEqual(exit_code, 0)
+            self.assertIn("- It supports line arrays.", payload["body"])
 
             exit_code, payload, _stderr = run_cli(["--workspace", str(workspace), "--json", "search", "Payments"])
             self.assertEqual(exit_code, 0)
@@ -96,6 +172,72 @@ class WikiCliTests(unittest.TestCase):
             self.assertEqual(exit_code, 2)
             codes = {issue["code"] for issue in payload["issues"]}
             self.assertIn("removed_registry", codes)
+
+    def test_export_copies_only_wiki_pages_to_sources_target(self) -> None:
+        with tempfile.TemporaryDirectory() as raw_tmp:
+            workspace = Path(raw_tmp)
+            run_cli(["--workspace", str(workspace), "--json", "init"])
+            run_cli(
+                [
+                    "--workspace",
+                    str(workspace),
+                    "--json",
+                    "page",
+                    "create",
+                    "domains/payments.md",
+                    "--title",
+                    "Payments",
+                    "--type",
+                    "domain",
+                ]
+            )
+            target = workspace / "sources" / "4DreamTeam" / "docs"
+            (workspace / ".4dt" / "wiki" / "pages" / ".DS_Store").write_bytes(b"macos metadata")
+
+            exit_code, payload, _stderr = run_cli(["--workspace", str(workspace), "--json", "export", "--target", str(target)])
+
+            self.assertEqual(exit_code, 0)
+            self.assertEqual(payload["export"]["target"], target.resolve().as_posix())
+            self.assertIn("overview.md", payload["export"]["exported"])
+            self.assertIn("domains/payments.md", payload["export"]["exported"])
+            self.assertNotIn(".DS_Store", payload["export"]["exported"])
+            self.assertTrue((target / "overview.md").exists())
+            self.assertTrue((target / "domains" / "payments.md").exists())
+            self.assertFalse((target / "index.json").exists())
+            self.assertFalse((target / ".DS_Store").exists())
+
+            run_cli(
+                [
+                    "--workspace",
+                    str(workspace),
+                    "--json",
+                    "page",
+                    "section-set",
+                    "overview",
+                    "summary",
+                    "--content",
+                    "Updated overview.",
+                ]
+            )
+            exit_code, payload, _stderr = run_cli(["--workspace", str(workspace), "--json", "export", "--target", str(target)])
+            self.assertEqual(exit_code, 0)
+            self.assertIn("Updated overview.", (target / "overview.md").read_text(encoding="utf-8"))
+
+    def test_export_rejects_targets_outside_workspace_sources(self) -> None:
+        with tempfile.TemporaryDirectory() as raw_tmp:
+            workspace = Path(raw_tmp)
+            run_cli(["--workspace", str(workspace), "--json", "init"])
+
+            exit_code, payload, _stderr = run_cli(["--workspace", str(workspace), "--json", "export"])
+            self.assertEqual(exit_code, 1)
+            self.assertEqual(payload["error"]["code"], "target_required")
+
+            exit_code, payload, _stderr = run_cli(
+                ["--workspace", str(workspace), "--json", "export", "--target", str(workspace / "docs")]
+            )
+
+            self.assertEqual(exit_code, 1)
+            self.assertEqual(payload["error"]["code"], "target_not_allowed")
 
 
 if __name__ == "__main__":

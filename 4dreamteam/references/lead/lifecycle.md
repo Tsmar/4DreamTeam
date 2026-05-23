@@ -29,7 +29,7 @@ The current column determines the next owner role. Do not use `next_owner`.
 5. When analytic decisions require pre-development documentation alignment, `wiki sync` updates managed docs with `proposed` status before developer handoff.
 6. `developer` appends a `developer_report` timeline entry and moves completed implementation work to `quality`.
 7. `quality` appends `quality_accepted` or `quality_rejected`.
-8. Accepted work moves to `wiki` when docs are needed, otherwise to `done`.
+8. Accepted work moves to `wiki` for post-acceptance documentation review before it can move to `done` or `release`.
 9. Rejected work moves to `rejected`.
 10. Rework moves from `rejected` to `developer`, then back to `quality`.
 11. `release` moves work from `done` to `release` only after an explicit user request for release, changelog, staging, commit, or release packaging.
@@ -47,13 +47,13 @@ Use `4dt-board` metadata and current column as the state source of truth. Use th
 | `analytic-ready` | analytic | Technical impact can be analyzed from approved docs/sources. | `docs-alignment`, `developer-ready`, `blocked`, `needs-product` |
 | `docs-alignment` | analytic / wiki | Managed docs are aligned as `proposed`, or alignment is explicitly not required/deferred. | `developer-ready`, `blocked` |
 | `developer-ready` | developer | Affected areas, acceptance criteria, validation plan, and documentation alignment evidence are visible. | `developer-in-progress`, `blocked` |
-| `developer-in-progress` | developer | Task status marked `working` and implementation plan exists. | `developer-done`, `blocked` |
+| `developer-in-progress` | developer | Task status marked `working`, implementation plan exists, and operator plan approval or scoped auto implementation is recorded. | `developer-done`, `blocked` |
 | `developer-done` | developer | `developer_report` timeline entry includes checks and acceptance coverage. | `quality-review` |
 | `quality-review` | quality | Quality can compare implementation to every acceptance criterion. | `accepted`, `rejected` |
 | `rejected` | quality / developer | `quality_rejected` timeline entry gives actionable fixes. | `fixed`, `blocked`, `done` if abandoned |
 | `fixed` | developer | Developer revision entry explains the fix. | `quality-review` |
-| `accepted` | quality | `quality_accepted` timeline entry marks every criterion `pass`. | `wiki-update`, `release-ready`, `done` |
-| `wiki-update` | wiki | Docs update is source-backed or not needed. | `release-ready`, `done` |
+| `accepted` | quality | `quality_accepted` timeline entry marks every criterion `pass`. | `wiki-update` |
+| `wiki-update` | wiki | Docs update is source-backed or explicitly not needed. | `release-ready`, `done` |
 | `release-ready` | release | Accepted quality or product acceptance exists. | `release-planned` |
 | `release-planned` | release | Release plan timeline entry lists included/excluded files and approval requirements. | `released`, `blocked` |
 | `released` | release | Release timeline entry includes pushed release evidence. | `done` |

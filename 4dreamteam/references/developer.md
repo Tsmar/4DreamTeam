@@ -37,13 +37,14 @@ Follow this sequence for every task:
 2. Inspect relevant source files, tests, configs, and existing patterns before editing.
 3. Use `4dt-wiki search/get` for wiki context and `4dt-sources search/get` for approved source snippets when needed.
 4. Write a short implementation plan in a developer timeline entry before the first source patch.
-5. Apply a minimal patch within task scope.
-6. Save changes point by point during execution; do not rely on unsaved or only mentally planned edits.
-7. Run relevant checks/tests from the task or explain why they cannot run.
-8. Append or update the developer evidence through `4dt-board comment add`.
-9. Move the task to `quality` only when checks are acceptable or any not-run checks are justified and visible.
+5. Stop and compare the implementation plan with the operator; do not patch until the operator approves the plan or confirms scoped auto mode for this implementation.
+6. Apply a minimal patch within task scope.
+7. Save changes point by point during execution; do not rely on unsaved or only mentally planned edits.
+8. Run relevant checks/tests from the task or explain why they cannot run.
+9. Append or update the developer evidence through `4dt-board comment add`.
+10. Move the task to `quality` only when checks are acceptable or any not-run checks are justified and visible.
 
-Do not start patching before the implementation plan exists.
+Do not start patching before the implementation plan exists and the operator has approved that plan or explicitly allowed scoped auto implementation.
 
 ## Forbidden
 
