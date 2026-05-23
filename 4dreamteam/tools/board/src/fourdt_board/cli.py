@@ -43,6 +43,20 @@ TASK_STATUSES = {
     "rejected",
 }
 ROLES = {"product", "analytic", "developer", "quality", "wiki", "release", "lead"}
+TIMELINE_TYPES = {
+    "product_decision": "Product decision or acceptance intent.",
+    "product_scope": "Product scope clarification.",
+    "analytic_clarification": "Analytic implementation clarification.",
+    "analytic_handoff": "Analytic developer handoff.",
+    "developer_implementation": "Developer implementation report.",
+    "developer_rework": "Developer rework report.",
+    "quality_acceptance": "Quality acceptance review.",
+    "quality_rejection": "Quality rejection review.",
+    "wiki_update": "Wiki/documentation update record.",
+    "release_packaging": "Release packaging record.",
+    "lead_routing": "Lead routing or workflow decision.",
+    "lead_summary": "Lead task or epic summary.",
+}
 SECTION_KEYS = {
     "frontmatter": "frontmatter",
     "product_baseline": "Product Baseline",
@@ -388,6 +402,11 @@ def add_comment(args: argparse.Namespace, workspace: Path) -> dict[str, Any]:
     file = require_item(workspace, args.id)
     if args.role not in ROLES:
         raise UserError("invalid_role", f"Invalid role: {args.role}")
+    if args.type not in TIMELINE_TYPES:
+        raise UserError("invalid_type", f"Invalid timeline entry type: {args.type}")
+    expected_prefix = f"{args.role}_"
+    if not args.type.startswith(expected_prefix):
+        raise UserError("type_role_mismatch", f"Timeline type {args.type} must start with {expected_prefix}.")
     entry_id = args.entry_id or f"entry-{datetime.now(timezone.utc).strftime('%Y%m%d%H%M%S')}"
     summary = args.summary or args.type
     body = args.body or ""
@@ -496,6 +515,8 @@ def command(args: argparse.Namespace) -> tuple[int, dict[str, Any]]:
         return 0, payload(True, "ready", item=item_from_file(read_board_file(workspace, file.path)))
     if action == "comment-add":
         return 0, payload(True, "ready", **add_comment(args, workspace))
+    if action == "types-list":
+        return 0, payload(True, "ready", types=[{"type": key, "description": value} for key, value in sorted(TIMELINE_TYPES.items())])
     if action in {"comments-list", "comments-latest"}:
         file = require_item(workspace, args.id)
         comments = parse_comments(file)
@@ -528,6 +549,10 @@ def build_parser() -> argparse.ArgumentParser:
     sub = parser.add_subparsers(dest="action", required=True)
     for name in ("scan", "rebuild-index", "status", "validate", "repair-index"):
         sub.add_parser(name)
+    types = sub.add_parser("types")
+    types_sub = types.add_subparsers(dest="types_action", required=True)
+    types_list = types_sub.add_parser("list")
+    types_list.set_defaults(action="types-list")
     next_id_parser = sub.add_parser("next-id")
     next_id_parser.add_argument("kind", choices=("epic", "task"))
     list_parser = sub.add_parser("list")

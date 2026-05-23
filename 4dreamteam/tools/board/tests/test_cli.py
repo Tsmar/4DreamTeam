@@ -139,6 +139,51 @@ TBD
             self.assertEqual(exit_code, 1)
             self.assertEqual(payload["error"]["code"], "invalid_field")
 
+    def test_timeline_types_are_listed_and_validated(self) -> None:
+        with tempfile.TemporaryDirectory() as raw_tmp:
+            workspace = Path(raw_tmp)
+            run_cli(["--workspace", str(workspace), "--json", "create", "task", "--standalone", "Timeline"])
+
+            exit_code, payload, _stderr = run_cli(["--workspace", str(workspace), "--json", "types", "list"])
+            self.assertEqual(exit_code, 0)
+            type_names = {entry["type"] for entry in payload["types"]}
+            self.assertIn("developer_implementation", type_names)
+            self.assertIn("quality_acceptance", type_names)
+
+            exit_code, payload, _stderr = run_cli(
+                [
+                    "--workspace",
+                    str(workspace),
+                    "--json",
+                    "comment",
+                    "add",
+                    "TASK-0001",
+                    "--role",
+                    "developer",
+                    "--type",
+                    "unknown_action",
+                ]
+            )
+            self.assertEqual(exit_code, 1)
+            self.assertEqual(payload["error"]["code"], "invalid_type")
+
+            exit_code, payload, _stderr = run_cli(
+                [
+                    "--workspace",
+                    str(workspace),
+                    "--json",
+                    "comment",
+                    "add",
+                    "TASK-0001",
+                    "--role",
+                    "developer",
+                    "--type",
+                    "quality_acceptance",
+                ]
+            )
+            self.assertEqual(exit_code, 1)
+            self.assertEqual(payload["error"]["code"], "type_role_mismatch")
+
 
 if __name__ == "__main__":
     unittest.main()
