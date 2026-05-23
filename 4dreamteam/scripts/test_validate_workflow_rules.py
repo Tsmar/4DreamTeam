@@ -27,6 +27,21 @@ class WorkflowRulesValidationTests(unittest.TestCase):
             result = validate_workflow_rules.run(["rule.md"], root=root)
             self.assertTrue(result["ok"], result["issues"])
 
+    def test_required_new_session_memory_recall_is_checked(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            preflight = root / "4dreamteam" / "references" / "lead" / "preflight.md"
+            workflows = root / "docs" / "workflows.md"
+            preflight.parent.mkdir(parents=True)
+            workflows.parent.mkdir(parents=True)
+            preflight.write_text("4dt-board --workspace . --json validate\n", encoding="utf-8")
+            workflows.write_text("one status line for each tool\n", encoding="utf-8")
+
+            issues = validate_workflow_rules.validate_required_text(root)
+
+            codes = {issue["code"] for issue in issues}
+            self.assertIn("new_session_memory_recall", codes)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -32,7 +32,7 @@ Use this workflow when the user asks for workspace status, asks what is next, or
 
 For continuation across sessions, read `references/lead/memory.md` and optionally recall prior context from `4dt-memory`. If memory is unavailable, slow, empty, or low-signal, use `4dt-board`, `4dt-wiki`, and `4dt-sources` without stopping.
 
-Run:
+For a new session or continuation, first follow `references/lead/preflight.md` onboarding. Then run status queries as needed:
 
 1. `4dt-board status`
 2. `4dt-board list`
@@ -45,13 +45,15 @@ Run:
 
 Report:
 
-1. workspace preflight result;
-2. role board summary by current column;
-3. epics and tasks grouped by current owner role;
-4. timeline evidence relevant to developer, quality, release, wiki, and handoff decisions;
-5. rejected, blocked, or incomplete work;
-6. known wiki status and source registry state;
-7. the single recommended next action, or a short ordered list if multiple actions are equally important.
+1. one status line per tool;
+2. memory recall result for project rules, operator preferences, active modes, and workflow constraints;
+3. workspace state: `no_workspace`, `uninitialized`, `partially_initialized`, `degraded_tooling`, or `ready`;
+4. role board summary by current column;
+5. epics and tasks grouped by current owner role;
+6. timeline evidence relevant to developer, quality, release, wiki, and handoff decisions;
+7. rejected, blocked, or incomplete work;
+8. known wiki status and source registry state;
+9. available modes and the single recommended next action, or a short ordered list if multiple actions are equally important.
 
 Do not change files during status or continuation unless the user explicitly approves the next lifecycle step.
 

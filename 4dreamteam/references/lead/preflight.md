@@ -1,28 +1,56 @@
 # Workspace Preflight
 
-Use this file before writing files in a workspace.
+Use this file at the start of a new session and before writing files in a workspace.
 
-## Existing Workspace
+## New Session Onboarding
 
-A current workspace should have:
+Start every new session with command-based onboarding. Do not inspect managed storage folders directly.
 
-- `AGENTS.md`;
-- script-managed board storage reachable through `4dt-board`;
-- script-managed wiki storage reachable through `4dt-wiki`;
-- source registry reachable through `4dt-sources`;
-- workspace-local memory reachable through `4dt-memory`;
-- git-ignored `sources/`.
-
-Run:
+1. Read `AGENTS.md` if present.
+2. Run memory readiness:
 
 ```bash
-4dt-board validate
-4dt-wiki validate
-4dt-sources registry validate
-4dt-memory doctor
+4dt-memory doctor --workspace . --json
 ```
 
-If a tool reports incompatible or unreadable artifacts, stop and report the issue before proceeding.
+3. If memory is `ready`, immediately recall project rules, operator preferences, active modes, and workflow constraints:
+
+```bash
+4dt-memory search "project rules operator preferences active modes workflow constraints" --workspace . --json
+```
+
+If memory is degraded, unavailable, empty, or low-signal, report that state and continue from current workspace instructions. Do not invent remembered rules.
+
+4. Run the four onboarding checks:
+
+```bash
+4dt-board --workspace . --json validate
+4dt-sources --workspace . --json registry validate
+4dt-wiki --workspace . --json validate
+4dt-memory doctor --workspace . --json
+```
+
+5. Report one status line for each tool: `4dt-board`, `4dt-sources`, `4dt-wiki`, and `4dt-memory`.
+6. Name the workspace state: `no_workspace`, `uninitialized`, `partially_initialized`, `degraded_tooling`, or `ready`.
+7. Offer situation-aware next actions for the operator to choose from.
+
+Repair commands require explicit operator confirmation. If one tool is broken, propose partial or recovery choices based on the specific state instead of blocking all work by default.
+
+## Available Modes
+
+After onboarding, report only modes that are safe for the current state:
+
+- `read-only/status`
+- `product shaping`
+- `analytic`
+- `developer`
+- `quality`
+- `wiki`
+- `release`
+- `devops`
+- `recovery`
+
+If `4dt-board` is unavailable, task workflow modes require `recovery`. If `4dt-memory` is degraded, work may continue without memory after reporting the degraded state.
 
 ## Empty Workspace Bootstrap
 

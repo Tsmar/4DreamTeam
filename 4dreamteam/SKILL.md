@@ -15,10 +15,11 @@ Use this skill as the main entrypoint for the 4DreamTeam framework. The user sho
 ## First Steps
 
 1. Read `references/lead.md`.
-2. Follow the lead module map and load only the smallest sufficient detailed reference files for the route.
-3. Check whether the current folder is a 4DreamTeam workspace before writing files. Do not require a `skill/` folder in normal workspaces after the skill is installed.
-4. Route the request to the relevant role workflow.
-5. Load only the role reference and mode-specific references needed for the route.
+2. For a new session, read `references/lead/preflight.md` and run command-based onboarding before proposing work.
+3. Follow the lead module map and load only the smallest sufficient detailed reference files for the route.
+4. Check whether the current folder is a 4DreamTeam workspace before writing files. Do not require a `skill/` folder in normal workspaces after the skill is installed.
+5. Route the request to the relevant role workflow.
+6. Load only the role reference and mode-specific references needed for the route.
 
 ## Role References
 
@@ -94,4 +95,5 @@ Use route-specific references to reduce unnecessary context:
 15. Release commits require accepted quality or product acceptance, a visible commit plan, and explicit user approval before staging or committing.
 16. The old multi-project wiki registry, source-map workflow, generated source inventory files, and standalone report files are legacy. Do not migrate or preserve them; create current artifacts through the tools.
 17. When a current `4dt-wiki` or `4dt-sources` index exists, use tool search/get commands before broad wiki or approved-source reading.
-18. Report created and changed files at the end.
+18. At the start of a new session, run onboarding checks and recall memory for project rules, operator preferences, active modes, and workflow constraints when memory is ready.
+19. Report created and changed files at the end.

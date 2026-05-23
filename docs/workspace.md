@@ -20,6 +20,18 @@ The underlying Markdown files remain human-readable storage, but agents do not r
 - workspace-local memory/runtime state
 - `sources/` as the operator-facing source staging area
 
+## New Session State
+
+A new session is classified from tool checks, not from folder inspection:
+
+- `no_workspace`
+- `uninitialized`
+- `partially_initialized`
+- `degraded_tooling`
+- `ready`
+
+The startup summary reports `4dt-board`, `4dt-sources`, `4dt-wiki`, and `4dt-memory` separately. Repair actions require explicit operator confirmation.
+
 ## Board
 
 The board is role-based. Use `4dt-board status`, `4dt-board list`, `4dt-board get`, `4dt-board move`, and `4dt-board comment add` for all task work.

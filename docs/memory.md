@@ -14,11 +14,20 @@ When memory conflicts with those sources, trust the current request, workspace a
 
 By default, 4DT Memory stores data in the workspace-local runtime area managed by the memory tool.
 
-SQLite is the authoritative store for memory items, evidence, workspace identity, session state, and audit logs. LanceDB is only a rebuildable vector index. The index can be deleted and rebuilt from SQLite with `reindex`.
+SQLite is the authoritative store for memory items, evidence, workspace identity, session state, and audit logs. LanceDB is an experimental, rebuildable vector index for improved retrieval quality. The index can be deleted and rebuilt from SQLite with `reindex`.
 
 The CLI supports `--storage-root <path>` for tests, debugging, and controlled maintenance.
 
 ## Commands
+
+At the start of a new session, check memory and recall project rules when memory is ready:
+
+```txt
+4dt-memory doctor --workspace . --json
+4dt-memory search "project rules operator preferences active modes workflow constraints" --workspace . --json
+```
+
+If memory is degraded or empty, report that state and continue from current workspace instructions without inventing remembered rules.
 
 Initialize storage:
 
@@ -149,6 +158,8 @@ Redaction is a blocking guard before storage. It is conservative and testable, b
 Memory absence must not fail a 4DreamTeam workflow.
 
 If SQLite is uninitialized, LanceDB is unavailable, index metadata is mismatched, or embeddings are unavailable, the CLI returns structured degraded status and warnings. Agents should continue with board timeline evidence, the local wiki index, and approved source files.
+
+LanceDB should be presented to the operator as an experimental memory quality enhancement, not as mandatory baseline functionality.
 
 The deterministic `hash` provider exists for smoke tests and reproducible local checks. It should not be presented as high-quality semantic search. The `none` provider uses lexical fallback.
 

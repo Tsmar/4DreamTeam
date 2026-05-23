@@ -59,6 +59,58 @@ RULES = [
 ]
 
 
+REQUIRED_TEXT = [
+    (
+        "new_session_memory_recall",
+        "4dreamteam/references/lead/preflight.md",
+        '4dt-memory search "project rules operator preferences active modes workflow constraints"',
+        "New-session onboarding must immediately recall memory for project rules and working modes when memory is ready.",
+    ),
+    (
+        "new_session_board_check",
+        "4dreamteam/references/lead/preflight.md",
+        "4dt-board --workspace . --json validate",
+        "New-session onboarding must check 4dt-board explicitly.",
+    ),
+    (
+        "new_session_sources_check",
+        "4dreamteam/references/lead/preflight.md",
+        "4dt-sources --workspace . --json registry validate",
+        "New-session onboarding must check 4dt-sources explicitly.",
+    ),
+    (
+        "new_session_wiki_check",
+        "4dreamteam/references/lead/preflight.md",
+        "4dt-wiki --workspace . --json validate",
+        "New-session onboarding must check 4dt-wiki explicitly.",
+    ),
+    (
+        "new_session_memory_check",
+        "4dreamteam/references/lead/preflight.md",
+        "4dt-memory doctor --workspace . --json",
+        "New-session onboarding must check 4dt-memory explicitly.",
+    ),
+    (
+        "repair_confirmation",
+        "4dreamteam/references/lead/preflight.md",
+        "Repair commands require explicit operator confirmation.",
+        "Recovery and repair actions must require explicit operator confirmation.",
+    ),
+    (
+        "startup_tool_status",
+        "docs/workflows.md",
+        "one status line for each tool",
+        "Operator-facing startup docs must require per-tool status output.",
+    ),
+    (
+        "lancedb_experimental",
+        "docs/memory.md",
+        "LanceDB should be presented to the operator as an experimental memory quality enhancement",
+        "Memory docs must describe LanceDB as an experimental quality enhancement, not mandatory baseline behavior.",
+    ),
+]
+
+
 ALLOW_RE = re.compile(
     r"(legacy|old|removed|no longer|must not|do not|stale|replaced|example output|"
     r"script-managed|internal storage|storage path|tool output|validation check|"
@@ -107,11 +159,32 @@ def validate_file(root: Path, path: Path) -> list[dict[str, object]]:
     return issues
 
 
+def validate_required_text(root: Path) -> list[dict[str, object]]:
+    issues: list[dict[str, object]] = []
+    for code, relpath, needle, message in REQUIRED_TEXT:
+        path = root / relpath
+        text = path.read_text(encoding="utf-8") if path.exists() else ""
+        if needle not in text:
+            issues.append(
+                {
+                    "code": code,
+                    "severity": "error",
+                    "path": relpath,
+                    "line": None,
+                    "message": message,
+                    "text": needle,
+                }
+            )
+    return issues
+
+
 def run(paths: Iterable[str] | None = None, root: Path = REPO_ROOT) -> dict[str, object]:
     checked = list(iter_target_files(root, paths))
     issues: list[dict[str, object]] = []
     for path in checked:
         issues.extend(validate_file(root, path))
+    if paths is None:
+        issues.extend(validate_required_text(root))
     return {
         "ok": not issues,
         "checked": [path.relative_to(root).as_posix() for path in checked],
