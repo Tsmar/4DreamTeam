@@ -38,9 +38,9 @@ class PathTests(unittest.TestCase):
                 paths = workspace_paths(workspace, storage)
 
                 self.assertEqual(paths.storage_root, storage.resolve())
-                self.assertEqual(paths.workspace_dir.parent, storage.resolve() / "workspaces")
-                self.assertEqual(paths.sqlite_path, paths.workspace_dir / "state.sqlite3")
-                self.assertEqual(paths.lancedb_dir, paths.workspace_dir / "lancedb")
+                self.assertEqual(paths.workspace_dir, storage.resolve())
+                self.assertEqual(paths.sqlite_path, paths.workspace_dir / "db" / "state.sqlite3")
+                self.assertEqual(paths.lancedb_dir, paths.workspace_dir / "lance")
                 self.assertNotIn(workspace.resolve(), paths.sqlite_path.parents)
 
     def test_default_workspace_layout_stays_inside_workspace(self) -> None:

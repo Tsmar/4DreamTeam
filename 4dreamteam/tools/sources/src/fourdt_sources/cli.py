@@ -14,6 +14,7 @@ from typing import Any
 
 REGISTRY_VERSION = 1
 INDEX_VERSION = 1
+RUNTIME_ROOT = Path(".4dt")
 DEFAULT_LIMIT = 50
 MAX_GET_BYTES = 32_000
 IGNORE_NAMES = {
@@ -70,16 +71,16 @@ def kebab(value: str) -> str:
     return value.strip("-") or "source"
 
 
-def docs_dir(workspace: Path) -> Path:
-    return workspace / "docs"
+def sources_runtime_dir(workspace: Path) -> Path:
+    return workspace / RUNTIME_ROOT / "sources"
 
 
 def registry_path(workspace: Path) -> Path:
-    return docs_dir(workspace) / "sources.md"
+    return sources_runtime_dir(workspace) / "registry.md"
 
 
 def index_dir(workspace: Path) -> Path:
-    return docs_dir(workspace) / ".index" / "sources"
+    return sources_runtime_dir(workspace) / "index"
 
 
 def index_path(workspace: Path) -> Path:
@@ -324,7 +325,7 @@ def build_index(workspace: Path) -> dict[str, Any]:
     index = {
         "schemaVersion": INDEX_VERSION,
         "generatedAt": iso_now(),
-        "registryPath": "docs/sources.md",
+        "registryPath": "sources",
         "registrySha256": sha256(registry_text),
         "sourceCount": len(all_sources(workspace)),
         "entryCount": len(entries),
@@ -336,7 +337,7 @@ def build_index(workspace: Path) -> dict[str, Any]:
     manifest = {
         "schemaVersion": INDEX_VERSION,
         "generatedAt": index["generatedAt"],
-        "registryPath": "docs/sources.md",
+        "registryPath": "sources",
         "registrySha256": index["registrySha256"],
         "sourceCount": index["sourceCount"],
         "entryCount": index["entryCount"],
@@ -364,7 +365,7 @@ def check_index(workspace: Path) -> tuple[dict[str, Any], list[dict[str, str]]]:
     issues: list[dict[str, str]] = []
     registry_text = registry_path(workspace).read_text(encoding="utf-8") if registry_path(workspace).exists() else ""
     if index.get("registrySha256") != sha256(registry_text):
-        issues.append(issue("stale_index", "docs/sources.md", "Source registry changed after index build."))
+        issues.append(issue("stale_index", "sources", "Source registry changed after index build."))
     errors, warnings = validate_registry(workspace)
     issues.extend(errors)
     issues.extend(warnings)

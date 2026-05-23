@@ -4,9 +4,7 @@
 
 This folder is a working `4DreamTeam workspace`.
 
-It is a git repository overlay above current projects, file dumps, images, exported documents, and other source materials.
-
-It stores script-managed board artifacts, script-managed wiki artifacts, timeline comments, memory, and the local `sources/` source staging boundary.
+It is a local working area for project work, source materials, decisions, tasks, wiki knowledge, memory, and role coordination.
 
 ## Main Entrypoint
 
@@ -20,19 +18,18 @@ Do not bypass the `$4DreamTeam` process with ad-hoc work when the request can be
 
 ## Script-Managed Artifacts
 
-Agents do not read or write `tasks/` directly. Use `4dt-board` for board status, task lookup, section reads, creation, movement, metadata updates, timeline comments, validation, and repair.
+Agents do not read or write managed board storage directly. Use `4dt-board` for board status, task lookup, section reads, creation, movement, metadata updates, timeline comments, validation, and repair.
 
-Agents do not read or write `docs/` directly. Use `4dt-wiki` for wiki pages and `4dt-sources` for source registry and approved-source inventory.
+Agents do not read or write managed wiki storage directly. Use `4dt-wiki` for wiki pages and `4dt-sources` for source registry and approved-source inventory.
 
-The storage folders remain human-readable implementation details, but the scripts are the only supported mutation and query interface for agents.
+Storage layout is an implementation detail owned by the tools. The scripts are the only supported mutation and query interface for agents.
 
 Allowed workspace artifacts:
 
-- script-managed `tasks/` board storage
-- script-managed `docs/` wiki storage
-- script-managed `docs/sources.md` source registry
-- workspace-local `.4dt/` runtime and memory storage
-- `sources/` as a git-ignored local source staging area
+- `AGENTS.md` as the workspace rule entrypoint
+- tool-managed board, wiki, source registry, memory, cache, and runtime state
+- `sources/` as the local source staging area
+- `keys/` as the local DevOps key lookup area when infrastructure work requires it
 
 ## Role Board
 
@@ -94,7 +91,7 @@ For wiki bootstrap, first show the intake summary and wait for confirmation. Sou
 
 When the user asks to update this workspace to the currently installed 4DreamTeam skill version, replace only this root `AGENTS.md` from the installed skill template `assets/templates/workspace/AGENTS.md`.
 
-Do not change script-managed storage, `reports/`, `keys/`, approved source repositories, or installed skill files during workspace self-update.
+Do not change tool-managed storage, `keys/`, approved source repositories, or installed skill files during workspace self-update.
 
 Before replacing `AGENTS.md`, show a concise change summary or diff and wait for explicit approval.
 

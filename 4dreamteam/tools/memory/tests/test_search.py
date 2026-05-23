@@ -142,7 +142,7 @@ class SearchTests(unittest.TestCase):
                     "--json",
                 ]
             )
-            index = LanceIndex(storage / "workspaces" / MemoryStore(workspace, storage).identity.id / "lancedb")
+            index = LanceIndex(MemoryStore(workspace, storage).paths.lancedb_dir)
             data = index.read()
             data["items"].append({"id": deleted_id, "vector": [1.0] * 16, "providerModel": "hash:sha256-16"})
             data["items"].append({"id": "mem_missing", "vector": [1.0] * 16, "providerModel": "hash:sha256-16"})

@@ -79,14 +79,14 @@ Use route-specific references to reduce unnecessary context:
 
 1. Do not bypass 4DreamTeam workflow with ad-hoc work when a 4DreamTeam route applies.
 2. Do not write files until workspace preflight passes or the user explicitly confirms using the current folder as a 4DreamTeam workspace.
-3. In an empty folder, create only workspace artifacts after confirmation: `AGENTS.md`, script-managed `docs/`, script-managed `tasks/`, workspace-local `.4dt/`, and `sources/.gitignore`. Use `assets/templates/workspace/AGENTS.md` for `AGENTS.md`, `assets/templates/workspace/sources.gitignore` for `sources/.gitignore`, `4dt-board` for board artifacts, `4dt-wiki` for wiki artifacts, and `4dt-sources` for source registry artifacts. Do not create a `skill/` skill folder there.
+3. In an empty folder, create only workspace artifacts after confirmation: `AGENTS.md`, tool-managed workspace state, and `sources/.gitignore`. Use `assets/templates/workspace/AGENTS.md` for `AGENTS.md`, `assets/templates/workspace/sources.gitignore` for `sources/.gitignore`, `4dt-board` for board artifacts, `4dt-wiki` for wiki artifacts, and `4dt-sources` for source registry artifacts. Do not create a `skill/` skill folder there.
 4. Do not skip independent quality for task implementation workflows.
 5. Do not run wiki post-acceptance updates before an accepted quality timeline entry.
 6. For wiki bootstrap, show intake summary and wait for confirmation before creating files unless the user explicitly accepts defaults/auto.
 7. Treat workspace `sources/` descendants and explicitly approved external source paths registered through `4dt-sources` as hard read boundaries.
 8. Workspace `sources/` is available for reading by default, but external source boundaries must be added explicitly with operator approval through `4dt-sources`.
-9. Agents must not read or write `tasks/` directly. Use `4dt-board` for listing, reading sections, creating items, moving items, setting metadata, adding timeline entries, and validation.
-10. Agents must not read or write `docs/` directly. Use `4dt-wiki` for wiki pages and `4dt-sources` for the source registry and source inventory.
+9. Agents must not read or write board storage directly. Use `4dt-board` for listing, reading sections, creating items, moving items, setting metadata, adding timeline entries, and validation.
+10. Agents must not read or write wiki storage directly. Use `4dt-wiki` for wiki pages and `4dt-sources` for the source registry and source inventory.
 11. Developer, quality, release, product, analytic, wiki, and handoff reports are task timeline entries managed by `4dt-board`, not standalone report files.
 12. Ask the operator to confirm scoped auto mode for `lead -> product`, `product -> analytic`, `analytic -> developer`, and `quality -> wiki` transitions unless the exact transition is already approved for the current scope.
 13. Create an epic handoff timeline entry before closing a completed epic or starting the next epic as the active implementation focus.

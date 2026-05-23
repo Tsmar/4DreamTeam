@@ -35,6 +35,7 @@ class MemoryStore:
     def connect(self) -> sqlite3.Connection:
         if self.connection is None:
             self.paths.workspace_dir.mkdir(parents=True, exist_ok=True)
+            self.paths.sqlite_path.parent.mkdir(parents=True, exist_ok=True)
             self.connection = sqlite3.connect(self.paths.sqlite_path)
             self.connection.row_factory = sqlite3.Row
             self.connection.execute("PRAGMA foreign_keys = ON")

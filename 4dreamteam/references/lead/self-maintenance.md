@@ -36,7 +36,7 @@ assets/templates/workspace/AGENTS.md
 Rules:
 
 1. Replace only workspace-root `AGENTS.md`.
-2. Do not change `docs/`, `tasks/`, `reports/`, `keys/`, approved source repositories, or installed skill files.
+2. Do not change tool-managed storage, `keys/`, approved source repositories, or installed skill files.
 3. Do not create task, report, wiki, or quality artifacts for self-update unless the user explicitly asks for an auditable lifecycle.
 4. After replacing `AGENTS.md`, report the source template path, target path, and installed skill version when known.
 5. Tell the user to restart Codex so the updated skill and workspace instructions are loaded in a clean session.

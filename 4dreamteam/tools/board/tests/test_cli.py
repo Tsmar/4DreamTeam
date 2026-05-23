@@ -32,7 +32,8 @@ class BoardCliTests(unittest.TestCase):
             self.assertEqual(exit_code, 0)
             epic_id = payload["item"]["id"]
             self.assertEqual(epic_id, "EPIC-0001")
-            self.assertEqual(payload["item"]["path"], "tasks/backlog/EPIC-0001-workflow-rules.md")
+            self.assertEqual(payload["item"]["path"], "backlog/EPIC-0001-workflow-rules.md")
+            self.assertTrue((workspace / ".4dt" / "board" / "tasks" / payload["item"]["path"]).exists())
 
             exit_code, payload, _stderr = run_cli(
                 ["--workspace", str(workspace), "--json", "create", "task", "--epic", epic_id, "Board CLI"]
@@ -50,7 +51,7 @@ class BoardCliTests(unittest.TestCase):
             )
             self.assertEqual(exit_code, 0)
             self.assertEqual(payload["item"]["board_column"], "analytic")
-            self.assertTrue((workspace / payload["item"]["path"]).exists())
+            self.assertTrue((workspace / ".4dt" / "board" / "tasks" / payload["item"]["path"]).exists())
 
             exit_code, payload, _stderr = run_cli(
                 ["--workspace", str(workspace), "--json", "section", "get", task_id, "product_baseline"]
@@ -92,7 +93,7 @@ class BoardCliTests(unittest.TestCase):
     def test_validate_reports_deprecated_next_owner_and_board_state(self) -> None:
         with tempfile.TemporaryDirectory() as raw_tmp:
             workspace = Path(raw_tmp)
-            path = workspace / "tasks" / "backlog" / "EPIC-0001-TASK-0001-example.md"
+            path = workspace / ".4dt" / "board" / "tasks" / "backlog" / "EPIC-0001-TASK-0001-example.md"
             path.parent.mkdir(parents=True)
             path.write_text(
                 """---

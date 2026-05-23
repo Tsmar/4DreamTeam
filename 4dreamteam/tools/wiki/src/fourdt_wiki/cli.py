@@ -11,6 +11,7 @@ from typing import Any
 
 
 INDEX_VERSION = 1
+RUNTIME_ROOT = Path(".4dt")
 PAGE_STATUSES = {"draft", "actual", "accepted", "superseded", "deprecated", "unknown"}
 PAGE_KINDS = {
     "overview",
@@ -74,11 +75,11 @@ def kebab(value: str) -> str:
 
 
 def docs_dir(workspace: Path) -> Path:
-    return workspace / "docs"
+    return workspace / RUNTIME_ROOT / "wiki" / "pages"
 
 
 def index_path(workspace: Path) -> Path:
-    return docs_dir(workspace) / ".index" / "wiki.json"
+    return workspace / RUNTIME_ROOT / "wiki" / "index.json"
 
 
 def parse_frontmatter(content: str) -> tuple[dict[str, str], str, bool]:
@@ -172,15 +173,8 @@ def init_wiki(workspace: Path) -> dict[str, Any]:
             continue
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(dump_frontmatter(meta_for(relpath, title, kind, "draft")) + page_template(title), encoding="utf-8")
-        created.append(f"docs/{relpath}")
-    sources = root / "sources.md"
-    if not sources.exists():
-        sources.write_text(
-            "# Source Registry\n\nThis file is maintained by `4dt-sources`. Agents use `4dt-sources` commands instead of editing it directly.\n",
-            encoding="utf-8",
-        )
-        created.append("docs/sources.md")
-    return {"created": created, "root": "docs"}
+        created.append(relpath)
+    return {"created": created, "root": "wiki"}
 
 
 def read_page(workspace: Path, path: Path) -> WikiPage:
@@ -189,23 +183,23 @@ def read_page(workspace: Path, path: Path) -> WikiPage:
     relpath = path.relative_to(docs_dir(workspace)).as_posix()
     issues: list[dict[str, str]] = []
     if relpath == "index.md":
-        issues.append(issue("removed_registry", "error", f"docs/{relpath}", "docs/index.md is removed from the single-workspace wiki model."))
+        issues.append(issue("removed_registry", "error", relpath, "index.md is removed from the single-workspace wiki model."))
     if not has_frontmatter:
-        issues.append(issue("missing_frontmatter", "error", f"docs/{relpath}", "Wiki page requires frontmatter."))
+        issues.append(issue("missing_frontmatter", "error", relpath, "Wiki page requires frontmatter."))
     for key in sorted(REQUIRED_FRONTMATTER):
         if key not in meta:
-            issues.append(issue("missing_field", "error", f"docs/{relpath}", f"Missing frontmatter field: {key}."))
+            issues.append(issue("missing_field", "error", relpath, f"Missing frontmatter field: {key}."))
     if meta.get("status") and meta["status"] not in PAGE_STATUSES:
-        issues.append(issue("invalid_status", "error", f"docs/{relpath}", f"Invalid status: {meta['status']}."))
+        issues.append(issue("invalid_status", "error", relpath, f"Invalid status: {meta['status']}."))
     if meta.get("kind") and meta["kind"] not in PAGE_KINDS:
-        issues.append(issue("invalid_kind", "error", f"docs/{relpath}", f"Invalid kind: {meta['kind']}."))
+        issues.append(issue("invalid_kind", "error", relpath, f"Invalid kind: {meta['kind']}."))
     expected_id = page_id_for(relpath)
     if meta.get("id") and meta["id"] != expected_id:
-        issues.append(issue("id_mismatch", "warning", f"docs/{relpath}", f"Expected id: {expected_id}."))
+        issues.append(issue("id_mismatch", "warning", relpath, f"Expected id: {expected_id}."))
     for key, heading in SECTION_KEYS.items():
         if not re.search(rf"^## {re.escape(heading)}\s*$", body, re.MULTILINE):
-            issues.append(issue("missing_section", "error", f"docs/{relpath}", f"Missing section: {key}."))
-    return WikiPage(path, f"docs/{relpath}", meta, body, issues)
+            issues.append(issue("missing_section", "error", relpath, f"Missing section: {key}."))
+    return WikiPage(path, relpath, meta, body, issues)
 
 
 def wiki_pages(workspace: Path) -> list[WikiPage]:
@@ -239,7 +233,7 @@ def build_index(workspace: Path) -> dict[str, Any]:
     index = {
         "schemaVersion": INDEX_VERSION,
         "generatedAt": iso_now(),
-        "root": "docs",
+        "root": "wiki",
         "pageCount": len(pages),
         "pages": [item_from_page(page) for page in pages],
         "issues": [entry for page in pages for entry in page.issues],
@@ -261,6 +255,8 @@ def load_index(workspace: Path) -> dict[str, Any]:
 def find_page(workspace: Path, page_or_id: str) -> WikiPage:
     normalized = page_or_id
     if normalized.startswith("docs/"):
+        normalized = normalized[5:]
+    if normalized.startswith("wiki/"):
         normalized = normalized[5:]
     candidate = docs_dir(workspace) / normalized
     if candidate.exists() and candidate.is_file():
@@ -289,13 +285,15 @@ def create_page(workspace: Path, relpath: str, title: str, kind: str) -> dict[st
         raise UserError("invalid_kind", f"Invalid page kind: {kind}")
     if relpath.startswith("docs/"):
         relpath = relpath[5:]
+    if relpath.startswith("wiki/"):
+        relpath = relpath[5:]
     if relpath == "index.md":
-        raise UserError("removed_registry", "docs/index.md is removed from the new wiki model.")
+        raise UserError("removed_registry", "index.md is removed from the new wiki model.")
     if not relpath.endswith(".md"):
         relpath += ".md"
     path = docs_dir(workspace) / relpath
     if path.exists():
-        raise UserError("already_exists", f"Wiki page already exists: docs/{relpath}")
+        raise UserError("already_exists", f"Wiki page already exists: {relpath}")
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(dump_frontmatter(meta_for(relpath, title, kind)) + page_template(title), encoding="utf-8")
     index = build_index(workspace)

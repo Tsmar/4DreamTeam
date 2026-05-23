@@ -69,6 +69,7 @@ SECTION_KEYS = {
 }
 CONTROLLED_METADATA = {"board_column", "status", "updated_at", "title"}
 INDEX_VERSION = 1
+RUNTIME_ROOT = Path(".4dt")
 
 
 @dataclass
@@ -133,7 +134,7 @@ def dump_frontmatter(meta: dict[str, str]) -> str:
 def read_board_file(workspace: Path, path: Path) -> BoardFile:
     content = path.read_text(encoding="utf-8")
     meta, body, has_frontmatter = parse_frontmatter(content)
-    relpath = path.relative_to(workspace).as_posix()
+    relpath = path.relative_to(tasks_dir(workspace)).as_posix()
     column = path.parent.name
     issues: list[dict[str, str]] = []
     if not has_frontmatter:
@@ -180,11 +181,11 @@ def issue(code: str, severity: str, path: str, message: str) -> dict[str, str]:
 
 
 def tasks_dir(workspace: Path) -> Path:
-    return workspace / "tasks"
+    return workspace / RUNTIME_ROOT / "board" / "tasks"
 
 
 def index_path(workspace: Path) -> Path:
-    return tasks_dir(workspace) / ".index.json"
+    return workspace / RUNTIME_ROOT / "board" / ".index.json"
 
 
 def ensure_board_dirs(workspace: Path) -> None:

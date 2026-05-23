@@ -101,11 +101,11 @@ Likely route:
 status / continuation
 ```
 
-What 4DreamTeam should read:
+What 4DreamTeam should query:
 
 - `AGENTS.md`
-- `tasks/`
-- `reports/`
+- `4dt-board status`
+- `4dt-board list`
 - `4dt-wiki status`
 - relevant wiki pages and optional memory only when useful
 
@@ -113,7 +113,7 @@ Output:
 
 - Current role board.
 - Active/rejected/blocked tasks.
-- Accepted reports.
+- Accepted timeline evidence.
 - Recommended next safe action.
 
 Why this matters:

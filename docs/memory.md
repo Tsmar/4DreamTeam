@@ -5,18 +5,14 @@
 Memory is not a source of truth. It is a recall layer below:
 
 1. the current user request and explicit approvals;
-2. workspace artifacts such as `AGENTS.md`, `tasks/`, `reports/`, and managed wiki pages;
+2. current workspace instructions, tool-managed board/wiki artifacts, and accepted timeline evidence;
 3. approved source files inside explicit source boundaries.
 
 When memory conflicts with those sources, trust the current request, workspace artifacts, managed wiki, or approved source files.
 
 ## Storage
 
-By default, 4DT Memory stores data outside the workspace and outside the skill directory:
-
-```txt
-~/.codex/storage/4dreamteam/memory
-```
+By default, 4DT Memory stores data in the workspace-local runtime area managed by the memory tool.
 
 SQLite is the authoritative store for memory items, evidence, workspace identity, session state, and audit logs. LanceDB is only a rebuildable vector index. The index can be deleted and rebuilt from SQLite with `reindex`.
 
@@ -39,7 +35,7 @@ Check storage and index health:
 Save accepted memory:
 
 ```txt
-4dt-memory remember "Use local memory storage outside the workspace." \
+4dt-memory remember "Use workspace-local memory storage managed by 4dt-memory." \
   --workspace . \
   --scope workspace \
   --type decision \
@@ -81,7 +77,7 @@ For example, the Russian request `как работает память в dreamt
 4DreamTeam memory recall workflow
 4DreamTeam local memory runtime
 4DT Memory SQLite LanceDB search reindex
-4DreamTeam memory policy wiki fallback tasks reports
+4DreamTeam memory policy wiki fallback board timeline
 4DT Memory retrieval quality benchmark
 references lead memory context budget source map
 ```
@@ -152,7 +148,7 @@ Redaction is a blocking guard before storage. It is conservative and testable, b
 
 Memory absence must not fail a 4DreamTeam workflow.
 
-If SQLite is uninitialized, LanceDB is unavailable, index metadata is mismatched, or embeddings are unavailable, the CLI returns structured degraded status and warnings. Agents should continue with epic handoffs, the local wiki index, tasks, reports, and approved source files.
+If SQLite is uninitialized, LanceDB is unavailable, index metadata is mismatched, or embeddings are unavailable, the CLI returns structured degraded status and warnings. Agents should continue with board timeline evidence, the local wiki index, and approved source files.
 
 The deterministic `hash` provider exists for smoke tests and reproducible local checks. It should not be presented as high-quality semantic search. The `none` provider uses lexical fallback.
 

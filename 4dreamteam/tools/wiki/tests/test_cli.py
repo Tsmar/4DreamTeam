@@ -30,9 +30,9 @@ class WikiCliTests(unittest.TestCase):
 
             exit_code, payload, _stderr = run_cli(["--workspace", str(workspace), "--json", "init"])
             self.assertEqual(exit_code, 0)
-            self.assertTrue((workspace / "docs" / "overview.md").exists())
-            self.assertFalse((workspace / "docs" / "index.md").exists())
-            self.assertTrue((workspace / "docs" / "sources.md").exists())
+            self.assertTrue((workspace / ".4dt" / "wiki" / "pages" / "overview.md").exists())
+            self.assertFalse((workspace / ".4dt" / "wiki" / "pages" / "index.md").exists())
+            self.assertFalse((workspace / "docs").exists())
 
             exit_code, payload, _stderr = run_cli(["--workspace", str(workspace), "--json", "get", "overview", "--section", "summary"])
             self.assertEqual(exit_code, 0)
@@ -90,7 +90,8 @@ class WikiCliTests(unittest.TestCase):
             self.assertEqual(exit_code, 1)
             self.assertEqual(payload["error"]["code"], "removed_registry")
 
-            (workspace / "docs" / "index.md").write_text("# Old registry\n", encoding="utf-8")
+            old = workspace / ".4dt" / "wiki" / "pages" / "index.md"
+            old.write_text("# Old registry\n", encoding="utf-8")
             exit_code, payload, _stderr = run_cli(["--workspace", str(workspace), "--json", "validate"])
             self.assertEqual(exit_code, 2)
             codes = {issue["code"] for issue in payload["issues"]}

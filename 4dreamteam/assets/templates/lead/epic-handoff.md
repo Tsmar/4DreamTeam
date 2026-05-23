@@ -29,9 +29,9 @@ Summarize the completed epic in a few paragraphs. Focus on what changed, why it 
 
 ## Where To Look First
 
-- `tasks/...`
-- `reports/...`
-- `docs/...`
+- board item ids
+- timeline entry ids
+- wiki page ids
 - approved source paths:
 
 ## Workflow Notes

@@ -9,15 +9,16 @@ Agents use scripts as the stable API:
 - `4dt-sources` manages approved source boundaries and source inventory.
 - `4dt-memory` manages workspace-local memory.
 
-The underlying Markdown files remain human-readable storage, but agents do not read or write board or wiki storage directly.
+The underlying Markdown files remain human-readable storage, but agents do not read or write managed storage directly.
 
 ## Required Artifacts
 
 - `AGENTS.md`
-- script-managed `tasks/`
-- script-managed `docs/`
-- workspace-local `.4dt/`
-- git-ignored `sources/`
+- tool-managed board state
+- tool-managed wiki pages
+- tool-managed source registry
+- workspace-local memory/runtime state
+- `sources/` as the operator-facing source staging area
 
 ## Board
 
@@ -43,4 +44,4 @@ External source boundaries are added explicitly with `4dt-sources registry add -
 
 ## Runtime
 
-Workspace runtime and memory live in `.4dt/` so a workspace can be archived or moved with its local state.
+Workspace runtime is owned by the tools. Agents should use commands and states rather than storage paths.

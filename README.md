@@ -71,8 +71,8 @@ Prepare the accepted work for release.
 - Converts approved work into implementation-ready technical tasks.
 - Implements scoped changes through a developer workflow.
 - Runs independent quality review before work is accepted.
-- Maintains source-backed project wikis with source maps and local indexes.
-- Uses optional local 4DT Memory for continuity while keeping wiki/tasks/reports as the source of truth.
+- Maintains source-backed project wikis through `4dt-wiki` and source access through `4dt-sources`.
+- Uses local 4DT Memory for continuity while keeping current workspace instructions, tool-managed artifacts, and approved sources as the source of truth.
 - Prepares README positioning, launch copy, release narratives, and claim audits from confirmed sources.
 - Documents infrastructure facts and runbooks with DevOps safety gates.
 - Packages accepted work into changelog entries and commit plans after explicit approval.
@@ -93,26 +93,19 @@ Prepare the accepted work for release.
 
 ## Why Files Matter
 
-4DreamTeam stores state in the workspace:
-
-```txt
-tasks/
-reports/
-docs/
-sources/
-```
+4DreamTeam stores state in the workspace through its tools.
 
 That means:
 
 - decisions and assumptions survive beyond one chat;
 - tasks can be resumed without guessing;
 - developer work and quality review are separate;
-- a workspace is a git repository overlay that can sit above existing projects, file collections, images, and other source materials;
-- `sources/` can stage source materials or symlinks, but it is not listed, indexed, or read until the operator confirms first-touch access;
+- a workspace is a local working area for 4DreamTeam coordination;
+- `sources/` stages source materials and is readable by default inside the workspace;
 - rejected work has a clear correction path;
 - project knowledge lives in Markdown;
 - completed epics leave handoff notes for the next session, next agent, or next epic;
-- release plans show what will be staged before git changes happen.
+- release plans show what will be staged before approved git changes happen when release packaging is requested.
 
 ## Quick Start
 
@@ -154,8 +147,8 @@ Detailed documentation lives in [docs/](docs/):
 
 - [Examples](docs/examples.md) - realistic end-to-end situations.
 - [Workflows](docs/workflows.md) - product, task, quality, wiki, release, DevOps, marketing, and self-improvement flows.
-- [Workspace](docs/workspace.md) - workspace shape, role board, reports, and safety gates.
-- [Wiki Index](docs/wiki-index.md) - source maps, generated indexes, and source-boundary navigation.
+- [Workspace](docs/workspace.md) - workspace tool contract, role board, and safety gates.
+- [Wiki Index](docs/wiki-index.md) - wiki and source search tooling.
 - [4DT Memory](docs/memory.md) - local memory storage, recall, safety, degraded mode, and benchmark behavior.
 - [Development](docs/development.md) - repository structure and contribution notes.
 

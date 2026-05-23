@@ -58,7 +58,7 @@ class SourcesCliTests(unittest.TestCase):
             self.assertEqual(exit_code, 0)
             self.assertEqual(payload["source"]["kind"], "file")
 
-            registry = (workspace / "docs" / "sources.md").read_text(encoding="utf-8")
+            registry = (workspace / ".4dt" / "sources" / "registry.md").read_text(encoding="utf-8")
             self.assertIn("maintained by `4dt-sources`", registry)
             self.assertIn("Notes", registry)
 
