@@ -5,6 +5,7 @@
   "scripts": {
     "board": "python3 4dreamteam/tools/board/src/fourdt_board/cli.py",
     "sources": "python3 4dreamteam/tools/sources/src/fourdt_sources/cli.py",
+    "4dt-wiki": "python3 4dreamteam/tools/wiki/src/fourdt_wiki/cli.py",
     "wiki": "python3 4dreamteam/scripts/wiki_index.py"
   }
 }

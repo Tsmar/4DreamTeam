@@ -1,0 +1,9 @@
+[project]
+name = "fourdt-wiki"
+version = "0.1.0"
+description = "4DreamTeam single-workspace wiki tooling"
+requires-python = ">=3.10"
+dependencies = []
+
+[project.scripts]
+4dt-wiki = "fourdt_wiki.cli:main"
