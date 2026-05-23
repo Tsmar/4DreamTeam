@@ -3,6 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "board": "python3 4dreamteam/tools/board/src/fourdt_board/cli.py",
     "wiki": "python3 4dreamteam/scripts/wiki_index.py"
   }
 }

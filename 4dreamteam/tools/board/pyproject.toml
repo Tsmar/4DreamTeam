@@ -1,0 +1,9 @@
+[project]
+name = "fourdt-board"
+version = "0.1.0"
+description = "4DreamTeam board management tooling"
+requires-python = ">=3.10"
+dependencies = []
+
+[project.scripts]
+4dt-board = "fourdt_board.cli:main"
