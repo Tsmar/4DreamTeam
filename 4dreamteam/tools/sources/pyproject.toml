@@ -1,0 +1,9 @@
+[project]
+name = "fourdt-sources"
+version = "0.1.0"
+description = "4DreamTeam source registry and inventory tooling"
+requires-python = ">=3.10"
+dependencies = []
+
+[project.scripts]
+4dt-sources = "fourdt_sources.cli:main"

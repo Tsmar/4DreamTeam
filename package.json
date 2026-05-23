@@ -4,6 +4,7 @@
   "type": "module",
   "scripts": {
     "board": "python3 4dreamteam/tools/board/src/fourdt_board/cli.py",
+    "sources": "python3 4dreamteam/tools/sources/src/fourdt_sources/cli.py",
     "wiki": "python3 4dreamteam/scripts/wiki_index.py"
   }
 }
