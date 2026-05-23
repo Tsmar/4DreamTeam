@@ -167,6 +167,6 @@ Detailed documentation lives in [docs/](docs/):
 
 ## Status
 
-Current documented version: `0.2.0`.
+Current documented version: `0.3.0`.
 
 See [CHANGELOG.md](CHANGELOG.md) for release history.

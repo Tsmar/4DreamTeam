@@ -2,8 +2,18 @@
 
 ## Unreleased
 
-- Added an English-first agent memory search protocol for 4DT Memory recall, including bounded typed query variants and artifact verification guidance.
+- No unreleased changes yet.
+
+## 0.3.0 - 2026-05-23
+
+- Added script-managed workspace tooling with `4dt-board`, `4dt-sources`, and `4dt-wiki` for board, source registry, and single-workspace wiki operations.
+- Added 4DT Memory contract keys and startup defaults via `4dt-memory defaults load`, plus `keys`, `mode`, and onboarding repair commands.
+- Updated new-session startup so ready memory defaults apply current project rules, operator preferences, active mode, git policy, and validation policy without asking the operator to repeat context.
+- Added SQLite schema v2 for contract memory entries, migration coverage, safety checks, and audit entries for contract updates.
+- Added an English-first agent memory search protocol for supplemental semantic recall, including bounded typed query variants and artifact verification guidance.
 - Extended the retrieval-quality benchmark with a raw user query vs English-first agent protocol comparison without changing `4dt-memory search` runtime behavior.
+- Moved managed runtime storage toward `.4dt`, updated workspace setup guidance, and strengthened rules that agents use scripts instead of reading or writing managed board/wiki storage directly.
+- Bumped skill and memory package version metadata to `0.3.0`.
 
 ## 0.2.0 - 2026-05-22
 
