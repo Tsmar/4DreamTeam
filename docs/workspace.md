@@ -1,81 +1,46 @@
-# Workspace
+# Workspace Model
 
-4DreamTeam uses files as its shared memory and handoff layer.
+4DreamTeam workspaces are script-managed overlays for project work.
 
-## Workspace Shape
+Agents use scripts as the stable API:
 
-A normal 4DreamTeam workspace does not contain the skill source. After initialization, it contains:
+- `4dt-board` manages epics, tasks, columns, metadata, and timeline entries.
+- `4dt-wiki` manages the single workspace wiki.
+- `4dt-sources` manages approved source boundaries and source inventory.
+- `4dt-memory` manages workspace-local memory.
 
-```txt
-AGENTS.md
-docs/index.md
-tasks/
-  backlog/
-  analytic/
-  developer/
-  quality/
-  wiki/
-  release/
-  released/
-  done/
-  rejected/
-reports/
-  product/
-  tasks/
-  quality/
-  release/
-```
+The underlying Markdown files remain human-readable storage, but agents do not read or write board or wiki storage directly.
 
-`tasks/` is a role-based virtual Kanban board. Epics live in `tasks/backlog/`; executable work is always represented as `TASK-XXXX` files in the role column that owns the next action.
+## Required Artifacts
 
-`tasks/release/` is the active release queue, and `tasks/released/` contains tasks included in pushed releases.
+- `AGENTS.md`
+- script-managed `tasks/`
+- script-managed `docs/`
+- workspace-local `.4dt/`
+- git-ignored `sources/`
 
-## Project Documentation
+## Board
 
-Project documentation lives under:
+The board is role-based. Use `4dt-board status`, `4dt-board list`, `4dt-board get`, `4dt-board move`, and `4dt-board comment add` for all task work.
 
-```txt
-docs/<project-name>/
-```
+Supported columns: `backlog`, `analytic`, `developer`, `quality`, `wiki`, `release`, `released`, `done`, and `rejected`.
 
-DevOps documentation for a project lives under:
+Reports are timeline entries on tasks. There is no active standalone report-file workflow for new work.
 
-```txt
-docs/<project-name>/devops/
-  servers/
-  runbooks/
-```
+## Wiki
 
-`runbooks/` is used only when the task explicitly asks to save a runbook.
+The workspace has one wiki, managed by `4dt-wiki`.
 
-## Workspace Self-Update
+Baseline pages include overview, product overview, architecture overview, changelog, and source registry integration.
 
-Use this after installing or updating the 4DreamTeam skill and before continuing work in an existing workspace:
+Use `4dt-wiki search/get` before broad source reading.
 
-```txt
-Run $4DreamTeam self-update workspace.
-```
+## Sources
 
-Self-update is intentionally narrow. It replaces only the workspace root `AGENTS.md` from the installed skill template:
+The workspace `sources/` folder is readable by default.
 
-```txt
-assets/templates/workspace/AGENTS.md
-```
+External source boundaries are added explicitly with `4dt-sources registry add --operator-approved`. The registry is the single source of truth for approved external source access.
 
-It must not change `docs/`, `tasks/`, `reports/`, `keys/`, approved source repositories, or installed skill files.
+## Runtime
 
-After replacing `AGENTS.md`, restart Codex so the updated skill and workspace instructions are loaded in a clean session. After restart, run `$4DreamTeam validate workspace` if you want to verify the workspace.
-
-## Safety Gates
-
-4DreamTeam is built around conservative operating rules:
-
-- do not write files until workspace preflight passes or the user confirms the workspace;
-- do not bypass the workflow when a 4DreamTeam route applies;
-- do not skip independent quality review for implementation work;
-- do not update wiki post-acceptance docs before accepted quality exists;
-- do not read outside approved source paths;
-- do not expose secrets in tasks, reports, docs, or chat;
-- do not run migrations or destructive commands without explicit approval;
-- document verified facts only for DevOps;
-- do not invent marketing claims that are not backed by approved sources.
+Workspace runtime and memory live in `.4dt/` so a workspace can be archived or moved with its local state.

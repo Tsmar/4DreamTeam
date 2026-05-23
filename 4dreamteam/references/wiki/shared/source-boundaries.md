@@ -103,7 +103,7 @@ Documentation, tests, and comments are used only if they are inside approved sou
 
 ## Project Name Rules
 
-`project name` is used as the directory name in `docs/<project-name>`.
+Use `4dt-wiki` to create wiki pages; agents do not derive wiki storage paths from project names.
 
 Allowed format:
 

@@ -7,6 +7,7 @@
     "memory": "PYTHONPATH=4dreamteam/tools/memory/src python3 -m fourdt_memory.cli",
     "sources": "python3 4dreamteam/tools/sources/src/fourdt_sources/cli.py",
     "4dt-wiki": "python3 4dreamteam/tools/wiki/src/fourdt_wiki/cli.py",
-    "wiki": "python3 4dreamteam/scripts/wiki_index.py"
+    "wiki": "python3 4dreamteam/scripts/wiki_index.py",
+    "rules": "python3 4dreamteam/scripts/validate_workflow_rules.py"
   }
 }

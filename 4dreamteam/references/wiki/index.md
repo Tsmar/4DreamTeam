@@ -103,7 +103,6 @@ If mode selection affects file writes and cannot be safely inferred from the req
 - `shared.md` - compact map for common wiki rules and shared modules.
 - `shared/source-boundaries.md` - source boundaries, ignore list, source truth, and project-name rules.
 - `shared/page-shape.md` - language policy, wiki shape, documentation depth, drilldown links, and page status policy.
-- `shared/source-map.md` - source-map purpose and structure.
 - `shared/indexing.md` - generated local index rules, Python index commands, and index-first navigation.
 - `post-acceptance.md` - docs update after accepted quality.
 - `audit.md` - read-only gap analysis.

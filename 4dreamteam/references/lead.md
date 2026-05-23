@@ -8,8 +8,8 @@ The lead file is intentionally compact. Use it to choose the route, then load on
 
 1. Read this file first.
 2. Do not load every role or workflow reference by default.
-3. Prefer exact task, report, wiki page, and source-map pointers over broad directory reads.
-4. For direct project questions and unfamiliar source areas, use index-first navigation when a current local wiki index exists.
+3. Prefer exact task ids, timeline entry ids, wiki slugs, and tool search results over broad directory reads.
+4. For direct project questions and unfamiliar source areas, use `4dt-wiki` and `4dt-sources` search/get commands before broad approved-source reading.
 5. Load detailed lead modules only when their route or gate applies.
 6. If a user names an exact file, page, task, report, or command, start there.
 7. When source and installed skill copies disagree during self-improvement, treat the approved source repository as the source of truth and the installed copy as runtime context only.
@@ -37,7 +37,7 @@ After routing, load only the relevant role reference:
 - Task analysis: read `references/analytic.md`.
 - Implementation: read `references/developer.md`.
 - Independent acceptance: read `references/quality.md`.
-- Knowledge base, docs, source boundaries, source maps, local wiki indexes, bootstrap/audit/sync/check/blueprint/deepening: read `references/wiki.md`, then follow `references/wiki/index.md`.
+- Knowledge base, docs, source boundaries, wiki search, bootstrap/audit/sync/check/blueprint/deepening: read `references/wiki.md`, then follow `references/wiki/index.md`.
 - Marketing, press releases, product messaging, README positioning, launch materials, market-facing analysis: read `references/marketing.md`.
 - Infrastructure operations, server documentation, deployment diagnostics, SSH access, logs, migrations, and operational runbooks: read `references/devops.md`.
 - Release packaging, changelogs, branch checks, commit plans, staging, and commits after accepted work: read `references/release.md`.
@@ -61,13 +61,13 @@ After routing, load only the relevant role reference:
 2. Do not write files until workspace preflight passes or the user explicitly confirms using the current folder as a 4DreamTeam workspace.
 3. Treat approved source paths as hard read boundaries.
 4. Do not skip independent quality for task implementation workflows.
-5. Do not run wiki post-acceptance updates before accepted quality report.
+5. Do not run wiki post-acceptance updates before accepted quality timeline evidence.
 6. Release commits require accepted quality or product acceptance, a visible commit plan, and explicit user approval before staging or committing.
 7. Do not read or expose secrets, `.env`, credentials, private keys, dumps, or unrelated user files.
 8. Do not run destructive commands, deploys, migrations, pushes, tags, publication, or infrastructure state changes without explicit approval.
 9. Do not stage broad file sets such as `git add .` or `git add -A`.
-10. Generated `.index/*` wiki files must be rebuilt with the bundled Python wiki index tooling instead of edited by hand.
-11. When a current local wiki index exists, use index-first navigation before broad project wiki or approved-source reading.
+10. Agents must not read or write board storage directly; use `4dt-board`.
+11. Agents must not read or write wiki storage directly; use `4dt-wiki` and `4dt-sources`.
 12. Report created and changed files at the end.
 
 If a detailed module conflicts with this file, use the stricter rule.

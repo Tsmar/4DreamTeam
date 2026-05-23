@@ -44,7 +44,7 @@ Save accepted memory:
   --scope workspace \
   --type decision \
   --source-type task \
-  --source-ref tasks/done/EPIC-0007-TASK-0029-technical-architecture-task-contract.md \
+  --source-ref board:EPIC-0007-TASK-0029 \
   --json
 ```
 
@@ -68,7 +68,7 @@ Agents should not rely on one literal query for conceptual, architectural, conti
 
 1. Read exact task ids, file paths, commands, titles, or known artifact pointers first.
 2. Identify intent, project or framework name, source type, and important entities.
-3. Preserve technical terms while translating, including commands, CLI names, filenames, task ids, package names, `4dt-memory`, SQLite, LanceDB, hooks, MCP, and source-map terms.
+3. Preserve technical terms while translating, including commands, CLI names, filenames, task ids, package names, `4dt-memory`, SQLite, LanceDB, hooks, MCP, and project-specific identifiers.
 4. Generate 4-8 typed English query variants for architecture/workflow, implementation/file, decision/history, task/report/wiki artifact, and benchmark/process angles as relevant.
 5. Use the original-language query only as a fallback when English results are thin or when a target source is known to contain that language.
 6. Prefer results supported by exact pointers, multiple query variants, or current task/report/wiki evidence.

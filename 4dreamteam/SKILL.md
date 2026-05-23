@@ -26,7 +26,7 @@ Use this skill as the main entrypoint for the 4DreamTeam framework. The user sho
 - Task analysis: read `references/analytic.md`.
 - Implementation: read `references/developer.md`.
 - Independent acceptance: read `references/quality.md`.
-- Knowledge base, docs, source boundaries, source maps, local wiki indexes, bootstrap/audit/sync/check/blueprint/deepening: read `references/wiki.md`, then follow `references/wiki/index.md`.
+- Knowledge base, docs, source boundaries, wiki search, bootstrap/audit/sync/check/blueprint/deepening: read `references/wiki.md`, then follow `references/wiki/index.md`.
 - Marketing, GTM briefs, value reviews, claim audits, release narratives, press releases, product messaging, README positioning, launch materials, market-facing analysis: read `references/marketing.md`.
 - Infrastructure operations, server documentation, deployment diagnostics, SSH access, logs, migrations, and operational runbooks: read `references/devops.md`.
 - Release packaging, changelogs, branch checks, commit plans, staging, and commits after accepted work: read `references/release.md`.
@@ -37,12 +37,6 @@ Use bundled templates from `assets/templates/`:
 
 - `assets/templates/analytic/task.md`
 - `assets/templates/product/epic.md`
-- `assets/templates/product/report.md`
-- `assets/templates/product/review-accepted.md`
-- `assets/templates/product/review-rejected.md`
-- `assets/templates/developer/report.md`
-- `assets/templates/quality/accepted.md`
-- `assets/templates/quality/rejected.md`
 - `assets/templates/lead/epic-handoff.md`
 - `assets/templates/marketing/press-release.md`
 - `assets/templates/marketing/market-analysis.md`
@@ -52,12 +46,9 @@ Use bundled templates from `assets/templates/`:
 - `assets/templates/marketing/gtm-brief.md`
 - `assets/templates/marketing/claim-audit.md`
 - `assets/templates/release/plan.md`
-- `assets/templates/wiki/docs-index.md`
 - `assets/templates/wiki/project.md`
 - `assets/templates/wiki/product-overview.md`
 - `assets/templates/wiki/architecture-overview.md`
-- `assets/templates/wiki/sources.md`
-- `assets/templates/wiki/source-map.md`
 - `assets/templates/wiki/adr.md`
 - `assets/templates/devops/server-index.md`
 - `assets/templates/devops/server-card.md`
@@ -88,16 +79,19 @@ Use route-specific references to reduce unnecessary context:
 
 1. Do not bypass 4DreamTeam workflow with ad-hoc work when a 4DreamTeam route applies.
 2. Do not write files until workspace preflight passes or the user explicitly confirms using the current folder as a 4DreamTeam workspace.
-3. In an empty folder, create only workspace artifacts after confirmation: `AGENTS.md`, `docs/index.md`, `tasks/`, `reports/`, and `sources/.gitignore`. Use `assets/templates/workspace/AGENTS.md` for `AGENTS.md` and `assets/templates/workspace/sources.gitignore` for `sources/.gitignore`. Do not create a `skill/` skill folder there.
+3. In an empty folder, create only workspace artifacts after confirmation: `AGENTS.md`, script-managed `docs/`, script-managed `tasks/`, workspace-local `.4dt/`, and `sources/.gitignore`. Use `assets/templates/workspace/AGENTS.md` for `AGENTS.md`, `assets/templates/workspace/sources.gitignore` for `sources/.gitignore`, `4dt-board` for board artifacts, `4dt-wiki` for wiki artifacts, and `4dt-sources` for source registry artifacts. Do not create a `skill/` skill folder there.
 4. Do not skip independent quality for task implementation workflows.
-5. Do not run wiki post-acceptance updates before accepted quality report.
+5. Do not run wiki post-acceptance updates before an accepted quality timeline entry.
 6. For wiki bootstrap, show intake summary and wait for confirmation before creating files unless the user explicitly accepts defaults/auto.
-7. Treat confirmed workspace `sources/` descendants and explicitly approved external source paths as hard read boundaries.
-8. Do not list, stat, resolve, inventory, index, or read workspace `sources/` before operator first-touch confirmation.
-9. Ask the operator to confirm scoped auto mode for `lead -> product`, `product -> analytic`, `analytic -> developer`, and `quality -> wiki` transitions unless the exact transition is already approved for the current scope.
-10. Create an epic handoff in `reports/handoffs/` before closing a completed epic or starting the next epic as the active implementation focus.
-11. DevOps server documentation belongs in `docs/<project-name>/devops/servers/`; DevOps keys are looked up only in workspace-root `keys/`.
-12. Release commits require accepted quality or product acceptance, a visible commit plan, and explicit user approval before staging or committing.
-13. Wiki source maps are maintained in `docs/<project-name>/source-map.md`; generated `.index/*` files must be rebuilt with the bundled wiki index tooling instead of edited by hand.
-14. When a current local wiki index exists, use index-first navigation before broad project wiki or approved-source reading.
-15. Report created and changed files at the end.
+7. Treat workspace `sources/` descendants and explicitly approved external source paths registered through `4dt-sources` as hard read boundaries.
+8. Workspace `sources/` is available for reading by default, but external source boundaries must be added explicitly with operator approval through `4dt-sources`.
+9. Agents must not read or write `tasks/` directly. Use `4dt-board` for listing, reading sections, creating items, moving items, setting metadata, adding timeline entries, and validation.
+10. Agents must not read or write `docs/` directly. Use `4dt-wiki` for wiki pages and `4dt-sources` for the source registry and source inventory.
+11. Developer, quality, release, product, analytic, wiki, and handoff reports are task timeline entries managed by `4dt-board`, not standalone report files.
+12. Ask the operator to confirm scoped auto mode for `lead -> product`, `product -> analytic`, `analytic -> developer`, and `quality -> wiki` transitions unless the exact transition is already approved for the current scope.
+13. Create an epic handoff timeline entry before closing a completed epic or starting the next epic as the active implementation focus.
+14. DevOps server documentation belongs in the single workspace wiki managed by `4dt-wiki`; DevOps keys are looked up only in workspace-root `keys/`.
+15. Release commits require accepted quality or product acceptance, a visible commit plan, and explicit user approval before staging or committing.
+16. The old multi-project wiki registry, source-map workflow, generated source inventory files, and standalone report files are legacy. Do not migrate or preserve them; create current artifacts through the tools.
+17. When a current `4dt-wiki` or `4dt-sources` index exists, use tool search/get commands before broad wiki or approved-source reading.
+18. Report created and changed files at the end.

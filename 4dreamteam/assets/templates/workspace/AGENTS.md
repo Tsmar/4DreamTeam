@@ -6,7 +6,7 @@ This folder is a working `4DreamTeam workspace`.
 
 It is a git repository overlay above current projects, file dumps, images, exported documents, and other source materials.
 
-It stores epics, tasks, reports, knowledge bases, and the local `sources/` source staging boundary.
+It stores script-managed board artifacts, script-managed wiki artifacts, timeline comments, memory, and the local `sources/` source staging boundary.
 
 ## Main Entrypoint
 
@@ -18,74 +18,83 @@ If a request concerns a business request, product development, a task, implement
 
 Do not bypass the `$4DreamTeam` process with ad-hoc work when the request can be handled through the framework.
 
-## Workspace Artifacts
+## Script-Managed Artifacts
 
-Allowed working artifacts:
+Agents do not read or write `tasks/` directly. Use `4dt-board` for board status, task lookup, section reads, creation, movement, metadata updates, timeline comments, validation, and repair.
 
-- `tasks/`
-- `reports/`
-- `docs/index.md`
-- `docs/<project-name>/`
-- `docs/<project-name>/devops/servers/`
-- `docs/<project-name>/devops/runbooks/` only when a runbook is explicitly requested
+Agents do not read or write `docs/` directly. Use `4dt-wiki` for wiki pages and `4dt-sources` for source registry and approved-source inventory.
+
+The storage folders remain human-readable implementation details, but the scripts are the only supported mutation and query interface for agents.
+
+Allowed workspace artifacts:
+
+- script-managed `tasks/` board storage
+- script-managed `docs/` wiki storage
+- script-managed `docs/sources.md` source registry
+- workspace-local `.4dt/` runtime and memory storage
 - `sources/` as a git-ignored local source staging area
 
 ## Role Board
 
-`tasks/` is a virtual Kanban board by role. A task file lives in the folder of the role that owns the next action:
+The board is role-based and is managed only through `4dt-board`.
 
-- `tasks/backlog/` - epics, product backlog, discovery, and grouped task planning
-- `tasks/analytic/` - needs technical analysis
-- `tasks/developer/` - ready for implementation or developer rework
-- `tasks/quality/` - ready for independent quality
-- `tasks/wiki/` - accepted work needing documentation
-- `tasks/release/` - accepted work selected for release packaging
-- `tasks/released/` - work included in a pushed release
-- `tasks/done/` - closed with no active next role
-- `tasks/rejected/` - rejected work awaiting decision or correction
+Supported columns:
+
+- `backlog`
+- `analytic`
+- `developer`
+- `quality`
+- `wiki`
+- `release`
+- `released`
+- `done`
+- `rejected`
+
+A task's current column determines which role owns the next action. `next_owner` is not used.
+
+## Timeline Model
+
+Tasks are living timelines. Product description, analytic questions, developer reports, quality decisions, wiki notes, release notes, and lead handoffs are appended as timeline entries through `4dt-board comment add`.
+
+Agents do not rewrite another role's comment. They append their own role-scoped timeline entry with a fixed `roleName_actionName` type.
 
 ## Internal Artifact Policy
 
-Internal tasks, briefs, reports, release plans, and managed wiki pages are written in English for agents. `$4DreamTeam` lead summarizes results to the user in the user's language.
+Internal tasks, briefs, timeline entries, release plans, and managed wiki pages are written in English for agents. `$4DreamTeam` lead summarizes results to the user in the user's language.
 
 ## Operator And Framework User
 
 The `framework user` owns product meaning: goals, audience, value, scope, priorities, roadmap intent, and product acceptance intent.
 
-The `operator` is the above-workflow 4DreamTeam role that controls execution permission in the current session: source access, role transitions, auto mode, file writes, git actions, infrastructure actions, publication, and other safety gates.
+The `operator` is the above-workflow 4DreamTeam role that controls execution permission in the current session: external source access, role transitions, auto mode, file writes, git actions, infrastructure actions, publication, and other safety gates.
 
 The operator role is currently human-led and still forming. Future agentic operator behavior is experimental and must be opt-in, scoped, auditable, and quality-reviewed before use.
 
 ## Source Access
 
-`sources/` is the workspace-local source staging area. It may contain source copies, exports, screenshots, extracted materials, or symlinks to external projects and file collections.
+`sources/` is the workspace-local source staging area. It may contain source copies, exports, screenshots, extracted materials, or links to external projects and file collections.
 
-Do not list, stat, resolve symlinks, inventory, index, or read anything inside `sources/` until the operator personally inspects it and confirms either:
+The `sources/` folder and all descendants are readable by default for this workspace.
 
-1. all current `sources/` contents may be used as workspace-approved sources; or
-2. access is denied or no usable sources are present.
+All other source boundaries must be added explicitly through `4dt-sources registry add --operator-approved`. The registry list is the single source of truth for approved external sources: if a path is listed, it is approved; if it is removed, it is no longer approved.
 
-`sources/` approval is all-or-nothing for current contents. New files added later require a separate rescan/actualization confirmation. Creating or repairing `sources/.gitignore` is allowed without reading any other `sources/` contents.
-
-After first-touch confirmation, descendants of `sources/` are approved source boundaries for the workspace, subject to ignore and secret-handling rules. Read files outside `sources/` only as explicitly approved external sources.
-
-An approved source is a hard boundary: do not read parent directories, sibling directories, inferred project roots, or neighboring projects without separate approval. Symlinks inside confirmed `sources/` must be resolved before use; record both the workspace alias and resolved target when the source is indexed.
+An approved source is a hard boundary: do not read parent directories, sibling directories, inferred project roots, or neighboring projects without separate approval.
 
 Do not read secrets, `.env`, credentials, private keys, dumps, or unrelated user files.
 
-DevOps SSH keys are looked up only in `keys/` at the workspace root. Do not print key contents and do not copy them into documentation, tasks, or reports.
+DevOps SSH keys are looked up only in `keys/` at the workspace root. Do not print key contents and do not copy them into documentation, tasks, timeline entries, or reports.
 
 ## Confirmation Policy
 
 Before changing files, explain what will be changed and wait for user approval unless there is explicit `auto` mode or direct confirmation.
 
-For wiki bootstrap, first show the intake summary and wait for confirmation. If `sources/` has not had first-touch confirmation, ask the operator to inspect it before reading source contents.
+For wiki bootstrap, first show the intake summary and wait for confirmation. Source registry changes for paths outside workspace `sources/` require explicit operator approval.
 
 ## Workspace Self-Update
 
 When the user asks to update this workspace to the currently installed 4DreamTeam skill version, replace only this root `AGENTS.md` from the installed skill template `assets/templates/workspace/AGENTS.md`.
 
-Do not change `docs/`, `tasks/`, `reports/`, `keys/`, approved source repositories, or installed skill files during workspace self-update.
+Do not change script-managed storage, `reports/`, `keys/`, approved source repositories, or installed skill files during workspace self-update.
 
 Before replacing `AGENTS.md`, show a concise change summary or diff and wait for explicit approval.
 
@@ -95,6 +104,6 @@ After replacing `AGENTS.md`, report the source template, target path, and instal
 
 Do not run destructive commands without explicit approval.
 
-Do not expose secrets in tasks, reports, documentation, or responses.
+Do not expose secrets in tasks, timeline entries, reports, documentation, or responses.
 
 Do not perform unrelated refactoring.

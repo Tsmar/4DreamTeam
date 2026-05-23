@@ -36,7 +36,7 @@ Fallback order:
 
 ```txt
 4DT Memory recall when ready and relevant
--> epic handoffs in reports/handoffs/ for completed epic context
+-> `lead_handoff` timeline entries for completed epic context
 -> local wiki index/docs
 -> tasks and reports
 -> exact approved source files when needed and allowed
@@ -53,7 +53,7 @@ Do not rely on a single literal memory query for conceptual, architectural, cont
 
 1. Search or read exact task ids, file paths, commands, titles, and known artifact pointers first.
 2. Identify the user's intent, project or framework name, source type, and important entities.
-3. Preserve technical terms while translating: commands, CLI names, filenames, package names, class names, task ids, source-map terms, `4dt-memory`, SQLite, LanceDB, MCP, hooks, and other project-specific identifiers.
+3. Preserve technical terms while translating: commands, CLI names, filenames, package names, class names, task ids, `4dt-memory`, SQLite, LanceDB, MCP, hooks, and other project-specific identifiers.
 4. Generate 4-8 typed English query variants, selected from normalized technical wording, architecture/workflow, implementation/file, decision/history, task/report/wiki artifact, and benchmark/process queries.
 5. Use the user's original-language wording only as a fallback when English queries are thin or when the target source is known to contain that language.
 6. Prefer results supported by exact pointers, multiple query variants, or current wiki/task/report evidence.
@@ -76,13 +76,13 @@ references lead memory context budget source map
 
 The local wiki is the authoritative project memory fallback.
 
-When a current `docs/<project-name>/.index/source-map.json` exists, use index-first navigation before broad wiki or approved-source reading. If the generated index is missing or stale, use `docs/<project-name>/source-map.md` directly, then the smallest relevant wiki pages.
+Use `4dt-wiki search/get` and `4dt-sources search/get` before broad approved-source reading. Memory does not expand source permissions and does not replace current wiki, source, or board evidence.
 
 For plain workspace status, use the board and reports first. Do not run broad wiki search unless a project-specific question or continuation needs it.
 
 ## Epic Handoffs
 
-Epic handoffs in `reports/handoffs/` are the preferred durable local memory for completed epics. Use them before broad task/report history when continuing into the next epic, restarting work in a new session, or orienting a new agent.
+`lead_handoff` timeline entries are the preferred durable local memory for completed epics. Use them before broad board history when continuing into the next epic, restarting work in a new session, or orienting a new agent.
 
 Handoffs do not override current tasks, reports, wiki pages, approved sources, or the current user request. Treat them as compressed navigation and context: verify details from authoritative artifacts before changing behavior.
 

@@ -24,7 +24,7 @@ planned / approved / committed / pushed / tagged / published / blocked
 
 ## Changelog
 
-- Workspace target: `docs/<project-name>/CHANGELOG.md` / not applicable
+- Workspace target: `changelog.md` through `4dt-wiki` / not applicable
 - Source target: `<approved-source>/CHANGELOG.md` / not applicable
 
 ```md
@@ -63,5 +63,5 @@ git commit -m "<message>"
 - Branch pushed: yes / no
 - Tag pushed: `<tag>` / no
 - GitHub Release: `<url>` / draft / not created
-- Released tasks moved to `tasks/released`: yes / no
+- Released tasks moved to `released` column through `4dt-board`: yes / no
 - Notes: <blocked reason or `None`>

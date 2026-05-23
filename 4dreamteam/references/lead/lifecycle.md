@@ -1,108 +1,86 @@
 # Lead Lifecycle
 
-Use this file when moving tasks between columns or checking lifecycle state.
+Use this file when moving tasks between board columns or checking lifecycle state.
 
-## Role Board
+## Board Interface
 
-The `tasks/` directory is a virtual Kanban board. A task file lives in the folder of the role that currently owns the next action.
+The board is managed through `4dt-board`.
 
-Board columns:
+Agents must not read or write the board storage directly. Use the script for every operation:
 
-```txt
-tasks/backlog/      # epics, product backlog, discovery, grouped task planning
-tasks/analytic/     # needs technical analysis before implementation
-tasks/developer/    # ready for implementation or developer rework
-tasks/quality/      # implementation complete, ready for independent quality
-tasks/wiki/         # accepted work that needs wiki documentation
-tasks/release/      # accepted work selected for release packaging
-tasks/released/     # work included in a pushed release
-tasks/done/         # closed, no active next role
-tasks/rejected/     # rejected work awaiting a decision or correction
-reports/handoffs/   # epic completion handoffs for the next session or next epic
-```
+- `4dt-board status` for column summary.
+- `4dt-board list` or `4dt-board find` for discovery.
+- `4dt-board get`, `4dt-board section get`, and `4dt-board comments list/latest` for task details.
+- `4dt-board create epic` and `4dt-board create task` for new work.
+- `4dt-board move` and `4dt-board set-status` for lifecycle movement.
+- `4dt-board comment add` for product, analytic, developer, quality, wiki, release, and lead timeline entries.
+- `4dt-board validate` before handoff, acceptance, release packaging, or workspace status summaries.
 
-Movement rules:
+Supported columns: `backlog`, `analytic`, `developer`, `quality`, `wiki`, `release`, `released`, `done`, and `rejected`.
 
-1. `product` creates and shapes epics in `tasks/backlog/`.
+The current column determines the next owner role. Do not use `next_owner`.
+
+## Movement Rules
+
+1. `product` creates and shapes epics and task candidates with `4dt-board`.
 2. Every epic contains only tasks as child work items. Do not create Product or Item entities.
-3. `product` may keep an epic in `tasks/backlog/`, hand its tasks to `tasks/analytic/`, or hand clear delivery tasks directly to `tasks/developer/`.
-4. `analytic` creates or moves implementation-ready task specs to `tasks/developer/` only after required documentation alignment is complete or explicitly not required.
+3. `product` may keep an epic in `backlog`, hand its tasks to `analytic`, or hand clear delivery tasks directly to `developer`.
+4. `analytic` moves implementation-ready task specs to `developer` only after required documentation alignment is complete or explicitly not required.
 5. When analytic decisions require pre-development documentation alignment, `wiki sync` updates managed docs with `proposed` status before developer handoff.
-6. `developer` moves completed implementation work to `tasks/quality/` and creates a developer report.
-7. `quality` moves accepted work to `tasks/wiki/` when docs are needed, otherwise to `tasks/done/`.
-8. `quality` moves rejected work to `tasks/rejected/`.
-9. Rework moves from `tasks/rejected/` to `tasks/developer/`, then back to `tasks/quality/`.
-10. `release` moves work from `tasks/done/` to `tasks/release/` only after an explicit user request for release, changelog, staging, commit, or release packaging.
-11. `release` moves work from `tasks/release/` to `tasks/released/` only after the release branch is pushed and the chosen release publication step is complete.
-12. Before an epic is closed as done or the next epic becomes the active implementation focus, lead creates `reports/handoffs/EPIC-XXXX-handoff.md`.
+6. `developer` appends a `developer_report` timeline entry and moves completed implementation work to `quality`.
+7. `quality` appends `quality_accepted` or `quality_rejected`.
+8. Accepted work moves to `wiki` when docs are needed, otherwise to `done`.
+9. Rejected work moves to `rejected`.
+10. Rework moves from `rejected` to `developer`, then back to `quality`.
+11. `release` moves work from `done` to `release` only after an explicit user request for release, changelog, staging, commit, or release packaging.
+12. `release` moves work from `release` to `released` only after the release branch is pushed and the chosen release publication step is complete.
+13. Before an epic is closed as done or the next epic becomes the active implementation focus, lead appends a `lead_handoff` timeline entry.
 
 ## Task Lifecycle State Machine
 
-Use folder location as the primary state. Use the task's status field for finer lifecycle notes.
+Use `4dt-board` metadata and current column as the state source of truth. Use the task status field for finer lifecycle notes.
 
-| State | Owner | Required artifact or evidence | Required check | Valid next transitions |
-|---|---|---|---|---|
-| `draft` | product | Epic or draft task in `tasks/backlog/` | Product goal and audience are visible. | `product-approved`, `blocked`, `rejected` |
-| `product-approved` | product | Epic with scope, non-goals, task candidates, and product acceptance criteria. | No product blocking questions. | `analytic-ready`, `developer-ready`, `blocked` |
-| `analytic-ready` | analytic | Task candidate in epic or `tasks/analytic/`. | Technical impact can be analyzed from approved docs/sources. | `docs-alignment`, `developer-ready`, `blocked`, `needs-product` |
-| `docs-alignment` | analytic / wiki | Analytic task plus confirmed documentation-changing decision. | Managed docs are aligned as `proposed`, or alignment is explicitly not required/deferred. | `developer-ready`, `blocked` |
-| `developer-ready` | developer | `tasks/developer/TASK-XXXX.md` with affected areas, acceptance criteria, validation plan, and documentation alignment evidence. | No analytic blocking questions and no required docs alignment remains open. | `developer-in-progress`, `blocked` |
-| `developer-in-progress` | developer | Task status marked `working`. | Implementation plan exists before patching. | `developer-done`, `blocked` |
-| `developer-done` | developer | Developer report in `reports/tasks/`. | Relevant checks run or skipped with reasons. | `quality-review` |
-| `quality-review` | quality | Task in `tasks/quality/` and developer report. | Acceptance matrix covers every criterion. | `accepted`, `rejected` |
-| `rejected` | quality / developer | Rejected quality report in `reports/quality/rejected/`. | Rejection reason and required fix are actionable. | `fixed`, `blocked`, `done` if abandoned |
-| `fixed` | developer | Updated developer report and revision history. | Only failed criteria were changed unless scope was approved. | `quality-review` |
-| `accepted` | quality | Accepted quality report in `reports/quality/accepted/`. | Every criterion is `pass`. | `wiki-update`, `release-ready`, `done` |
-| `wiki-update` | wiki | Task in `tasks/wiki/` plus accepted quality report. | Docs update is source-backed or not needed. | `release-ready`, `done` |
-| `release-ready` | release | Task in `tasks/done/` selected by explicit release request. | Accepted quality or product acceptance exists. | `release-planned` |
-| `release-planned` | release | Release plan in `reports/release/`. | Included/excluded files and approval requirements are visible. | `released`, `blocked` |
-| `released` | release | Release report with pushed release evidence. | Branch push and requested publication steps succeeded. | `done` |
-| `done` | lead | Task in `tasks/done/` or `tasks/released/`. | No active next role remains. | none |
-| `epic-handoff` | lead | `reports/handoffs/EPIC-XXXX-handoff.md`. | Completed epic changes, evidence, risks, and next-session pointers are captured. | next epic intake, continuation, `done` |
+| State | Owner | Required evidence | Valid next transitions |
+|---|---|---|---|
+| `draft` | product | Product goal and audience are visible. | `product-approved`, `blocked`, `rejected` |
+| `product-approved` | product | Epic has scope, non-goals, task candidates, and product acceptance criteria. | `analytic-ready`, `developer-ready`, `blocked` |
+| `analytic-ready` | analytic | Technical impact can be analyzed from approved docs/sources. | `docs-alignment`, `developer-ready`, `blocked`, `needs-product` |
+| `docs-alignment` | analytic / wiki | Managed docs are aligned as `proposed`, or alignment is explicitly not required/deferred. | `developer-ready`, `blocked` |
+| `developer-ready` | developer | Affected areas, acceptance criteria, validation plan, and documentation alignment evidence are visible. | `developer-in-progress`, `blocked` |
+| `developer-in-progress` | developer | Task status marked `working` and implementation plan exists. | `developer-done`, `blocked` |
+| `developer-done` | developer | `developer_report` timeline entry includes checks and acceptance coverage. | `quality-review` |
+| `quality-review` | quality | Quality can compare implementation to every acceptance criterion. | `accepted`, `rejected` |
+| `rejected` | quality / developer | `quality_rejected` timeline entry gives actionable fixes. | `fixed`, `blocked`, `done` if abandoned |
+| `fixed` | developer | Developer revision entry explains the fix. | `quality-review` |
+| `accepted` | quality | `quality_accepted` timeline entry marks every criterion `pass`. | `wiki-update`, `release-ready`, `done` |
+| `wiki-update` | wiki | Docs update is source-backed or not needed. | `release-ready`, `done` |
+| `release-ready` | release | Accepted quality or product acceptance exists. | `release-planned` |
+| `release-planned` | release | Release plan timeline entry lists included/excluded files and approval requirements. | `released`, `blocked` |
+| `released` | release | Release timeline entry includes pushed release evidence. | `done` |
+| `done` | lead | No active next role remains. | none |
 
-Never move a task forward by changing only the status text. The required artifact and evidence must exist.
+Never move a task forward by changing only the status text. The required timeline evidence must exist.
 
 ## Internal Artifact Policy
 
-Internal files are for agents, not end users.
+Internal artifacts are for agents, not end users.
 
-1. Write tasks, briefs, reports, release plans, and managed wiki pages in English.
+1. Write tasks, briefs, timeline entries, release plans, and managed wiki pages in English.
 2. Keep internal artifacts concise, structured, evidence-oriented, and free of user-facing narration.
 3. Prefer pointers to source artifacts and changed files over repeating the full story.
 4. `$4DreamTeam` lead translates and summarizes results for the user in the user's language.
 
-## File Contract
-
-Roles pass state only through files:
-
-- `/tasks/backlog/EPIC-XXXX.md`
-- `/tasks/analytic/TASK-XXXX.md`
-- `/tasks/developer/TASK-XXXX.md`
-- `/tasks/quality/TASK-XXXX.md`
-- `/tasks/wiki/TASK-XXXX.md`
-- `/tasks/release/TASK-XXXX.md`
-- `/tasks/released/TASK-XXXX.md`
-- `/tasks/done/TASK-XXXX.md`
-- `/tasks/rejected/TASK-XXXX.md`
-- `/reports/product/EPIC-XXXX-report.md`
-- `/reports/product/accepted/EPIC-XXXX-review.md`
-- `/reports/product/rejected/EPIC-XXXX-review.md`
-- `/reports/tasks/TASK-XXXX-report.md`
-- `/reports/quality/accepted/TASK-XXXX-quality.md`
-- `/reports/quality/rejected/TASK-XXXX-quality.md`
-- `/reports/handoffs/EPIC-XXXX-handoff.md`
-
 ## Epic Completion Handoff
 
-Create an epic handoff for every completed epic.
+Create a `lead_handoff` timeline entry for every completed epic.
 
 The handoff is durable inter-session memory for the next agent, next session, or next epic. It should be high-signal and can be long when the project is large or complex.
 
 Rules:
 
-1. Use `assets/templates/lead/epic-handoff.md`.
+1. Use `4dt-board comment add --type lead_handoff`.
 2. Create the handoff before starting the next epic as the active implementation focus.
 3. Include the most important accepted changes, changed files, validation evidence, workflow notes, project nuances, open threads, and suggested next starting points.
-4. Prefer pointers to tasks, reports, wiki pages, commits, and source files over copied source text.
+4. Prefer pointers to tasks, timeline entries, wiki pages, commits, and source files over copied source text.
 5. Do not include secrets, credentials, raw logs, dumps, or large source excerpts.
 6. Distinguish accepted facts from suggestions, risks, and open questions.

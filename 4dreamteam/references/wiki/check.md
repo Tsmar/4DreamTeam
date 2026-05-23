@@ -1,38 +1,12 @@
-# Wiki Mode: Check
+# Wiki Check
 
-Read-only check that a managed wiki matches approved sources.
+Use this mode for a read-only check that wiki content matches approved sources.
 
-## Purpose
+## Flow
 
-Verify that documentation does not contradict approved source code and correctly marks unknown/proposed areas.
+1. Use `4dt-wiki status` and `4dt-wiki validate`.
+2. Use `4dt-wiki search/get` for relevant pages.
+3. Use `4dt-sources registry list`, `4dt-sources index check`, and `4dt-sources search/get` for approved source evidence.
+4. Report stale, conflicting, missing, or unverified claims.
 
-## Rules
-
-1. May run without an accepted quality report.
-2. Do not change files.
-3. Read only the existing wiki and approved sources.
-4. Do not draw conclusions from sources outside approved boundaries.
-5. If checking would require first-touch access to workspace `sources/`, stop before listing, statting, resolving, inventorying, indexing, or reading it.
-
-## Workflow
-
-1. Identify `docs/<project-name>`.
-2. Read `sources.md` if it exists.
-3. Check that user-approved sources match listed sources, or explicitly record the mismatch.
-4. Compare key wiki claims with approved sources.
-5. Separately check statuses and `wiki-meta`.
-6. Check relative links for local wiki pages that should exist.
-7. Check whether product-facing pages are understandable without reading implementation details first.
-8. If `source-map.md` exists, check that it is not a raw file manifest and that primary links point to approved sources.
-9. If `.index/source-map.json` exists, run or recommend `python3 <resolved-skill-path>/scripts/wiki_index.py index check <docs-project-path>` to detect stale generated index state.
-10. If `.index/sources/manifest.json` exists, run or recommend `python3 <resolved-skill-path>/scripts/wiki_index.py sources check <docs-project-path>` to detect missing generated source inventory files.
-11. Report findings by severity.
-
-## Output
-
-Return:
-
-1. Checked scope.
-2. Findings: contradictions, stale claims, unsupported claims, missing links, missing sources, invalid statuses, missing `wiki-meta`, unclear product-facing pages, stale source map or generated index.
-3. Residual risk.
-4. Recommended next mode: `sync`, `deepening`, `audit`, or no action.
+Do not repair files unless the user approves the specific changes.

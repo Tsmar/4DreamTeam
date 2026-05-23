@@ -106,7 +106,7 @@ What 4DreamTeam should read:
 - `AGENTS.md`
 - `tasks/`
 - `reports/`
-- `docs/index.md`
+- `4dt-wiki status`
 - relevant wiki pages and optional memory only when useful
 
 Output:
@@ -147,7 +147,7 @@ What 4DreamTeam should do:
 
 1. Show an intake summary before writing.
 2. Treat each source path as a hard boundary.
-3. Create a managed wiki under `docs/<project-name>/`.
+3. Create or update the managed wiki through `4dt-wiki`.
 4. Build a source map and local index when possible.
 
 What it must not do:

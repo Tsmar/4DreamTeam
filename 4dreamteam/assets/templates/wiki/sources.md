@@ -13,7 +13,7 @@ actual
 
 ## Purpose
 
-Human-readable registry of approved source boundaries for this managed wiki. Generated low-token source inventory lives under `.index/sources/` and must not be edited manually.
+Human-readable registry of approved source boundaries for this managed wiki. Low-token source inventory is generated and queried by `4dt-sources`.
 
 ## Operator Confirmation
 
@@ -27,7 +27,7 @@ Human-readable registry of approved source boundaries for this managed wiki. Gen
 
 | Source ID | Workspace Alias | Resolved Path | Type | Confirmation Status | Inventory Manifest | Access |
 |---|---|---|---|---|---|---|
-| `<source-id>` | `sources/<path>` | `<resolved-path>` | directory / file / symlink | confirmed | `.index/sources/<source-id>.json` | read-only |
+| `<source-id>` | `sources/<path>` | `<resolved-path>` | directory / file | operator approved | `4dt-sources` | read-only |
 
 ## Standard Ignore Policy
 

@@ -35,7 +35,7 @@ Do not create an epic for a clear standalone engineering task unless the user ex
 | Raw idea, product direction, roadmap, feature decomposition, audience/value/scope question | `product` | Stop after epic changes in controlled mode. |
 | Clear engineering change that still needs technical shaping | `analytic -> developer -> quality` | Stop after analytic in controlled mode unless the user approved auto. |
 | Small safe localized engineering change with explicit go-ahead | `analytic compact task -> developer -> quality` | Never skip quality. |
-| Already implementation-ready task in `tasks/developer/` | `developer -> quality` | Developer must follow task scope and report checks. |
+| Already implementation-ready task in the `developer` board column | `developer -> quality` | Developer must follow task scope and timeline evidence checks. |
 | Completed implementation awaiting review | `quality` | Reject if any criterion is failed or not verified. |
 | Accepted behavior needs docs | `wiki post-acceptance` | Requires accepted quality report, task, and developer report. |
 | Existing docs need source-backed check without writes | `wiki audit/check` | Read-only unless a later update is approved. |
