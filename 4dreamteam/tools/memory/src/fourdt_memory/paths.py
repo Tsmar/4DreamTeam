@@ -6,7 +6,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 
-DEFAULT_STORAGE_ROOT = Path.home() / ".codex" / "storage" / "4dreamteam" / "memory"
+DEFAULT_STORAGE_ROOT = Path(".4dt") / "memory"
 
 
 @dataclass(frozen=True)
@@ -65,12 +65,16 @@ def workspace_identity(workspace: str | Path) -> WorkspaceIdentity:
     )
 
 
-def resolve_storage_root(storage_root: str | Path | None = None) -> Path:
-    return normalize_path(storage_root) if storage_root is not None else DEFAULT_STORAGE_ROOT
+def resolve_storage_root(storage_root: str | Path | None = None, workspace: str | Path | None = None) -> Path:
+    if storage_root is not None:
+        return normalize_path(storage_root)
+    if workspace is not None:
+        return normalize_path(workspace) / DEFAULT_STORAGE_ROOT
+    return normalize_path(DEFAULT_STORAGE_ROOT)
 
 
 def workspace_paths(workspace: str | Path, storage_root: str | Path | None = None) -> WorkspacePaths:
-    resolved_storage_root = resolve_storage_root(storage_root)
+    resolved_storage_root = resolve_storage_root(storage_root, workspace)
     identity = workspace_identity(workspace)
     workspace_dir = resolved_storage_root / "workspaces" / identity.id
 

@@ -64,8 +64,9 @@ class ReindexTests(unittest.TestCase):
             )
 
             self.assertEqual(exit_code, 0)
-            self.assertEqual(payload["status"], "reindexed")
+            self.assertEqual(payload["status"], "degraded_intentional_fallback")
             self.assertEqual(payload["indexedItems"], 1)
+            self.assertIn("using_lexical_fallback", payload["warnings"])
             store = MemoryStore(workspace, storage)
             try:
                 live = store.get_memory_item(live_id)

@@ -36,8 +36,9 @@ class DoctorTests(unittest.TestCase):
 
             self.assertEqual(exit_code, 3)
             self.assertFalse(payload["ok"])
-            self.assertEqual(payload["status"], "not_initialized")
+            self.assertEqual(payload["status"], "degraded_setup_required")
             self.assertIn("memory_store_not_initialized", payload["warnings"])
+            self.assertIn("recovery", payload)
             self.assertFalse(storage.exists())
 
     def test_doctor_reports_index_counts_and_mismatch_warning(self) -> None:
@@ -73,9 +74,36 @@ class DoctorTests(unittest.TestCase):
             )
 
             self.assertEqual(exit_code, 3)
-            self.assertEqual(payload["status"], "degraded")
+            self.assertEqual(payload["status"], "degraded_setup_required")
             self.assertEqual(payload["lancedb"]["indexedItems"], 2)
             self.assertIn("index_missing_sqlite_rows", payload["warnings"])
+
+    def test_doctor_reports_intentional_fallback_when_requested(self) -> None:
+        with tempfile.TemporaryDirectory() as raw_tmp:
+            tmp_path = Path(raw_tmp)
+            workspace = tmp_path / "workspace"
+            storage = tmp_path / "storage"
+            workspace.mkdir()
+            store = MemoryStore(workspace, storage)
+            store.initialize()
+            store.close()
+
+            exit_code, payload = run_cli(
+                [
+                    "doctor",
+                    "--workspace",
+                    str(workspace),
+                    "--storage-root",
+                    str(storage),
+                    "--intentional-fallback",
+                    "--json",
+                ]
+            )
+
+            self.assertIn(exit_code, (0, 3))
+            if payload["warnings"]:
+                self.assertEqual(payload["status"], "degraded_intentional_fallback")
+                self.assertIn("Intentional lexical fallback is active.", payload["recovery"])
 
 
 if __name__ == "__main__":

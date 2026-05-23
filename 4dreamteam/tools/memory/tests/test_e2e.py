@@ -42,7 +42,7 @@ class EndToEndTests(unittest.TestCase):
                 ["doctor", "--workspace", str(workspace), "--storage-root", str(storage), "--json"]
             )
             self.assertIn(exit_code, (0, 3))
-            self.assertIn(payload["status"], ("ready", "degraded"))
+            self.assertIn(payload["status"], ("ready", "degraded_setup_required"))
 
             exit_code, payload = run_cli(
                 [

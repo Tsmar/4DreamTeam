@@ -56,8 +56,47 @@ class DegradedModeTests(unittest.TestCase):
             )
 
             self.assertEqual(exit_code, 3)
-            self.assertEqual(payload["status"], "degraded")
+            self.assertEqual(payload["status"], "degraded_setup_required")
             self.assertIn("semantic_index_unavailable", payload["warnings"])
+            self.assertIn("using_lexical_fallback", payload["warnings"])
+            self.assertIn("recovery", payload)
+
+    def test_search_can_mark_lexical_fallback_as_intentional(self) -> None:
+        with tempfile.TemporaryDirectory() as raw_tmp:
+            tmp_path = Path(raw_tmp)
+            workspace = tmp_path / "workspace"
+            storage = tmp_path / "storage"
+            workspace.mkdir()
+            store = MemoryStore(workspace, storage)
+            store.initialize()
+            try:
+                store.create_memory_item(
+                    scope="workspace",
+                    type="constraint",
+                    content="Intentional fallback search remains recoverable.",
+                    source_type="task",
+                    source_ref="tasks/example.md",
+                )
+            finally:
+                store.close()
+
+            exit_code, payload = run_cli(
+                [
+                    "search",
+                    "fallback",
+                    "--workspace",
+                    str(workspace),
+                    "--storage-root",
+                    str(storage),
+                    "--embedding-provider",
+                    "hash",
+                    "--intentional-fallback",
+                    "--json",
+                ]
+            )
+
+            self.assertEqual(exit_code, 3)
+            self.assertEqual(payload["status"], "degraded_intentional_fallback")
             self.assertIn("using_lexical_fallback", payload["warnings"])
 
 

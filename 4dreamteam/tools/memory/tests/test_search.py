@@ -50,7 +50,7 @@ class SearchTests(unittest.TestCase):
 
             self.assertEqual(exit_code, 3)
             self.assertTrue(payload["ok"])
-            self.assertEqual(payload["status"], "degraded")
+            self.assertEqual(payload["status"], "degraded_setup_required")
             self.assertEqual(payload["query"], "SQLite validation")
             self.assertIn("using_lexical_fallback", payload["warnings"])
             self.assertEqual(payload["items"][0]["id"], memory_id)

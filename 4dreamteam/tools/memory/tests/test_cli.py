@@ -43,7 +43,7 @@ class CliTests(unittest.TestCase):
                 ["doctor", "--workspace", str(workspace), "--storage-root", str(storage), "--json"]
             )
             self.assertIn(exit_code, (0, 3))
-            self.assertIn(payload["status"], ("ready", "degraded"))
+            self.assertIn(payload["status"], ("ready", "degraded_setup_required"))
             self.assertIn("sqlite", payload)
 
             exit_code, payload, _stderr = run_cli(
@@ -99,7 +99,7 @@ class CliTests(unittest.TestCase):
             )
 
             self.assertEqual(exit_code, 3)
-            self.assertEqual(payload["status"], "not_initialized")
+            self.assertEqual(payload["status"], "degraded_setup_required")
             self.assertEqual(payload["error"]["code"], "not_initialized")
 
 

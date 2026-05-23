@@ -49,8 +49,10 @@ class JsonContractTests(unittest.TestCase):
 
             self.assertEqual(exit_code, 3)
             self.assertFalse(payload["ok"])
+            self.assertEqual(payload["status"], "degraded_setup_required")
             self.assertEqual(payload["error"]["code"], "not_initialized")
             self.assertEqual(payload["warnings"], [])
+            self.assertIn("recovery", payload)
 
     def test_unsafe_save_error_shape_is_stable(self) -> None:
         with tempfile.TemporaryDirectory() as raw_tmp:

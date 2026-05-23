@@ -56,6 +56,34 @@ def error_response(code: str, message: str, status: str | None = None) -> dict[s
     )
 
 
+def degraded_status(warnings: Sequence[str], *, intentional_fallback: bool = False) -> str:
+    if not warnings:
+        return "ready"
+    if intentional_fallback and (
+        "semantic_index_unavailable" in warnings
+        or "using_lexical_fallback" in warnings
+        or "semantic_index_missing" in warnings
+    ):
+        return "degraded_intentional_fallback"
+    return "degraded_setup_required"
+
+
+def recovery_guidance(status: str) -> list[str]:
+    if status == "degraded_setup_required":
+        return [
+            "Run 4dt-memory init --workspace . --json if storage is not initialized.",
+            "Install optional LanceDB dependencies only after operator approval.",
+            "Run 4dt-memory reindex --workspace . --json after full-memory setup.",
+            "Verify with 4dt-memory doctor --workspace . --json.",
+        ]
+    if status == "degraded_intentional_fallback":
+        return [
+            "Intentional lexical fallback is active.",
+            "Install optional LanceDB dependencies and run reindex later if full semantic memory is desired.",
+        ]
+    return []
+
+
 def emit(payload: dict[str, Any], json_output: bool) -> None:
     if json_output:
         print(json.dumps(payload, sort_keys=True))
@@ -76,6 +104,11 @@ def add_common_arguments(parser: argparse.ArgumentParser, *, workspace: bool = T
     if workspace:
         parser.add_argument("--workspace", default=".", help="Workspace path.")
     parser.add_argument("--storage-root", help="Explicit storage root for tests/debug/maintenance.")
+    parser.add_argument(
+        "--intentional-fallback",
+        action="store_true",
+        help="Classify missing semantic memory dependencies as an intentional lexical fallback.",
+    )
     parser.add_argument("--json", action="store_true", help="Emit JSON output.")
 
 
@@ -103,12 +136,12 @@ def build_parser() -> argparse.ArgumentParser:
     search_parser.add_argument("--scope")
     search_parser.add_argument("--type")
     search_parser.add_argument("--role")
-    search_parser.add_argument("--embedding-provider", default="none", choices=["none", "hash"])
+    search_parser.add_argument("--embedding-provider", default="hash", choices=["none", "hash"])
     search_parser.add_argument("--embedding-model")
 
     reindex_parser = subparsers.add_parser("reindex")
     add_common_arguments(reindex_parser)
-    reindex_parser.add_argument("--embedding-provider", default="none", choices=["none", "hash"])
+    reindex_parser.add_argument("--embedding-provider", default="hash", choices=["none", "hash"])
     reindex_parser.add_argument("--embedding-model")
 
     export_parser = subparsers.add_parser("export")
@@ -261,15 +294,17 @@ def handle_doctor(args: argparse.Namespace) -> tuple[int, dict[str, Any]]:
     identity = workspace_identity(args.workspace)
     paths = workspace_paths(args.workspace, args.storage_root)
     if not paths.sqlite_path.exists():
+        status = "degraded_setup_required"
         return EXIT_DEGRADED, response(
             ok=False,
-            status="not_initialized",
+            status=status,
             workspaceId=identity.id,
             storageRoot=str(paths.storage_root),
             sqlitePath=str(paths.sqlite_path),
             sqlite={"ok": False, "path": str(paths.sqlite_path), "schemaVersion": None},
             lancedb={"ok": False, "path": str(paths.lancedb_dir), "indexedItems": None},
             warnings=["memory_store_not_initialized"],
+            recovery=recovery_guidance(status),
         )
 
     try:
@@ -307,7 +342,7 @@ def handle_doctor(args: argparse.Namespace) -> tuple[int, dict[str, Any]]:
         store.close()
 
     warnings = lancedb.pop("warnings")
-    status = "ready" if not warnings else "degraded"
+    status = degraded_status(warnings, intentional_fallback=args.intentional_fallback)
     exit_code = EXIT_OK if not warnings else EXIT_DEGRADED
     return exit_code, response(
         ok=True,
@@ -318,13 +353,26 @@ def handle_doctor(args: argparse.Namespace) -> tuple[int, dict[str, Any]]:
         sqlite={"ok": sqlite_ok, "path": str(paths.sqlite_path), "schemaVersion": version},
         lancedb=lancedb,
         warnings=warnings,
+        recovery=recovery_guidance(status),
     )
 
 
 def open_existing_store(args: argparse.Namespace) -> tuple[MemoryStore | None, dict[str, Any] | None, int]:
     paths = workspace_paths(args.workspace, args.storage_root)
     if not paths.sqlite_path.exists():
-        return None, error_response("not_initialized", "Memory store is not initialized."), EXIT_DEGRADED
+        status = "degraded_setup_required"
+        return (
+            None,
+            response(
+                ok=False,
+                status=status,
+                error={"code": "not_initialized", "message": "Memory store is not initialized."},
+                storageRoot=str(paths.storage_root),
+                sqlitePath=str(paths.sqlite_path),
+                recovery=recovery_guidance(status),
+            ),
+            EXIT_DEGRADED,
+        )
 
     store = MemoryStore(args.workspace, args.storage_root)
     try:
@@ -438,7 +486,7 @@ def handle_search(args: argparse.Namespace) -> tuple[int, dict[str, Any]]:
 
         scored_rows.sort(key=lambda pair: (-pair[0], pair[1]["created_at"]))
         items = [search_item_payload(row, score) for score, row in scored_rows[: args.limit]]
-        status = "degraded" if warnings else "ready"
+        status = degraded_status(warnings, intentional_fallback=args.intentional_fallback or not provider.supports_vectors)
         exit_code = EXIT_DEGRADED if warnings else EXIT_OK
         return exit_code, response(
             ok=True,
@@ -447,6 +495,7 @@ def handle_search(args: argparse.Namespace) -> tuple[int, dict[str, Any]]:
             query=args.query,
             items=items,
             warnings=warnings,
+            recovery=recovery_guidance(status),
         )
     finally:
         store.close()
@@ -486,15 +535,17 @@ def handle_reindex(args: argparse.Namespace) -> tuple[int, dict[str, Any]]:
             warnings.append("semantic_index_unavailable")
         if not provider.supports_vectors:
             warnings.append("using_lexical_fallback")
+        status = degraded_status(warnings, intentional_fallback=args.intentional_fallback or not provider.supports_vectors)
         return EXIT_OK, response(
             ok=True,
-            status="reindexed",
+            status="reindexed" if status == "ready" else status,
             workspaceId=store.identity.id,
             indexedItems=len(rows),
             provider=provider.name,
             embeddingModel=provider_model,
             lancedb={"ok": index.available, "path": str(store.paths.lancedb_dir), "indexedItems": len(index_items)},
             warnings=warnings,
+            recovery=recovery_guidance(status),
         )
     finally:
         store.close()
