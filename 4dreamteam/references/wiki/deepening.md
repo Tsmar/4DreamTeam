@@ -4,9 +4,9 @@ Use this mode when existing wiki content needs more implementation detail from c
 
 ## Flow
 
-1. Find relevant pages through `4dt-wiki search`.
-2. Read the smallest required page sections through `4dt-wiki get <page-or-id> --section <section>`.
-3. Use `4dt-sources search/get` for approved source evidence.
+1. Find relevant pages through `4dt-search query "<query>" --domain wiki --json`.
+2. Read the smallest required page sections through the result `getCommand` or `4dt-wiki get <page-or-id> --section <section>`.
+3. Use `4dt-search query "<query>" --domain sources --json` for approved source evidence, then read full snippets through the result `getCommand` or `4dt-sources get`.
 4. Update managed pages through the smallest safe `4dt-wiki` command:
    - `4dt-wiki page section-set` for one section;
    - `4dt-wiki page update` for metadata-only changes;

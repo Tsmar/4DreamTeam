@@ -1,0 +1,9 @@
+[project]
+name = "fourdt-search"
+version = "0.1.0"
+description = "4DreamTeam universal local search tooling"
+requires-python = ">=3.10"
+dependencies = []
+
+[project.scripts]
+4dt-search = "fourdt_search.cli:main"

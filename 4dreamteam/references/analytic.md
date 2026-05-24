@@ -19,7 +19,7 @@
 - `4dt-sources` for approved source registry and snippets.
 - Source code, tests, and config files inside approved source boundaries.
 
-Use tool search/get commands before broad approved-source reading.
+Use `4dt-search query` with explicit `wiki`, `sources`, `memory`, or `board` domains before broad approved-source reading; use result `getCommand` or domain `get` commands for full reads.
 
 ## Writing
 

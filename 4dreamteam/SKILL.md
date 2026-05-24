@@ -4,7 +4,7 @@ description: Coordinate the 4DreamTeam file-based agent framework for Codex. Use
 license: MIT
 metadata:
   author: Tsmar
-  version: 0.4.0
+  version: 0.5.0
   repository: https://github.com/Tsmar/4DreamTeam
 ---
 
@@ -17,7 +17,7 @@ Use this skill as the main entrypoint for the 4DreamTeam framework. The user sho
 1. Read `references/lead.md`.
 2. For a new session, read `references/lead/preflight.md` and run command-based onboarding before proposing work.
 3. Follow the lead module map and load only the smallest sufficient detailed reference files for the route.
-4. Check whether the current folder is a 4DreamTeam workspace before writing files. Do not require a `skill/` folder in normal workspaces after the skill is installed.
+4. Check whether the current folder is a 4DreamTeam workspace before writing files. Do not require a local installed-skill copy in normal workspaces after the `4dreamteam/` package is installed.
 5. Route the request to the relevant role workflow.
 6. Load only the role reference and mode-specific references needed for the route.
 
@@ -80,7 +80,7 @@ Use route-specific references to reduce unnecessary context:
 
 1. Do not bypass 4DreamTeam workflow with ad-hoc work when a 4DreamTeam route applies.
 2. Do not write files until workspace preflight passes or the user explicitly confirms using the current folder as a 4DreamTeam workspace.
-3. In an empty folder, create only workspace artifacts after confirmation: `AGENTS.md`, tool-managed workspace state, and `sources/.gitignore`. Use `assets/templates/workspace/AGENTS.md` for `AGENTS.md`, `assets/templates/workspace/sources.gitignore` for `sources/.gitignore`, `4dt-board` for board artifacts, `4dt-wiki` for wiki artifacts, and `4dt-sources` for source registry artifacts. Do not create a `skill/` skill folder there.
+3. In an empty folder, create only workspace artifacts after confirmation: `AGENTS.md`, tool-managed workspace state, and `sources/.gitignore`. Use `assets/templates/workspace/AGENTS.md` for `AGENTS.md`, `assets/templates/workspace/sources.gitignore` for `sources/.gitignore`, `4dt-board` for board artifacts, `4dt-wiki` for wiki artifacts, and `4dt-sources` for source registry artifacts. Do not create a local installed-skill copy there; the installed package is `4dreamteam/`.
 4. Do not skip independent quality for task implementation workflows.
 5. Do not run wiki post-acceptance updates before an accepted quality timeline entry.
 6. For wiki bootstrap, show intake summary and wait for confirmation before creating files unless the user explicitly accepts defaults/auto.
@@ -94,6 +94,6 @@ Use route-specific references to reduce unnecessary context:
 14. DevOps server documentation belongs in the single workspace wiki managed by `4dt-wiki`; DevOps keys are looked up only in workspace-root `keys/`.
 15. Release commits require accepted quality or product acceptance, a visible commit plan, and explicit user approval before staging or committing.
 16. The old multi-project wiki registry, source-map workflow, generated source inventory files, and standalone report files are legacy. Do not migrate or preserve them; create current artifacts through the tools.
-17. When a current `4dt-wiki` or `4dt-sources` index exists, use tool search/get commands before broad wiki or approved-source reading.
+17. Use `4dt-search query` with explicit `wiki`, `sources`, `memory`, or `board` domains before broad wiki, source, memory, or board reading; use domain tools for exact reads, writes, validation, and administration.
 18. At the start of a new session, run startup checks and load contract memory defaults for project rules, operator preferences, active modes, and workflow constraints when memory is ready. Ask onboarding questions only when defaults are incomplete or invalid.
 19. Report created and changed files at the end.

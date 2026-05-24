@@ -8,8 +8,8 @@ The lead file is intentionally compact. Use it to choose the route, then load on
 
 1. Read this file first.
 2. Do not load every role or workflow reference by default.
-3. Prefer exact task ids, timeline entry ids, wiki slugs, and tool search results over broad directory reads.
-4. For direct project questions and unfamiliar source areas, use `4dt-wiki` and `4dt-sources` search/get commands before broad approved-source reading.
+3. Prefer exact task ids, timeline entry ids, wiki slugs, and `4dt-search` results over broad directory reads.
+4. For direct project questions and unfamiliar source areas, use `4dt-search query` with explicit `wiki`, `sources`, `memory`, or `board` domains before broad approved-source reading; use domain tools for exact reads, writes, validation, and administration.
 5. Load detailed lead modules only when their route or gate applies.
 6. If a user names an exact file, page, task, report, or command, start there.
 7. When source and installed skill copies disagree during self-improvement, treat the approved source repository as the source of truth and the installed copy as runtime context only.
@@ -37,7 +37,7 @@ After routing, load only the relevant role reference:
 - Task analysis: read `references/analytic.md`.
 - Implementation: read `references/developer.md`.
 - Independent acceptance: read `references/quality.md`.
-- Knowledge base, docs, source boundaries, wiki search, bootstrap/audit/sync/check/blueprint/deepening: read `references/wiki.md`, then follow `references/wiki/index.md`.
+- Knowledge base, docs, source boundaries, wiki work, bootstrap/audit/sync/check/blueprint/deepening: read `references/wiki.md`, then follow `references/wiki/index.md`.
 - Marketing, press releases, product messaging, README positioning, launch materials, market-facing analysis: read `references/marketing.md`.
 - Infrastructure operations, server documentation, deployment diagnostics, SSH access, logs, migrations, and operational runbooks: read `references/devops.md`.
 - Release packaging, changelogs, branch checks, commit plans, staging, and commits after accepted work: read `references/release.md`.

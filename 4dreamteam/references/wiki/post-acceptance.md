@@ -6,8 +6,8 @@ Use this mode after accepted quality timeline evidence when delivered behavior n
 
 1. Read task sections and timeline evidence through `4dt-board`.
 2. Confirm accepted quality evidence exists.
-3. Search existing wiki content with `4dt-wiki search`.
-4. Verify source-backed facts with `4dt-sources` when needed.
+3. Search existing wiki content with `4dt-search query "<query>" --domain wiki --json`.
+4. Verify source-backed facts with `4dt-search query "<query>" --domain sources --json` and result `getCommand` when needed.
 5. Update managed wiki pages through `4dt-wiki`.
 6. Create ADRs through `4dt-wiki adr create` for significant architecture decisions.
 7. Validate with `4dt-wiki validate`.

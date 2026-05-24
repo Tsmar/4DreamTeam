@@ -35,7 +35,7 @@ Follow this sequence for every task:
 
 1. Read the task through `4dt-board`, including acceptance criteria, constraints, assumptions, validation plan, and prior role comments.
 2. Inspect relevant source files, tests, configs, and existing patterns before editing.
-3. Use `4dt-wiki search/get` for wiki context and `4dt-sources search/get` for approved source snippets when needed.
+3. Use `4dt-search query` with explicit `wiki`, `sources`, `memory`, or `board` domains for discovery; use result `getCommand` or domain `get` commands for full reads.
 4. Write a short implementation plan in a developer timeline entry before the first source patch.
 5. Stop and compare the implementation plan with the operator; do not patch until the operator approves the plan or confirms scoped auto mode for this implementation.
 6. Apply a minimal patch within task scope.
@@ -60,12 +60,12 @@ Do not start patching before the implementation plan exists and the operator has
 ## Reading
 
 - `4dt-board` task sections and timeline entries.
-- `4dt-wiki` pages and search results.
+- `4dt-wiki` pages and `4dt-search` wiki results.
 - `4dt-sources` registry, inventory, and approved snippets.
 - Source code, tests, and package/config files inside approved workspace or source boundaries.
 - `references/developer.md` and `AGENTS.md`.
 
-Use tool search/get commands before broad wiki or approved-source reading. Skip search for exact file tasks or when the task already defines precise source scope.
+Use `4dt-search query` before broad wiki, memory, board, or approved-source reading. Skip search for exact file tasks or when the task already defines precise source scope.
 
 ## Writing
 

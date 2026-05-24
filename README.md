@@ -107,7 +107,7 @@ Prepare the accepted work for release.
 
 ## Quick Start
 
-Install the skill from [Tsmar/4DreamTeam](https://github.com/Tsmar/4DreamTeam/tree/main/4dreamteam).
+Install the `4dreamteam/` skill package from [Tsmar/4DreamTeam](https://github.com/Tsmar/4DreamTeam/tree/main/4dreamteam).
 
 Restart Codex, then ask:
 
@@ -121,7 +121,7 @@ From any project folder:
 Run $4DreamTeam.
 ```
 
-If the folder is not yet a 4DreamTeam workspace, the skill asks before creating workspace files.
+If the folder is not yet a 4DreamTeam workspace, 4DreamTeam asks before creating workspace files.
 
 ### Working With An Existing Project
 
@@ -174,6 +174,6 @@ Detailed documentation lives in [docs/](docs/) and is exported from the managed 
 
 ## Status
 
-Current documented version: `0.4.0`.
+Current documented version: `0.5.0`.
 
 See [CHANGELOG.md](CHANGELOG.md) for release history.

@@ -4,15 +4,16 @@ kind: changelog
 title: Changelog
 status: actual
 created_at: 2026-05-23T07:31:46Z
-updated_at: 2026-05-23T08:50:39Z
+updated_at: 2026-05-24T10:49:51Z
 owner: wiki
 source_refs: ["sources/4DreamTeam/CHANGELOG.md", "sources/4DreamTeam/4dreamteam/references/release.md"]
-task_refs: []
+task_refs: ["EPIC-0001", "EPIC-0002-TASK-0014", "EPIC-0002-TASK-0015"]
 ---
 
 # Changelog
 
 ## Summary
+
 
 
 This workspace wiki changelog records notable managed-wiki changes for the 4DreamTeam skill workspace. Source release history remains in the repository `CHANGELOG.md`.
@@ -21,6 +22,9 @@ This workspace wiki changelog records notable managed-wiki changes for the 4Drea
 
 
 
+
+
+2026-05-24: Prepared 4DreamTeam v0.5.0 release packaging for EPIC-0001 and accepted EPIC-0002 packaging work. The release adds the universal `4dt-search` CLI across `sources`, `wiki`, `board`, and `memory`; replaces memory retrieval with the SQLite-authoritative search backend; moves CLI source packages into repository `packages/`; adds self-contained installed-skill runtime wrappers under `4dreamteam/scripts`; adds local and GitHub Actions quality gates; and updates managed wiki/source docs for the new search, memory, package, and runtime contracts.
 
 2026-05-23: Bootstrapped the managed workspace wiki for the 4DreamTeam skill source repository. The initial wiki covers product promise, architecture, runtime entrypoint, documentation and README maintenance, agent instruction contracts, workspace tools, lifecycle, wiki workflow, templates, memory, source boundaries, and tool storage schema.
 
@@ -35,18 +39,23 @@ This wiki changelog is not a replacement for the source repository changelog. Re
 
 
 
+
 - `sources/4DreamTeam/CHANGELOG.md` is the source repository release history.
 - `sources/4DreamTeam/4dreamteam/references/release.md` defines workspace and source changelog policy, including wiki export before packaging when source-shipped docs are needed.
 - This managed wiki was created and updated through `4dt-wiki init`, `page create`, `page section-set`, and `page apply`.
-- TASK-0001, TASK-0002, TASK-0003, TASK-0004, and TASK-0005 contain timeline evidence for recent wiki and README updates.
+- EPIC-0001, EPIC-0002-TASK-0014, and EPIC-0002-TASK-0015 contain timeline evidence for the v0.5.0 release scope, quality acceptance, and wiki updates.
+- TASK-0001, TASK-0002, TASK-0003, TASK-0004, and TASK-0005 contain timeline evidence for earlier wiki and README updates.
 
 ## Decisions
 
 
+
 - Use this page for workspace wiki history only.
 - Keep source release history in the approved source repository changelog.
+- Package source-level CLI code under repository `packages/` and installed skill runtime wrappers under `4dreamteam/scripts`.
 
 ## Open Questions
+
 
 
 - Whether future accepted wiki-only changes should create formal board timeline evidence before changelog entries.
@@ -54,6 +63,9 @@ This wiki changelog is not a replacement for the source repository changelog. Re
 ## Related
 
 
+
 - [Workspace Overview](overview.md)
-- [README Maintenance Flow](flows/readme-maintenance.md)
+- [Search Domain](domains/search.md)
+- [Memory Domain](domains/memory.md)
+- [Workspace Tools Contract](contracts/workspace-tools.md)
 - [Task Lifecycle Flow](flows/task-lifecycle.md)

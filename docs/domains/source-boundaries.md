@@ -4,10 +4,10 @@ kind: domain
 title: Source Boundaries Domain
 status: actual
 created_at: 2026-05-23T07:32:25Z
-updated_at: 2026-05-23T08:39:09Z
+updated_at: 2026-05-24T10:42:40Z
 owner: wiki
-source_refs: ["sources/4DreamTeam/4dreamteam/SKILL.md", "sources/4DreamTeam/4dreamteam/references/lead/preflight.md", "sources/4DreamTeam/4dreamteam/references/wiki.md", "sources/4DreamTeam/4dreamteam/tools/sources/src/fourdt_sources/cli.py"]
-task_refs: []
+source_refs: ["sources/4DreamTeam/4dreamteam/SKILL.md", "sources/4DreamTeam/4dreamteam/references/lead/preflight.md", "sources/4DreamTeam/4dreamteam/references/wiki.md", "sources/4DreamTeam/packages/sources/src/fourdt_sources/cli.py", "sources/4DreamTeam/packages/search/src/fourdt_search/domains/sources.py"]
+task_refs: ["TASK-0001", "EPIC-0001-TASK-0010"]
 ---
 
 # Source Boundaries Domain
@@ -15,9 +15,11 @@ task_refs: []
 ## Summary
 
 
+
 Source boundaries control what agents may read for project facts. Workspace `sources/` is built in; external paths must be registered explicitly through `4dt-sources` with operator approval.
 
 ## Content
+
 
 
 
@@ -35,26 +37,35 @@ In this workspace, `4dt-sources registry list` reports the built-in `workspace-s
 
 
 
+
+
 - `sources/4DreamTeam/4dreamteam/SKILL.md` defines hard source-boundary guarantees.
 - `sources/4DreamTeam/4dreamteam/references/lead/preflight.md` defines workspace `sources/` and external source registration policy.
 - `sources/4DreamTeam/4dreamteam/references/wiki.md` defines wiki source-of-truth and approved-source rules.
-- `sources/4DreamTeam/4dreamteam/tools/sources/src/fourdt_sources/cli.py` defines registry behavior, ignored names, forbidden source patterns, `.gitignore` matching, and the shared index/get exclusion policy.
+- `sources/4DreamTeam/packages/sources/src/fourdt_sources/cli.py` defines registry behavior, ignored names, forbidden source patterns, `.gitignore` matching, and the shared index/get exclusion policy.
+- `sources/4DreamTeam/packages/search/src/fourdt_search/domains/sources.py` connects approved-source records to unified 4dt-search discovery without expanding permissions.
 - TASK-0001 accepted quality evidence records tests for node_modules, `.env`, `.gitignore` file and directory exclusions, registered directory sources, and `get` rejection for excluded paths.
 
 ## Decisions
 
 
-- Use `4dt-sources` as the source navigation API.
+
+
+- Use `4dt-search query --domain sources` for source discovery.
+- Use `4dt-sources` as the source registry, inventory, and exact-read API.
 - Treat source registry boundaries as hard limits, not suggestions.
 - Keep old multi-project wiki registry/source-map material as legacy, not new-work guidance.
 
 ## Open Questions
 
 
+
+
 - Whether old docs should remain inside the broad workspace `sources/` boundary or be archived outside active source inventory.
-- Whether `4dt-sources search` should support richer full-text search; current simple queries returned no matches for multi-term probes in this session.
+- Whether additional source-domain ranking fixtures are needed after CI is added.
 
 ## Related
+
 
 
 - [Workspace Tools Contract](../contracts/workspace-tools.md)

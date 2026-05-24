@@ -113,12 +113,6 @@ REQUIRED_TEXT = [
         "reports each tool status",
         "Operator-facing startup docs must require per-tool status output.",
     ),
-    (
-        "lancedb_experimental",
-        "docs/domains/memory.md",
-        "LanceDB is an experimental rebuildable index",
-        "Memory docs must describe LanceDB as an experimental quality enhancement, not mandatory baseline behavior.",
-    ),
 ]
 
 

@@ -4,6 +4,17 @@
 
 - No unreleased changes yet.
 
+## 0.5.0 - 2026-05-24
+
+- Added `4dt-search` as the universal search CLI for `sources`, `wiki`, `board`, and `memory` domains, including persistent indexes, advanced query controls, validation coverage, and agent-facing usage guidance.
+- Replaced `4dt-memory` retrieval with a SQLite-authoritative `4dt-search` backend and removed the previous vector-index implementation and references from active code and documentation.
+- Moved CLI source packages and tests out of the installable skill package into repository-level `packages/` trees for board, wiki, sources, memory, and search.
+- Added self-contained installed-skill runtime wrappers under `4dreamteam/scripts`, including the generated `4dt-tools.pyz` archive used when the skill is installed by copy or URL.
+- Added local and GitHub Actions quality gates for tool tests, Python compilation, workflow rules, package structure, installed-runtime smoke checks, managed workspace validation, and search quality validation.
+- Updated managed wiki exports and agent instructions for unified search, memory startup, source boundaries, package layout, installed runtime scripts, and workspace tool contracts.
+- Cleaned README, instruction, and wiki wording so the installable package is consistently named `4dreamteam/` and normal workspaces do not imply a local skill-folder copy.
+- Bumped the skill metadata version to `0.5.0`.
+
 ## 0.4.0 - 2026-05-23
 
 - Added `.gitignore`-aware `4dt-sources` exclusions and shared index/get path policy so ignored or forbidden paths are omitted from source inventories and rejected before content reads.
@@ -51,7 +62,7 @@
 - Added pre-development wiki sync guidance for confirmed requirements using `proposed` status without weakening post-acceptance docs rules.
 - Added DevOps server-card mirrors in `~/server-card`, including first-connection context recovery, server-local git history, automatic mirror updates after management approval, and secret-safe failure reporting.
 - Added a DevOps pre-task server-card version check so server work starts from the server-side card when it is available.
-- Corrected repository path documentation from stale `skill/` and `../codex/4DreamTeam` examples to the actual `4dreamteam/` source layout and portable local-checkout wording.
+- Corrected repository path documentation from obsolete package-folder and local-checkout examples to the actual `4dreamteam/` source layout and portable local-checkout wording.
 - Added explicit skill installation instructions for the GitHub `4dreamteam` folder in README and workflow docs.
 - Bumped the skill version to `0.1.6`.
 
@@ -179,7 +190,7 @@
 - Added the `release` role for packaging accepted work into changelog entries, commit plans, and approved git commits.
 - Added release routing in the lead rules for accepted work, changelog, branch, staging, and commit requests.
 - Added release rules covering workspace changelogs, source changelog policy, skill-development changelog requirements, commit plan gates, and git safety boundaries.
-- Added a release plan template at `skill/assets/templates/release/plan.md`.
+- Added a release plan template at `4dreamteam/assets/templates/release/plan.md`.
 - Updated README documentation to include the `release` role and accepted-work packaging flow.
 - Bumped the skill version to `0.0.3`.
 

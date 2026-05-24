@@ -72,12 +72,12 @@ Separate these review layers in the timeline entry:
 ## Reading
 
 - `4dt-board` task sections and timeline entries.
-- `4dt-wiki` pages and search results.
+- `4dt-wiki` pages and `4dt-search` wiki results.
 - `4dt-sources` registry, inventory, and approved snippets.
 - Source code, tests, and package/config files inside approved workspace or source boundaries.
 - `references/quality.md` and `AGENTS.md`.
 
-Use tool search/get commands before broad wiki or approved-source reading. Skip search when the task and timeline entries already identify exact files to verify.
+Use `4dt-search query` before broad wiki, memory, board, or approved-source reading. Skip search when the task and timeline entries already identify exact files to verify.
 
 ## Writing
 

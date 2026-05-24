@@ -24,7 +24,9 @@ At the start of a new session, always check memory readiness and load contract d
 4dt-memory defaults load --workspace . --json
 ```
 
-Apply contract project rules, operator preferences, active modes, and workflow constraints before proposing actions. If defaults load as `ready`, do not ask the operator to repeat context. If defaults are incomplete or invalid, run `4dt-memory onboarding questions --workspace . --json` and ask only the returned repair or setup questions before treating a mode or rule as active. If memory is degraded, empty, low-signal, or unavailable, report that state and continue from current workspace instructions without inventing remembered rules.
+If memory is not initialized and the current folder is already a confirmed 4DreamTeam workspace, run `4dt-memory init --workspace . --json`; it creates SQLite storage and seeds only missing baseline contract keys. Do not initialize memory in an unconfirmed empty workspace without operator approval.
+
+Apply contract project rules, operator preferences, active modes, and workflow constraints before proposing actions. If defaults load as `ready`, do not ask the operator to repeat context. If defaults are incomplete or invalid, run `4dt-memory onboarding questions --workspace . --json` and ask only the returned repair or setup questions before treating a mode or rule as active. If memory is empty, low-signal, or unavailable, report that state and continue from current workspace instructions without inventing remembered rules.
 
 Use additional local 4DT Memory searches only as supplemental recall when they are likely to reduce context loss:
 
@@ -39,20 +41,20 @@ When memory is relevant, start with:
 4dt-memory doctor --workspace . --json
 ```
 
-If storage is ready, use `4dt-memory search "<query>" --workspace . --json` for concise previews, then `4dt-memory get <id> --workspace . --json` for full content when needed. Search preview output is not enough to change behavior by itself; verify important claims against board timeline entries, wiki pages, or approved sources.
+If storage is ready, use `4dt-search query "<query>" --domain memory --workspace . --json` for concise previews, then the result `getCommand` or `4dt-memory get <id> --workspace . --json` for full content when needed. Search preview output is not enough to change behavior by itself; verify important claims against board timeline entries, wiki pages, or approved sources.
 
 Fallback order:
 
 ```txt
 4DT Memory recall when ready and relevant
 -> `lead_handoff` timeline entries for completed epic context
--> local wiki search
+-> local wiki discovery through `4dt-search --domain wiki`
 -> board timeline entries
 -> exact approved source files when needed and allowed
 -> user clarification only when required for safety or product meaning
 ```
 
-If 4DT Memory is unavailable, uninitialized, degraded, empty, low-signal, or contradictory, continue with local wiki search and board evidence. Do not fail the workflow because memory is unavailable.
+If 4DT Memory is unavailable, uninitialized, degraded, empty, low-signal, or contradictory, continue with local wiki and board evidence through `4dt-search` and exact domain reads. Do not fail the workflow because memory is unavailable.
 
 ## English-First Memory Search Protocol
 
@@ -62,7 +64,7 @@ Do not rely on a single literal memory query for conceptual, architectural, cont
 
 1. Search or read exact task ids, file paths, commands, titles, and known artifact pointers first.
 2. Identify the user's intent, project or framework name, source type, and important entities.
-3. Preserve technical terms while translating: commands, CLI names, filenames, package names, class names, task ids, `4dt-memory`, SQLite, LanceDB, MCP, hooks, and other project-specific identifiers.
+3. Preserve technical terms while translating: commands, CLI names, filenames, package names, class names, task ids, `4dt-memory`, SQLite, `4dt-search`, MCP, hooks, and other project-specific identifiers.
 4. Generate 4-8 typed English query variants, selected from normalized technical wording, architecture/workflow, implementation/file, decision/history, task/report/wiki artifact, and benchmark/process queries.
 5. Use the user's original-language wording only as a fallback when English queries are thin or when the target source is known to contain that language.
 6. Prefer results supported by exact pointers, multiple query variants, or current wiki/task/report evidence.
@@ -75,7 +77,7 @@ Example for `как работает память в dreamteam`:
 4DreamTeam memory architecture
 4DreamTeam memory recall workflow
 4DreamTeam local memory runtime
-4DT Memory SQLite LanceDB search reindex
+4DT Memory SQLite 4dt-search runtime retrieval
 4DreamTeam memory policy wiki fallback board timeline
 4DT Memory retrieval quality benchmark
 references lead memory context budget source map
@@ -85,7 +87,7 @@ references lead memory context budget source map
 
 The local wiki is the authoritative project memory fallback.
 
-Use `4dt-wiki search/get` and `4dt-sources search/get` before broad approved-source reading. Memory does not expand source permissions and does not replace current wiki, source, or board evidence.
+Use `4dt-search query` with explicit `wiki` or `sources` domains before broad approved-source reading. Memory does not expand source permissions and does not replace current wiki, source, or board evidence.
 
 For plain workspace status, use `4dt-board` first. Do not run broad wiki search unless a project-specific question or continuation needs it.
 
@@ -115,15 +117,70 @@ Do not save:
 
 Prefer concise memory entries with pointers to file paths instead of copying full content. Redaction blocks unsafe saves before storage; it is a safety gate, not a guarantee that all possible secrets can be detected.
 
-## Storage And Degraded Mode
+## Tool Launch Contract
 
-SQLite is the authoritative memory store. LanceDB is an experimental, rebuildable semantic index for improved retrieval quality. If LanceDB, embeddings, or index metadata are unavailable or mismatched, memory search degrades to lexical fallback or reports structured degraded status. The framework workflow continues through board timeline entries, wiki pages, and approved sources.
+Prefer installed skill wrappers when only the `4dreamteam/` package is available:
+
+```txt
+python3 4dreamteam/scripts/4dt-memory.py <args>
+python3 4dreamteam/scripts/4dt-search.py <args>
+```
+
+Prefer project scripts from the 4DreamTeam source checkout:
+
+```txt
+npm run memory -- <args>
+npm run search -- <args>
+```
+
+Use direct module fallbacks only when installed wrappers and project scripts are unavailable:
+
+```txt
+PYTHONPATH=packages/memory/src:packages/search/src python3 -m fourdt_memory.cli <args>
+PYTHONPATH=packages/search/src:packages/sources/src:packages/wiki/src:packages/board/src:packages/memory/src python3 -m fourdt_search.cli <args>
+```
+
+For Python compile/test commands in sandboxed environments, set:
+
+```txt
+PYTHONPYCACHEPREFIX=/tmp/4dt-pycache
+```
+
+If the first command fails with an import error, retry with the launch contract before concluding the memory or search tool is broken.
+
+## Storage And Retrieval
+
+SQLite is the authoritative memory store. The memory domain in `4dt-search query --domain memory` reads live SQLite rows and ranks them through the shared `4dt-search` runtime backend. There is no separate persisted retrieval index to rebuild. The framework workflow continues through board timeline entries, wiki pages, and approved sources if memory is unavailable.
+
+## Unified Search Protocol
+
+Use `4dt-search query` as the only discovery search entrypoint for agent work. Choose explicit domains instead of remembering separate search commands:
+
+```txt
+4dt-search query "<query>" --domain wiki --json
+4dt-search query "<query>" --domain sources --json
+4dt-search query "<query>" --domain memory --json
+4dt-search query "<query>" --domain board --json
+```
+
+Use domain tools for exact reads, writes, validation, and administration. Search results include locators and `getCommand` values; prefer those for full reads after discovery.
+
+Improve recall in this order:
+
+1. Translate non-English or conceptual operator intent into 4-8 English query variants while preserving technical identifiers.
+2. Restrict with `--domain` to reduce noise, or use comma-separated domains for intentional cross-domain search.
+3. Start with `--match all`; retry with `--match any` when the query is long or exploratory.
+4. Use `--field title,path` for known files/pages/tasks, `--field body` for content, and `--field all` as a fallback.
+5. Increase `--limit` and `--max-candidates` when recall is thin.
+6. Use `--mode extended` for `|`, negation, exact-ish patterns, prefixes, and suffixes.
+7. Use `--explain` when validating quality or diagnosing ranking.
+8. Use `--index auto` normally, `--index readonly` for quality checks that must not hide missing/stale indexes, and `--index rebuild` after broad workspace changes.
 
 ## Import, Export, And Sessions
 
 `4dt-memory export --format jsonl` exports live memory items only. JSONL export may include full accepted memory content and should be treated as local private data.
 
-`4dt-memory import <file> --format jsonl` is dry-run by default. It writes only with `--apply`, runs the same safety checks as `remember`, and leaves imported rows unindexed until `reindex`.
+`4dt-memory import <file> --format jsonl` is dry-run by default. It writes only with `--apply` and runs the same safety checks as `remember`.
 
 Session state is local workspace state for continuation. It is below board timeline entries, wiki pages, approved sources, and the current request in authority. Session state must be JSON-object data, size-limited, and TTL-scoped.
 

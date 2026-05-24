@@ -12,7 +12,16 @@ Use this file when context may expand beyond the compact route path, when large 
 
 ## Tool Order
 
-For board context:
+For discovery, use `4dt-search query` first with explicit domains:
+
+1. `4dt-search query "<query>" --domain board --json`
+2. `4dt-search query "<query>" --domain wiki --json`
+3. `4dt-search query "<query>" --domain sources --json`
+4. `4dt-search query "<query>" --domain memory --json`
+
+Use the result locator or `getCommand` for the smallest full read.
+
+For exact board context:
 
 1. `4dt-board status`
 2. `4dt-board list/find`
@@ -20,18 +29,16 @@ For board context:
 4. `4dt-board section get`
 5. `4dt-board comments list/latest`
 
-For wiki context:
+For exact wiki context:
 
-1. `4dt-wiki search`
-2. `4dt-wiki get`
-3. `4dt-wiki validate` when freshness or compatibility matters.
+1. `4dt-wiki get`
+2. `4dt-wiki validate` when freshness or compatibility matters.
 
-For source context:
+For exact source context:
 
 1. `4dt-sources registry list`
-2. `4dt-sources search`
-3. `4dt-sources get`
-4. Direct source reads only when the approved boundary and exact need are clear.
+2. `4dt-sources get`
+3. Direct source reads only when the approved boundary and exact need are clear.
 
 ## Escalation
 

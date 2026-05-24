@@ -3,11 +3,25 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "board": "python3 4dreamteam/tools/board/src/fourdt_board/cli.py",
-    "memory": "PYTHONPATH=4dreamteam/tools/memory/src python3 -m fourdt_memory.cli",
-    "sources": "python3 4dreamteam/tools/sources/src/fourdt_sources/cli.py",
-    "4dt-wiki": "python3 4dreamteam/tools/wiki/src/fourdt_wiki/cli.py",
+    "board": "python3 packages/board/src/fourdt_board/cli.py",
+    "memory": "PYTHONPATH=packages/memory/src:packages/search/src python3 -m fourdt_memory.cli",
+    "search": "PYTHONPATH=packages/search/src:packages/sources/src:packages/wiki/src:packages/board/src:packages/memory/src python3 -m fourdt_search.cli",
+    "search:validate": "PYTHONPATH=packages/search/src:packages/sources/src:packages/wiki/src:packages/board/src:packages/memory/src python3 -m fourdt_search.validate",
+    "sources": "python3 packages/sources/src/fourdt_sources/cli.py",
+    "4dt-wiki": "python3 packages/wiki/src/fourdt_wiki/cli.py",
     "wiki": "python3 4dreamteam/scripts/wiki_index.py",
-    "rules": "python3 4dreamteam/scripts/validate_workflow_rules.py"
+    "rules": "python3 4dreamteam/scripts/validate_workflow_rules.py",
+    "test": "npm run test:board && npm run test:wiki && npm run test:sources && npm run test:search && npm run test:memory",
+    "test:board": "PYTHONPYCACHEPREFIX=/tmp/4dt-pycache python3 -m unittest discover packages/board/tests",
+    "test:wiki": "PYTHONPYCACHEPREFIX=/tmp/4dt-pycache python3 -m unittest discover packages/wiki/tests",
+    "test:sources": "PYTHONPYCACHEPREFIX=/tmp/4dt-pycache python3 -m unittest discover packages/sources/tests",
+    "test:search": "PYTHONPYCACHEPREFIX=/tmp/4dt-pycache PYTHONPATH=packages/search/src:packages/sources/src:packages/wiki/src:packages/board/src:packages/memory/src python3 -m unittest discover packages/search/tests",
+    "test:memory": "PYTHONPYCACHEPREFIX=/tmp/4dt-pycache PYTHONPATH=packages/memory/src:packages/search/src python3 -m unittest discover packages/memory/tests",
+    "build:skill-runtime": "python3 4dreamteam/scripts/build_runtime.py",
+    "validate": "npm run build:skill-runtime && npm run validate:structure && npm run validate:python && npm run rules && npm run validate:runtime && npm run validate:workspace",
+    "validate:structure": "python3 4dreamteam/scripts/validate_package_structure.py",
+    "validate:python": "PYTHONPYCACHEPREFIX=/tmp/4dt-pycache PYTHONPATH=packages/search/src:packages/sources/src:packages/wiki/src:packages/board/src:packages/memory/src python3 -m compileall -q packages 4dreamteam",
+    "validate:runtime": "python3 4dreamteam/scripts/validate_installed_runtime.py",
+    "validate:workspace": "PYTHONPATH=packages/search/src:packages/sources/src:packages/wiki/src:packages/board/src:packages/memory/src python3 4dreamteam/scripts/validate_workspace_tools.py"
   }
 }

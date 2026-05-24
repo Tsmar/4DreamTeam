@@ -4,7 +4,7 @@ kind: domain
 title: Templates Domain
 status: actual
 created_at: 2026-05-23T07:32:19Z
-updated_at: 2026-05-23T08:39:55Z
+updated_at: 2026-05-24T12:24:08Z
 owner: wiki
 source_refs: ["sources/4DreamTeam/4dreamteam/SKILL.md", "sources/4DreamTeam/4dreamteam/references/lead/contracts.md", "sources/4DreamTeam/4dreamteam/assets/templates/analytic/task.md", "sources/4DreamTeam/4dreamteam/assets/templates/product/epic.md", "sources/4DreamTeam/4dreamteam/assets/templates/workspace/AGENTS.md"]
 task_refs: []
@@ -20,11 +20,12 @@ Templates define artifact shape for epics, tasks, reports, wiki pages, marketing
 ## Content
 
 
+
 `SKILL.md` lists the bundled templates under `assets/templates/`. The list covers analytic task specs, product epics, lead epic handoffs, marketing artifacts, release plans, wiki starter pages, DevOps server docs, workspace `AGENTS.md`, and `sources/.gitignore`.
 
 The instruction/template boundary is explicit. Role instructions define mandatory behavior. Templates define artifact shape. A required behavior must live in role instructions or shared lead rules; a template may add structure but cannot be the only place a required behavior exists. Instructions should point to templates they expect agents to use.
 
-Workspace bootstrap templates are special. In an empty workspace, after confirmation, the skill may create only `AGENTS.md` from the workspace template, `sources/.gitignore` from the sources template, and tool-managed artifacts through board/wiki/sources/memory tools. It must not create a local `skill/` folder in a normal workspace.
+Workspace bootstrap templates are special. In an empty workspace, after confirmation, 4DreamTeam may create only `AGENTS.md` from the workspace template, `sources/.gitignore` from the sources template, and tool-managed artifacts through board/wiki/sources/memory tools. It must not create a local installed-skill copy in a normal workspace; the installed package is `4dreamteam/`.
 
 Marketing templates are selected by mode: value review, README positioning review, release narrative, GTM brief, and claim audit each have specific entry conditions. Wiki templates include project, product overview, architecture overview, ADR, and sources. DevOps templates include server index and server card.
 
@@ -43,8 +44,9 @@ When changing a template that affects behavior, treat it as a framework behavior
 ## Decisions
 
 
+
 - Templates shape artifacts; references define behavior.
-- Bootstrap templates must stay aligned with the hard guarantee that normal workspaces do not get a local `skill/` folder.
+- Bootstrap templates must stay aligned with the hard guarantee that normal workspaces do not get a local installed-skill copy; the installed package is `4dreamteam/`.
 - Behavior-affecting template changes require reference alignment and quality review.
 
 ## Open Questions

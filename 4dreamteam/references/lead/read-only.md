@@ -6,14 +6,15 @@ Use this file for direct project questions, workspace status, continuation, and 
 
 Use this workflow when the user asks a direct question about an existing project and does not request a task, implementation, wiki update, audit, or validation.
 
-If the question may depend on prior session context, user preferences, or previous decisions, first read `references/lead/memory.md`. Use `4dt-memory` when it is available and likely to help; otherwise continue with the script-managed wiki, board, source registry, and current workspace evidence.
+If the question may depend on prior session context, user preferences, or previous decisions, first read `references/lead/memory.md`. Use `4dt-search query` with explicit domains for discovery; otherwise continue with the script-managed wiki, board, source registry, and current workspace evidence.
 
 Start with the smallest script query:
 
-1. `4dt-wiki search` or `4dt-wiki get` for existing wiki knowledge.
-2. `4dt-sources registry list` and `4dt-sources search/get` when source boundaries or source snippets are needed.
-3. `4dt-board get`, `4dt-board section get`, or `4dt-board comments list` when task history matters.
-4. `4dt-memory search` when prior session memory may contain useful accepted context.
+1. `4dt-search query "<query>" --domain wiki --json` for existing wiki knowledge.
+2. `4dt-search query "<query>" --domain sources --json` when source snippets are needed inside approved boundaries.
+3. `4dt-search query "<query>" --domain board --json` when task history, status, or timeline decisions matter.
+4. `4dt-search query "<query>" --domain memory --json` when prior session memory may contain useful accepted context.
+5. Use the result `getCommand` or exact domain `get` command for full reads after discovery.
 
 Do not perform a broad documentation audit or inspect approved sources by default.
 
@@ -78,7 +79,7 @@ Run the validation tools and report findings by severity:
 2. `4dt-wiki validate` checks single-workspace wiki metadata, stable sections, links, and removed registry files.
 3. `4dt-sources registry validate` checks source registry shape and approved boundaries.
 4. `4dt-sources index check` checks source inventory freshness.
-5. `4dt-memory doctor` checks memory storage, LanceDB readiness, and fallback state.
+5. `4dt-memory doctor` checks SQLite memory storage and the `4dt-search` runtime retrieval backend state.
 6. `npm run rules` checks that agent-facing instructions have not regressed to legacy workflows.
 
 Do not repair files unless the user explicitly approves the specific changes.

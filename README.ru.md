@@ -107,7 +107,7 @@ Lead сам направляет работу к нужной роли и дер
 
 ## Быстрый Старт
 
-Установите skill из [Tsmar/4DreamTeam](https://github.com/Tsmar/4DreamTeam/tree/main/4dreamteam).
+Установите пакет скила `4dreamteam/` из [Tsmar/4DreamTeam](https://github.com/Tsmar/4DreamTeam/tree/main/4dreamteam).
 
 Перезапустите Codex, затем спросите:
 
@@ -121,7 +121,7 @@ Is the 4DreamTeam skill available?
 Run $4DreamTeam.
 ```
 
-Если папка еще не является 4DreamTeam workspace, skill спросит перед созданием workspace files.
+Если папка еще не является 4DreamTeam workspace, 4DreamTeam спросит перед созданием workspace-файлов.
 
 ### Работа С Существующим Проектом
 
@@ -174,6 +174,6 @@ Read-only status и validation безопасны по умолчанию. Relea
 
 ## Статус
 
-Текущая документированная версия: `0.4.0`.
+Текущая документированная версия: `0.5.0`.
 
 История изменений: [CHANGELOG.md](CHANGELOG.md).
