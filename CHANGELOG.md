@@ -4,6 +4,12 @@
 
 - No unreleased changes yet.
 
+## 0.5.1 - 2026-05-24
+
+- Strengthened the workspace `AGENTS.md` template with startup orientation through memory defaults and managed workspace validation.
+- Added explicit `4dt-search` discovery guidance for wiki, sources, board, and memory domains before broad reading.
+- Bumped the skill metadata version to `0.5.1`.
+
 ## 0.5.0 - 2026-05-24
 
 - Added `4dt-search` as the universal search CLI for `sources`, `wiki`, `board`, and `memory` domains, including persistent indexes, advanced query controls, validation coverage, and agent-facing usage guidance.

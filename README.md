@@ -174,6 +174,6 @@ Detailed documentation lives in [docs/](docs/) and is exported from the managed 
 
 ## Status
 
-Current documented version: `0.5.0`.
+Current documented version: `0.5.1`.
 
 See [CHANGELOG.md](CHANGELOG.md) for release history.

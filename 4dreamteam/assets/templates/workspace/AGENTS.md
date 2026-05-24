@@ -12,6 +12,21 @@ All working requests are routed through `$4DreamTeam`.
 
 If a request concerns a business request, product development, a task, implementation, acceptance, wiki, a knowledge base, or continuing existing work, use the `$4DreamTeam` framework.
 
+## Startup Orientation
+
+This file is the workspace-level operating contract. At the start of a new session, do not infer project identity from folder names alone. Discover the concrete workspace state through managed tools before choosing a route.
+
+Run:
+
+1. `4dt-memory doctor --workspace . --json`
+2. `4dt-memory defaults load --workspace . --json` when memory is ready
+3. `4dt-board --workspace . --json validate`
+4. `4dt-sources --workspace . --json registry validate`
+5. `4dt-wiki --workspace . --json validate`
+6. `4dt-memory doctor --workspace . --json`
+
+Use the results to identify project purpose, source boundaries, current mode, operator preferences, approval policy, git policy, and validation expectations. If memory is unavailable, degraded, or empty, do not invent remembered rules; continue from this file and report that memory defaults were unavailable.
+
 ## Framework-First Rule
 
 Do not bypass the `$4DreamTeam` process with ad-hoc work when the request can be handled through the framework.
@@ -80,6 +95,25 @@ An approved source is a hard boundary: do not read parent directories, sibling d
 Do not read secrets, `.env`, credentials, private keys, dumps, or unrelated user files.
 
 DevOps SSH keys are looked up only in `keys/` at the workspace root. Do not print key contents and do not copy them into documentation, tasks, timeline entries, or reports.
+
+## Discovery And Search
+
+Before broad reading, use `4dt-search query` with explicit domains.
+
+Use the smallest useful query first:
+
+- `4dt-search query "<question>" --workspace . --domain wiki --json`
+- `4dt-search query "<question>" --workspace . --domain sources --json`
+- `4dt-search query "<question>" --workspace . --domain board --json`
+- `4dt-search query "<question>" --workspace . --domain memory --json`
+
+Prefer `wiki` first for project knowledge, `sources` for implementation/source truth, `board` for task status and timeline evidence, and `memory` for durable decisions, operator preferences, and prior-session context.
+
+Preserve exact ids, command names, filenames, paths, and technical terms in search queries. Translate vague operator intent into concise English search terms when useful.
+
+Use `--match any` for exploratory or fuzzy queries. Use `--match all` only when all terms must be present. If `--index readonly` reports a stale index, report it and use the appropriate managed validation or rebuild flow before trusting missing results.
+
+After discovery, use each result's `getCommand` or the domain tool for exact reads. Do not replace exact reads with broad filesystem inspection.
 
 ## Confirmation Policy
 
