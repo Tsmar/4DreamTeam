@@ -56,9 +56,74 @@ Fallback order:
 
 If 4DT Memory is unavailable, uninitialized, degraded, empty, low-signal, or contradictory, continue with local wiki and board evidence through `4dt-search` and exact domain reads. Do not fail the workflow because memory is unavailable.
 
+## Operator Memory Intent
+
+Operators often ask for durable learning in natural language instead of naming `4dt-memory`. Treat the following as memory-intent signals when the current request is durable, project-relevant, and useful beyond the current turn:
+
+1. Explicit remember phrases: "remember", "save this", "запомни", "нужно запомнить", "сохрани на будущее".
+2. Avoid repeated discovery: "next time do not study this again", "so we do not rediscover it", "чтобы в следующий раз не изучать".
+3. Context-waste corrections: noisy logs, repeated setup, irrelevant output, repeated source reading, or workflow friction that consumes agent/operator context.
+4. Corrective lessons: "avoid doing this", "we made this mistake", "учти на будущее", "больше так не делай".
+
+Classify the request before saving:
+
+1. `direct_save`: the operator states the durable rule clearly and it is safe to save.
+2. `investigate_then_save`: the operator names an area, such as test workflow or noisy logs, but the agent must inspect approved wiki, board, memory, or source evidence before summarizing the durable lesson.
+3. `behavior_change_plus_lesson`: the operator asks for a code, docs, tooling, or workflow change; run the normal task workflow first, then save a lesson only after evidence or acceptance makes it durable.
+4. `do_not_save`: the content is temporary, speculative, unsafe, secret-bearing, unaccepted, already obvious from files, or contradicted by current evidence.
+
+Memory intent does not bypass approval gates, source boundaries, role workflow, or independent quality. If the request includes file changes, infrastructure, dependencies, release actions, or other gated work, follow the normal workflow and record memory only through the safe save flow.
+
+The operator may express memory intent in any language. Store durable memory content in English for portability, cross-agent recall, and consistent `4dt-search` ranking. Preserve exact commands, file paths, task ids, CLI names, code identifiers, and localized user-facing text when they are the fact being remembered.
+
+## Memory Placement Policy
+
+Choose the narrowest durable scope that will be recalled by the right future agent:
+
+1. `scope=workspace`: workspace operating rules, startup commands, source boundaries, validation expectations, tool launch rules, and cross-project 4DreamTeam workspace behavior.
+2. `scope=project`: project-wide product, architecture, process, testing, logging, build, or documentation knowledge useful across multiple roles.
+3. `scope=role --role <role>`: role-specific lessons and instructions. Examples: `developer` test commands and log-noise gotchas; `quality` acceptance traps; `wiki` documentation sync rules; `release` packaging constraints; `devops` operational runbooks.
+4. `scope=user`: stable operator preferences about communication, approval style, workflow, or collaboration.
+
+Use concise durable types:
+
+1. `implementation_lesson` for learned behavior from completed implementation, debugging, testing, or validation.
+2. `gotcha` for mistakes or environmental traps that would cause repeated failures.
+3. `operator_preference` for stable user or operator preferences.
+4. `process_instruction` for accepted workflow instructions that should guide future agents.
+5. `decision` for accepted product, architecture, source-boundary, or process decisions.
+
+Save project, workspace, and role memories with a concrete `--source-ref`, preferably a task id, timeline entry id, wiki page id, or approved source path. Prefer one compact memory that points to evidence over copied logs, full reports, or broad source excerpts.
+
+## Role-Scoped Recall
+
+After route selection, use role-scoped memory searches only when prior lessons are likely to affect the next action. Build a small query from the current role, task title, artifact ids, commands, source paths, and translated English technical terms.
+
+Examples:
+
+```txt
+developer project test workflow noisy logs validation commands
+quality acceptance criteria rejected gotcha task TASK-0017
+wiki post-acceptance documentation source-backed update
+release packaging changelog staging commit policy
+```
+
+Search `scope=role` memories for the active role first when supported by the tool, then project/workspace memory for cross-role constraints. Keep recall bounded: use a small limit, read previews first, and fetch exact memory records only for results that could change the plan.
+
+## Startup And Task Recall Profiles
+
+Startup memory has two layers:
+
+1. Contract defaults from `4dt-memory defaults load --workspace . --json`; these are always applied when ready.
+2. Bounded supplemental recall; use it only after the task route, role, or continuation context makes it useful.
+
+Do not dump all memory into the startup context. Use `4dt-search query` with explicit domains and role/task-enriched English query variants. Prefer `--domain memory` for prior lessons, `--domain wiki` for accepted project knowledge, `--domain board` for timeline evidence, and `--domain sources` for approved source truth. Bring in only the smallest set needed to prevent repeated discovery or avoid known mistakes.
+
+For requests like "remember how tests work so next time you do not study it again", first discover the current test workflow through approved wiki/source/board evidence, then save a concise `project` or `role=developer` memory. For requests like "optimize test logs because they waste context", treat the log change as normal developer work and save a lesson afterward only if the final behavior is accepted or source-backed.
+
 ## English-First Memory Search Protocol
 
-4DreamTeam managed knowledge artifacts are written in English for agents. When the user asks in another language, translate the search intent into English before searching memory, wiki pages, tasks, reports, or accepted quality artifacts.
+4DreamTeam managed knowledge artifacts are written in English for agents. When the user asks in any other language, translate the search intent into English before searching memory, wiki pages, tasks, reports, or accepted quality artifacts. Durable memory content should be saved in English regardless of the operator's language, except for exact localized strings that are themselves the subject of the memory.
 
 Do not rely on a single literal memory query for conceptual, architectural, continuation, decision-history, or cross-artifact questions. Use a bounded query plan:
 
@@ -116,6 +181,18 @@ Do not save:
 4. Unaccepted proposals, rejected assumptions, or speculative claims as durable memory.
 
 Prefer concise memory entries with pointers to file paths instead of copying full content. Redaction blocks unsafe saves before storage; it is a safety gate, not a guarantee that all possible secrets can be detected.
+
+## Contradiction, Staleness, And Forgetting
+
+If recalled memory conflicts with the current request, current workspace instructions, board/wiki artifacts, approved source files, or live validation output, trust the current evidence. Do not silently follow stale memory.
+
+When a durable memory is stale, unsafe, or superseded, do one of the following through visible workflow:
+
+1. Save a newer memory with a clear source reference and mention the superseded lesson in the new content when useful.
+2. Use the available memory administration command to retire or forget the old memory when the operator requests cleanup.
+3. Record the conflict in the active task timeline when it affects implementation, quality, release, or operator expectations.
+
+Do not create a second source of truth by copying full agent instructions into memory. Keep canonical role workflows and long-form policy in Markdown references, and use memory for compact rules, gotchas, preferences, decisions, and pointers.
 
 ## Tool Launch Contract
 

@@ -102,6 +102,48 @@ REQUIRED_TEXT = [
         "New-session onboarding must check 4dt-memory explicitly.",
     ),
     (
+        "bounded_memory_recall",
+        "4dreamteam/references/lead/preflight.md",
+        "do not dump all memory into context",
+        "Startup memory recall must stay bounded after contract defaults.",
+    ),
+    (
+        "operator_memory_intent",
+        "4dreamteam/references/lead/memory.md",
+        "Operator Memory Intent",
+        "Memory policy must recognize natural-language operator memory intent.",
+    ),
+    (
+        "memory_placement_policy",
+        "4dreamteam/references/lead/memory.md",
+        "Memory Placement Policy",
+        "Memory policy must define workspace, project, user, and role placement.",
+    ),
+    (
+        "role_scoped_recall",
+        "4dreamteam/references/lead/memory.md",
+        "Role-Scoped Recall",
+        "Memory policy must define role-scoped recall for active work.",
+    ),
+    (
+        "memory_intent_russian_phrase",
+        "4dreamteam/references/lead/memory.md",
+        "чтобы в следующий раз не изучать",
+        "Memory policy must cover Russian operator phrasing for avoid-repeat-discovery intent.",
+    ),
+    (
+        "memory_behavior_change_plus_lesson",
+        "4dreamteam/references/lead/memory.md",
+        "behavior_change_plus_lesson",
+        "Memory policy must distinguish behavior changes from durable memory saves.",
+    ),
+    (
+        "memory_english_for_any_operator_language",
+        "4dreamteam/references/lead/memory.md",
+        "The operator may express memory intent in any language. Store durable memory content in English",
+        "Durable memory must be saved in English regardless of operator language.",
+    ),
+    (
         "repair_confirmation",
         "4dreamteam/references/lead/preflight.md",
         "Repair commands require explicit operator confirmation.",

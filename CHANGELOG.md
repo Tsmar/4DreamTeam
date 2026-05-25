@@ -4,6 +4,14 @@
 
 - No unreleased changes yet.
 
+## 0.5.2 - 2026-05-25
+
+- Added self-learning memory policy for operator memory-intent phrases, durable English memory, scope/type placement, and role-scoped recall.
+- Added bounded startup/task recall guidance so agents apply contract defaults first and fetch only relevant memory previews/details.
+- Added stale/conflicting memory handling and workflow-rule validation anchors/tests for the new memory guarantees.
+- Refreshed exported memory documentation and README positioning for operator-guided self-learning.
+- Bumped the skill metadata version to `0.5.2`.
+
 ## 0.5.1 - 2026-05-24
 
 - Strengthened the workspace `AGENTS.md` template with startup orientation through memory defaults and managed workspace validation.

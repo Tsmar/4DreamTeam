@@ -47,6 +47,8 @@ If memory is not initialized and the current folder is already a confirmed 4Drea
 
 If defaults load as `ready`, apply them without asking the operator to repeat context. If defaults are incomplete or invalid, run `4dt-memory onboarding questions --workspace . --json` and ask only the returned repair or setup questions before treating a mode or rule as active. If memory is degraded, unavailable, empty, or low-signal, report that state and continue from current workspace instructions. Do not invent remembered rules.
 
+After contract defaults are applied, do not dump all memory into context. Use bounded supplemental recall only when route, role, continuation state, or the operator's request makes prior lessons relevant. Build a role/task-enriched English `4dt-search query` over explicit domains, read concise previews first, and fetch exact memory records only when they may change the plan.
+
 5. Run the four startup checks:
 
 ```bash
