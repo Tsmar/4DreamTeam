@@ -110,12 +110,44 @@ release packaging changelog staging commit policy
 
 Search `scope=role` memories for the active role first when supported by the tool, then project/workspace memory for cross-role constraints. Keep recall bounded: use a small limit, read previews first, and fetch exact memory records only for results that could change the plan.
 
+## Wake Context / Wakeup Recall
+
+Wake Context is the compact continuation layer that lets a new agent session resume like a rested person waking up with the important parts of yesterday retained and the noisy working context gone. It is not a full transcript and it is not authority over current artifacts. It is a short set of memory records and pointers that tells the next session what matters first.
+
+Use Wakeup Recall at the start of every confirmed 4DreamTeam workspace session after memory readiness and contract defaults:
+
+1. Search memory for pending startup instructions, one-time operator messages, and the latest session handoff.
+2. Fetch exact memory records before acting on them.
+3. Deliver operator-facing one-time messages in the user's language unless the message explicitly requires another language.
+4. Retire or forget delivered one-time records when their metadata or content says `delete_after_delivery`, `temporary`, or equivalent.
+5. Treat session handoffs as compressed navigation: use their board task ids, wiki page ids, source paths, commands, decisions, and next-action pointers before broad discovery.
+6. Verify substantive claims against current board, wiki, approved sources, or the current user request before changing files, moving tasks, or making release decisions.
+
+Good Wakeup Recall queries include:
+
+```txt
+startup instruction pending operator message one-time delete after delivery
+latest session handoff wake context continuation next session
+```
+
+Use durable memory types consistently:
+
+1. `process_instruction` for accepted startup behavior, including pending one-time messages.
+2. `operator_preference` for stable operator collaboration preferences.
+3. `decision` for accepted project or workflow decisions.
+4. `implementation_lesson` or `gotcha` for reusable lessons from completed work.
+
+For session endings, create or update a compact handoff when the operator says the chat is ending, moving to a new chat, or should be continued later. The handoff should include current focus, last meaningful state, accepted decisions, exact task/wiki/source pointers, the best next action, and avoid repeating content that already exists in board/wiki/source artifacts. Supersede old handoffs instead of letting multiple stale continuation records compete.
+
+Deleted or forgotten memory should remain administratively auditable when the tool supports it, but normal Wakeup Recall must ignore retired records.
+
 ## Startup And Task Recall Profiles
 
 Startup memory has two layers:
 
 1. Contract defaults from `4dt-memory defaults load --workspace . --json`; these are always applied when ready.
-2. Bounded supplemental recall; use it only after the task route, role, or continuation context makes it useful.
+2. Wake Context from Wakeup Recall; pending startup instructions, one-time operator messages, and the latest session handoff are checked before proposing work.
+3. Bounded supplemental recall; use it only after the task route, role, or continuation context makes it useful.
 
 Do not dump all memory into the startup context. Use `4dt-search query` with explicit domains and role/task-enriched English query variants. Prefer `--domain memory` for prior lessons, `--domain wiki` for accepted project knowledge, `--domain board` for timeline evidence, and `--domain sources` for approved source truth. Bring in only the smallest set needed to prevent repeated discovery or avoid known mistakes.
 
@@ -196,25 +228,44 @@ Do not create a second source of truth by copying full agent instructions into m
 
 ## Tool Launch Contract
 
-Prefer installed skill wrappers when only the `4dreamteam/` package is available:
+Prefer installed skill wrappers for normal Codex workspace startup. Resolve the package from the active skill path or `$CODEX_HOME/skills/4dreamteam`; do not hardcode user-specific home directories:
 
 ```txt
-python3 4dreamteam/scripts/4dt-memory.py <args>
-python3 4dreamteam/scripts/4dt-search.py <args>
+python3 <installed-4dreamteam-skill>/scripts/4dt-memory.py <args>
+python3 <installed-4dreamteam-skill>/scripts/4dt-search.py <args>
+python3 <installed-4dreamteam-skill>/scripts/4dt-board.py <args>
+python3 <installed-4dreamteam-skill>/scripts/4dt-sources.py <args>
+python3 <installed-4dreamteam-skill>/scripts/4dt-wiki.py <args>
 ```
 
-Prefer project scripts from the 4DreamTeam source checkout:
+Use project scripts when intentionally working inside the 4DreamTeam source checkout:
 
 ```txt
 npm run memory -- <args>
 npm run search -- <args>
+npm run board -- <args>
+npm run sources -- <args>
+npm run 4dt-wiki -- <args>
 ```
 
-Use direct module fallbacks only when installed wrappers and project scripts are unavailable:
+Use console entrypoints only when they are already known to work in the current shell:
+
+```txt
+4dt-memory <args>
+4dt-search <args>
+4dt-board <args>
+4dt-sources <args>
+4dt-wiki <args>
+```
+
+Use direct module fallbacks only when installed wrappers, source scripts, and known-good console entrypoints are unavailable:
 
 ```txt
 PYTHONPATH=packages/memory/src:packages/search/src python3 -m fourdt_memory.cli <args>
 PYTHONPATH=packages/search/src:packages/sources/src:packages/wiki/src:packages/board/src:packages/memory/src python3 -m fourdt_search.cli <args>
+PYTHONPATH=packages/board/src python3 -m fourdt_board.cli <args>
+PYTHONPATH=packages/sources/src python3 -m fourdt_sources.cli <args>
+PYTHONPATH=packages/wiki/src:packages/sources/src python3 -m fourdt_wiki.cli <args>
 ```
 
 For Python compile/test commands in sandboxed environments, set:
@@ -223,7 +274,7 @@ For Python compile/test commands in sandboxed environments, set:
 PYTHONPYCACHEPREFIX=/tmp/4dt-pycache
 ```
 
-If the first command fails with an import error, retry with the launch contract before concluding the memory or search tool is broken.
+Resolve the launcher once per session and reuse it for startup checks, Wakeup Recall, validation, and exact reads. Do not spend the morning routine probing global `4dt-*` commands before using installed wrappers.
 
 ## Storage And Retrieval
 

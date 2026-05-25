@@ -20,12 +20,29 @@ Run:
 
 1. `4dt-memory doctor --workspace . --json`
 2. `4dt-memory defaults load --workspace . --json` when memory is ready
-3. `4dt-board --workspace . --json validate`
-4. `4dt-sources --workspace . --json registry validate`
-5. `4dt-wiki --workspace . --json validate`
-6. `4dt-memory doctor --workspace . --json`
+3. Wakeup Recall for Wake Context: search memory for pending startup instructions, one-time operator messages, and the latest session handoff; read exact records before acting; deliver one-time messages; retire delivered records that say they should be deleted after delivery
+4. `4dt-board --workspace . --json validate`
+5. `4dt-sources --workspace . --json registry validate`
+6. `4dt-wiki --workspace . --json validate`
+7. `4dt-memory doctor --workspace . --json`
 
 Use the results to identify project purpose, source boundaries, current mode, operator preferences, approval policy, git policy, and validation expectations. If memory is unavailable, degraded, or empty, do not invent remembered rules; continue from this file and report that memory defaults were unavailable.
+
+Use Wake Context as compressed continuation context: it may point to board tasks, wiki pages, source files, commands, decisions, and next actions. It does not override current user requests, workspace instructions, tool-managed artifacts, or approved source truth.
+
+## Tool Launch Contract
+
+For startup checks, prefer the installed 4DreamTeam skill wrappers as the default launcher. Resolve the installed skill package from the active skill path or `$CODEX_HOME/skills/4dreamteam`; do not hardcode user-specific home directories, and do not probe global `4dt-*` commands first.
+
+```bash
+python3 <installed-4dreamteam-skill>/scripts/4dt-memory.py <args>
+python3 <installed-4dreamteam-skill>/scripts/4dt-search.py <args>
+python3 <installed-4dreamteam-skill>/scripts/4dt-board.py <args>
+python3 <installed-4dreamteam-skill>/scripts/4dt-sources.py <args>
+python3 <installed-4dreamteam-skill>/scripts/4dt-wiki.py <args>
+```
+
+From the 4DreamTeam source checkout, prefer the matching npm scripts when intentionally working on the source repository. Treat console `4dt-*` commands as optional shortcuts only after they are known to work in the current shell. Use direct `PYTHONPATH=... python3 -m ...` module fallbacks only for diagnosis after wrappers and source scripts fail.
 
 ## Framework-First Rule
 
