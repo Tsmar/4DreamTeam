@@ -189,6 +189,6 @@ $4DreamTeam prepare this accepted work for release
 
 ## Статус
 
-Текущая документированная версия: `0.5.3`.
+Текущая документированная версия: `0.5.4`.
 
 История изменений: [CHANGELOG.md](CHANGELOG.md).

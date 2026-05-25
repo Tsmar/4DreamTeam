@@ -23,7 +23,31 @@ def run_cli(args: list[str]) -> tuple[int, dict[str, object], str]:
     return exit_code, payload, stderr.getvalue()
 
 
+def run_help(args: list[str]) -> tuple[int, str]:
+    stdout = io.StringIO()
+    with contextlib.redirect_stdout(stdout):
+        try:
+            main(args)
+        except SystemExit as exc:
+            return int(exc.code or 0), stdout.getvalue()
+    return 0, stdout.getvalue()
+
+
 class SourcesCliTests(unittest.TestCase):
+    def test_agent_help_mentions_approval_and_ranges(self) -> None:
+        exit_code, output = run_help(["--help"])
+        self.assertEqual(exit_code, 0)
+        self.assertIn("Manage approved source boundaries.", output)
+        self.assertIn("Build or check the approved source index.", output)
+
+        exit_code, output = run_help(["registry", "add", "--help"])
+        self.assertEqual(exit_code, 0)
+        self.assertIn("External paths require explicit operator", output)
+
+        exit_code, output = run_help(["get", "--help"])
+        self.assertEqual(exit_code, 0)
+        self.assertIn("Recommended for focused agent reads.", output)
+
     def test_registry_add_requires_operator_approval_and_supports_file_and_directory(self) -> None:
         with tempfile.TemporaryDirectory() as raw_tmp:
             workspace = Path(raw_tmp)

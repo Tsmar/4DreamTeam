@@ -527,51 +527,71 @@ def command(args: argparse.Namespace) -> tuple[int, dict[str, Any]]:
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(prog="4dt-wiki")
-    parser.add_argument("--workspace", default=".")
-    parser.add_argument("--json", action="store_true")
+    parser = argparse.ArgumentParser(
+        prog="4dt-wiki",
+        description="Manage the single 4DreamTeam workspace wiki through stable page and section contracts.",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
+    parser.add_argument("--workspace", default=".", help="Workspace path. Defaults to the current directory.")
+    parser.add_argument("--json", action="store_true", help="Emit structured JSON output for agents.")
     sub = parser.add_subparsers(dest="action", required=True)
-    sub.add_parser("init")
-    sub.add_parser("status")
-    sub.add_parser("validate")
-    export = sub.add_parser("export")
-    export.add_argument("--target")
+    sub.add_parser("init", help="Initialize managed wiki storage and baseline pages.")
+    sub.add_parser("status", help="Show managed wiki readiness and issue summary.")
+    sub.add_parser("validate", help="Validate managed wiki page shape and index health.")
+    export = sub.add_parser("export", help="Copy managed wiki pages to a target under workspace sources/.")
+    export.add_argument("--target", help="Export target under workspace sources/, for example sources/4DreamTeam/docs.")
     export.set_defaults(action="export")
-    index = sub.add_parser("index")
+    index = sub.add_parser("index", help="Build or check the managed wiki index.")
     index_sub = index.add_subparsers(dest="index_action", required=True)
     index_build = index_sub.add_parser("build")
     index_build.set_defaults(action="index-build")
     index_check = index_sub.add_parser("check")
     index_check.set_defaults(action="index-check")
-    search = sub.add_parser("search")
-    search.add_argument("query")
-    search.add_argument("--limit", type=int, default=10)
-    get = sub.add_parser("get")
-    get.add_argument("page")
-    get.add_argument("--section", choices=sorted(SECTION_KEYS))
-    page = sub.add_parser("page")
+    search = sub.add_parser("search", help="Search managed wiki pages. Prefer 4dt-search for cross-domain discovery.")
+    search.add_argument("query", help="Plain text query.")
+    search.add_argument("--limit", type=int, default=10, help="Maximum matches to return.")
+    get = sub.add_parser("get", help="Read a whole page or one stable section.")
+    get.add_argument("page", help="Page id or path.")
+    get.add_argument("--section", choices=sorted(SECTION_KEYS), help="Read only one stable section.")
+    page = sub.add_parser("page", help="Create, update, section-edit, or atomically apply page changes.")
     page_sub = page.add_subparsers(dest="page_action", required=True)
-    page_create = page_sub.add_parser("create")
-    page_create.add_argument("path")
-    page_create.add_argument("--title", required=True)
-    page_create.add_argument("--type", required=True, choices=sorted(PAGE_KINDS))
+    page_create = page_sub.add_parser("create", help="Create a managed wiki page with required frontmatter and sections.")
+    page_create.add_argument("path", help="Workspace-wiki page path such as domains/payments.md.")
+    page_create.add_argument("--title", required=True, help="Human-readable page title.")
+    page_create.add_argument("--type", required=True, choices=sorted(PAGE_KINDS), help="Managed page kind.")
     page_create.set_defaults(action="page-create")
-    page_update = page_sub.add_parser("update")
-    page_update.add_argument("page")
-    page_update.add_argument("--status", dest="status_value", choices=sorted(PAGE_STATUSES))
-    page_update.add_argument("--source-refs-json")
-    page_update.add_argument("--task-refs-json")
+    page_update = page_sub.add_parser("update", help="Update page metadata without rewriting section content.")
+    page_update.add_argument("page", help="Page id or path.")
+    page_update.add_argument("--status", dest="status_value", choices=sorted(PAGE_STATUSES), help="Page status.")
+    page_update.add_argument("--source-refs-json", help="JSON array of source refs.")
+    page_update.add_argument("--task-refs-json", help="JSON array of task refs.")
     page_update.set_defaults(action="page-update")
-    page_section_set = page_sub.add_parser("section-set")
-    page_section_set.add_argument("page")
-    page_section_set.add_argument("section", choices=sorted(SECTION_KEYS))
-    page_section_set.add_argument("--content")
+    page_section_set = page_sub.add_parser(
+        "section-set",
+        help="Replace one stable section. Omit --content to read generated content from stdin.",
+        epilog="Agent default: pipe generated Markdown through stdin. Use --content for short inline text.",
+    )
+    page_section_set.add_argument("page", help="Page id or path.")
+    page_section_set.add_argument("section", choices=sorted(SECTION_KEYS), help="Stable section key to replace.")
+    page_section_set.add_argument("--content", help="Inline section content. If omitted, content is read from stdin.")
     page_section_set.set_defaults(action="page-section-set")
-    page_apply = page_sub.add_parser("apply")
-    page_apply.add_argument("page")
-    page_apply.add_argument("--file")
+    page_apply = page_sub.add_parser(
+        "apply",
+        help="Apply metadata and multiple section updates from one JSON payload.",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""Agent default: omit --file and pass generated JSON on stdin.
+
+Example:
+  4dt-wiki page apply domains-payments <<'JSON'
+  {"status":"accepted","sections":{"summary":"Updated summary."}}
+  JSON
+
+Use --file only when the payload already exists as a reusable or reviewed artifact.""",
+    )
+    page_apply.add_argument("page", help="Page id or path.")
+    page_apply.add_argument("--file", help="Optional JSON payload file. If omitted, payload is read from stdin.")
     page_apply.set_defaults(action="page-apply")
-    adr = sub.add_parser("adr")
+    adr = sub.add_parser("adr", help="Create managed architecture decision records.")
     adr_sub = adr.add_subparsers(dest="adr_action", required=True)
     adr_create = adr_sub.add_parser("create")
     adr_create.add_argument("title")

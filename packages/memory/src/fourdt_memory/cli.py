@@ -238,52 +238,64 @@ def add_common_arguments(parser: argparse.ArgumentParser, *, workspace: bool = T
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(prog="4dt-memory")
+    parser = argparse.ArgumentParser(
+        prog="4dt-memory",
+        description="Manage durable 4DreamTeam memory, contract defaults, session state, and recall.",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""Agent workflow:
+  - Use doctor, then defaults load, during startup.
+  - Search memory for durable decisions and Wake Context; do not invent missing defaults.
+  - Import is dry-run by default; add --apply only after reviewing the import summary.""",
+    )
     subparsers = parser.add_subparsers(dest="command", required=True)
 
-    init_parser = subparsers.add_parser("init")
+    init_parser = subparsers.add_parser("init", help="Initialize SQLite-backed memory and default contracts.")
     add_common_arguments(init_parser)
 
-    doctor_parser = subparsers.add_parser("doctor")
+    doctor_parser = subparsers.add_parser("doctor", help="Check memory storage, schema, and search backend health.")
     add_common_arguments(doctor_parser)
 
-    list_parser = subparsers.add_parser("list")
+    list_parser = subparsers.add_parser("list", help="List durable memory items with optional filters.")
     add_common_arguments(list_parser)
     list_parser.add_argument("--limit", type=int)
     list_parser.add_argument("--scope")
     list_parser.add_argument("--type")
     list_parser.add_argument("--role")
 
-    search_parser = subparsers.add_parser("search")
+    search_parser = subparsers.add_parser("search", help="Search durable memory items.")
     add_common_arguments(search_parser)
-    search_parser.add_argument("query", nargs="?")
-    search_parser.add_argument("--limit", type=int, default=5)
-    search_parser.add_argument("--scope")
-    search_parser.add_argument("--type")
-    search_parser.add_argument("--role")
-    search_parser.add_argument("--match", choices=["all", "any"], default="all")
-    search_parser.add_argument("--mode", choices=["plain", "extended", "json"], default="plain")
-    search_parser.add_argument("--query-json")
-    search_parser.add_argument("--query-file")
-    search_parser.add_argument("--field", action="append")
-    search_parser.add_argument("--explain", action="store_true")
-    search_parser.add_argument("--max-candidates", type=int)
+    search_parser.add_argument("query", nargs="?", help="Plain or extended text query.")
+    search_parser.add_argument("--limit", type=int, default=5, help="Maximum memories to return.")
+    search_parser.add_argument("--scope", help="Filter by memory scope.")
+    search_parser.add_argument("--type", help="Filter by memory type.")
+    search_parser.add_argument("--role", help="Filter by role.")
+    search_parser.add_argument("--match", choices=["all", "any"], default="all", help="Require all terms or allow exploratory any-term recall.")
+    search_parser.add_argument("--mode", choices=["plain", "extended", "json"], default="plain", help="Query parser mode.")
+    search_parser.add_argument("--query-json", help="Inline structured JSON query. Best for generated one-off JSON.")
+    search_parser.add_argument("--query-file", help="Structured JSON query file. Use for existing reusable artifacts.")
+    search_parser.add_argument("--field", action="append", help="Restrict search fields; repeat for multiple fields.")
+    search_parser.add_argument("--explain", action="store_true", help="Include search diagnostics.")
+    search_parser.add_argument("--max-candidates", type=int, help="Candidate cap, must be >= --limit.")
 
-    reindex_parser = subparsers.add_parser("reindex")
+    reindex_parser = subparsers.add_parser("reindex", help="Refresh memory search indexes.")
     add_common_arguments(reindex_parser)
 
-    export_parser = subparsers.add_parser("export")
+    export_parser = subparsers.add_parser("export", help="Export durable memory rows as JSONL.")
     add_common_arguments(export_parser)
     export_parser.add_argument("--format", default="jsonl", choices=["jsonl"])
     export_parser.add_argument("--output")
 
-    import_parser = subparsers.add_parser("import")
+    import_parser = subparsers.add_parser(
+        "import",
+        help="Import JSONL memory rows. Dry-run by default; add --apply to write.",
+        description="Import JSONL memory rows. Dry-run by default; add --apply to write.",
+    )
     add_common_arguments(import_parser)
-    import_parser.add_argument("input")
-    import_parser.add_argument("--format", default="jsonl", choices=["jsonl"])
-    import_parser.add_argument("--apply", action="store_true")
+    import_parser.add_argument("input", help="JSONL input file.")
+    import_parser.add_argument("--format", default="jsonl", choices=["jsonl"], help="Import format.")
+    import_parser.add_argument("--apply", action="store_true", help="Write rows. Without --apply, import only validates and reports dry_run.")
 
-    session_parser = subparsers.add_parser("session")
+    session_parser = subparsers.add_parser("session", help="Read or write temporary session state.")
     session_subparsers = session_parser.add_subparsers(dest="session_command", required=True)
     session_get = session_subparsers.add_parser("get")
     add_common_arguments(session_get)
@@ -294,12 +306,12 @@ def build_parser() -> argparse.ArgumentParser:
     session_set.add_argument("state_json")
     session_set.add_argument("--ttl-seconds", type=int, default=DEFAULT_SESSION_TTL_SECONDS)
 
-    defaults_parser = subparsers.add_parser("defaults")
+    defaults_parser = subparsers.add_parser("defaults", help="Load contract defaults for startup orientation.")
     defaults_subparsers = defaults_parser.add_subparsers(dest="defaults_command", required=True)
     defaults_load = defaults_subparsers.add_parser("load")
     add_common_arguments(defaults_load)
 
-    keys_parser = subparsers.add_parser("keys")
+    keys_parser = subparsers.add_parser("keys", help="Manage contract memory keys.")
     keys_subparsers = keys_parser.add_subparsers(dest="keys_command", required=True)
     keys_list = keys_subparsers.add_parser("list")
     add_common_arguments(keys_list)
@@ -315,7 +327,7 @@ def build_parser() -> argparse.ArgumentParser:
     add_common_arguments(keys_delete)
     keys_delete.add_argument("key")
 
-    mode_parser = subparsers.add_parser("mode")
+    mode_parser = subparsers.add_parser("mode", help="List, read, or set workflow modes.")
     mode_subparsers = mode_parser.add_subparsers(dest="mode_command", required=True)
     mode_list = mode_subparsers.add_parser("list")
     add_common_arguments(mode_list)
@@ -326,35 +338,35 @@ def build_parser() -> argparse.ArgumentParser:
     add_common_arguments(mode_set_current)
     mode_set_current.add_argument("mode")
 
-    onboarding_parser = subparsers.add_parser("onboarding")
+    onboarding_parser = subparsers.add_parser("onboarding", help="Inspect missing contract defaults and suggested questions.")
     onboarding_subparsers = onboarding_parser.add_subparsers(dest="onboarding_command", required=True)
     onboarding_rules = onboarding_subparsers.add_parser("rules")
     add_common_arguments(onboarding_rules)
     onboarding_questions = onboarding_subparsers.add_parser("questions")
     add_common_arguments(onboarding_questions)
 
-    benchmark_parser = subparsers.add_parser("benchmark")
+    benchmark_parser = subparsers.add_parser("benchmark", help="Run local memory retrieval and performance benchmarks.")
     add_common_arguments(benchmark_parser)
     benchmark_parser.add_argument("--mode", choices=["wiki-only", "memory-only", "memory-plus-wiki"])
     benchmark_parser.add_argument("--profile", choices=["harness", "retrieval-quality"], default="harness")
 
-    get_parser = subparsers.add_parser("get")
+    get_parser = subparsers.add_parser("get", help="Read one durable memory item by id.")
     add_common_arguments(get_parser)
     get_parser.add_argument("id")
 
-    remember_parser = subparsers.add_parser("remember")
+    remember_parser = subparsers.add_parser("remember", help="Save one source-backed durable memory item.")
     add_common_arguments(remember_parser)
-    remember_parser.add_argument("content")
-    remember_parser.add_argument("--scope", required=True)
-    remember_parser.add_argument("--type", required=True)
-    remember_parser.add_argument("--role")
-    remember_parser.add_argument("--source-type", required=True)
-    remember_parser.add_argument("--source-ref")
-    remember_parser.add_argument("--confidence", type=float, default=0.70)
-    remember_parser.add_argument("--metadata-json")
-    remember_parser.add_argument("--ttl-at")
+    remember_parser.add_argument("content", help="Durable memory content. Keep concise and source-backed.")
+    remember_parser.add_argument("--scope", required=True, help="Memory scope, for example workspace or project.")
+    remember_parser.add_argument("--type", required=True, help="Memory type, for example decision, preference, or handoff.")
+    remember_parser.add_argument("--role", help="Role associated with this memory.")
+    remember_parser.add_argument("--source-type", required=True, help="Evidence source type.")
+    remember_parser.add_argument("--source-ref", help="Evidence source reference.")
+    remember_parser.add_argument("--confidence", type=float, default=0.70, help="Confidence score, defaults to 0.70.")
+    remember_parser.add_argument("--metadata-json", help="Inline metadata JSON object.")
+    remember_parser.add_argument("--ttl-at", help="Optional expiration timestamp.")
 
-    forget_parser = subparsers.add_parser("forget")
+    forget_parser = subparsers.add_parser("forget", help="Retire one durable memory item with an audit reason.")
     add_common_arguments(forget_parser)
     forget_parser.add_argument("id")
     forget_parser.add_argument("--reason", required=True)

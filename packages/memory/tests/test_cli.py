@@ -24,7 +24,32 @@ def run_cli(args: list[str]) -> tuple[int, dict[str, object], str]:
     return exit_code, payload, stderr.getvalue()
 
 
+def run_help(args: list[str]) -> tuple[int, str]:
+    stdout = io.StringIO()
+    with contextlib.redirect_stdout(stdout):
+        try:
+            main(args)
+        except SystemExit as exc:
+            return int(exc.code or 0), stdout.getvalue()
+    return 0, stdout.getvalue()
+
+
 class CliTests(unittest.TestCase):
+    def test_agent_help_mentions_memory_modes_and_dry_run_import(self) -> None:
+        exit_code, output = run_help(["--help"])
+        self.assertEqual(exit_code, 0)
+        self.assertIn("Load contract defaults for startup orientation.", output)
+        self.assertIn("Save one source-backed durable memory item.", output)
+
+        exit_code, output = run_help(["import", "--help"])
+        self.assertEqual(exit_code, 0)
+        self.assertIn("Dry-run by default", output)
+        self.assertIn("Without --apply, import only validates", output)
+
+        exit_code, output = run_help(["search", "--help"])
+        self.assertEqual(exit_code, 0)
+        self.assertIn("Inline structured JSON query", output)
+
     def test_init_doctor_list_and_get_json(self) -> None:
         with tempfile.TemporaryDirectory() as raw_tmp:
             tmp_path = Path(raw_tmp)

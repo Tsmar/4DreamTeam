@@ -189,6 +189,6 @@ I am grateful to my colleagues and friends for their belief in 4DreamTeam, for e
 
 ## Status
 
-Current documented version: `0.5.3`.
+Current documented version: `0.5.4`.
 
 See [CHANGELOG.md](CHANGELOG.md) for release history.

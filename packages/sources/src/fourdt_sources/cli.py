@@ -624,40 +624,56 @@ def command(args: argparse.Namespace) -> tuple[int, dict[str, Any]]:
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(prog="4dt-sources")
-    parser.add_argument("--workspace", default=".")
-    parser.add_argument("--json", action="store_true")
+    parser = argparse.ArgumentParser(
+        prog="4dt-sources",
+        description="Manage approved source boundaries, source indexes, safe search, and exact snippet reads.",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""Agent workflow:
+  - Use registry list/validate to confirm approved boundaries.
+  - External paths require registry add --operator-approved.
+  - Prefer get --range for focused reads instead of broad file dumps.""",
+    )
+    parser.add_argument("--workspace", default=".", help="Workspace path. Defaults to the current directory.")
+    parser.add_argument("--json", action="store_true", help="Emit structured JSON output for agents.")
     sub = parser.add_subparsers(dest="action", required=True)
-    registry = sub.add_parser("registry")
+    registry = sub.add_parser("registry", help="Manage approved source boundaries.")
     registry_sub = registry.add_subparsers(dest="registry_action", required=True)
-    registry_add = registry_sub.add_parser("add")
-    registry_add.add_argument("path")
-    registry_add.add_argument("--label")
-    registry_add.add_argument("--operator-approved", action="store_true")
+    registry_add = registry_sub.add_parser(
+        "add",
+        help="Register an approved source boundary. External paths require explicit operator approval.",
+        description="Register an approved source boundary. External paths require explicit operator approval.",
+    )
+    registry_add.add_argument("path", help="Source path to register.")
+    registry_add.add_argument("--label", help="Optional source label.")
+    registry_add.add_argument(
+        "--operator-approved",
+        action="store_true",
+        help="Confirm the operator approved this source boundary, required for paths outside workspace sources/.",
+    )
     registry_add.set_defaults(action="registry-add")
-    registry_remove = registry_sub.add_parser("remove")
+    registry_remove = registry_sub.add_parser("remove", help="Remove an approved source boundary.")
     registry_remove.add_argument("source")
     registry_remove.set_defaults(action="registry-remove")
-    registry_list_parser = registry_sub.add_parser("list")
+    registry_list_parser = registry_sub.add_parser("list", help="List approved source boundaries.")
     registry_list_parser.set_defaults(action="registry-list")
-    registry_validate = registry_sub.add_parser("validate")
+    registry_validate = registry_sub.add_parser("validate", help="Validate source registry boundaries.")
     registry_validate.set_defaults(action="registry-validate")
-    index = sub.add_parser("index")
+    index = sub.add_parser("index", help="Build or check the approved source index.")
     index_sub = index.add_subparsers(dest="index_action", required=True)
     index_build = index_sub.add_parser("build")
     index_build.set_defaults(action="index-build")
     index_check = index_sub.add_parser("check")
     index_check.set_defaults(action="index-check")
-    list_parser = sub.add_parser("list")
-    list_parser.add_argument("--kind", choices=("boundary", "file", "directory"))
-    list_parser.add_argument("--limit", type=int, default=DEFAULT_LIMIT)
-    search = sub.add_parser("search")
-    search.add_argument("query")
-    search.add_argument("--limit", type=int, default=10)
-    get = sub.add_parser("get")
-    get.add_argument("path")
-    get.add_argument("--range")
-    sub.add_parser("stats")
+    list_parser = sub.add_parser("list", help="List indexed boundaries, files, or directories.")
+    list_parser.add_argument("--kind", choices=("boundary", "file", "directory"), help="Inventory item kind.")
+    list_parser.add_argument("--limit", type=int, default=DEFAULT_LIMIT, help="Maximum items to return.")
+    search = sub.add_parser("search", help="Search approved source inventory. Prefer 4dt-search for cross-domain discovery.")
+    search.add_argument("query", help="Plain text query.")
+    search.add_argument("--limit", type=int, default=10, help="Maximum matches to return.")
+    get = sub.add_parser("get", help="Read an approved source path, optionally constrained to a line range.")
+    get.add_argument("path", help="Approved source path or indexed relative path.")
+    get.add_argument("--range", help="Line range start:end. Recommended for focused agent reads.")
+    sub.add_parser("stats", help="Show indexed source inventory statistics.")
     return parser
 
 

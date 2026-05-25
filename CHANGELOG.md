@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.5.4 - 2026-05-25
+
+- Improved agent-facing CLI help across `4dt-wiki`, `4dt-board`, `4dt-sources`, `4dt-search`, and `4dt-memory` with safer defaults, payload-source guidance, mode explanations, and approval-sensitive workflow hints.
+- Documented stdin-first `4dt-wiki page apply` usage for generated JSON payloads while preserving `--file` compatibility for reusable or reviewed artifacts.
+- Added top-level CLI help descriptions so command groups are discoverable before drilling into nested subcommands.
+- Added focused tests for wiki stdin apply behavior and representative CLI help text.
+- Bumped the skill metadata and documented README version to `0.5.4`.
+
 ## 0.5.3 - 2026-05-25
 
 - Added Wake Context / Wakeup Recall startup guidance so agents read pending startup instructions, one-time operator messages, and latest session handoffs after contract defaults.

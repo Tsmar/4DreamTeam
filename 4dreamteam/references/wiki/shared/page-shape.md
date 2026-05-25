@@ -45,13 +45,20 @@ Use `page update` for metadata-only changes:
 4dt-wiki page update <page-or-id> --status <status>
 ```
 
-Use `page apply` when metadata and one or more sections should change together:
+Use `page apply` when metadata and one or more sections should change together. For agent-generated payloads, prefer stdin so the agent does not need to create a temporary file:
 
 ```bash
-4dt-wiki page apply <page-or-id> --file payload.json
+4dt-wiki page apply <page-or-id> <<'JSON'
+{
+  "status": "accepted",
+  "sections": {
+    "summary": "Current accepted summary."
+  }
+}
+JSON
 ```
 
-If `--file` is omitted, `4dt-wiki` reads the JSON payload from stdin.
+Use `--file payload.json` only when the payload already exists as a reusable, reviewed, or operator-provided artifact. If `--file` is omitted, `4dt-wiki` reads the JSON payload from stdin.
 
 Payload fields:
 

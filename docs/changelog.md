@@ -4,10 +4,10 @@ kind: changelog
 title: Changelog
 status: actual
 created_at: 2026-05-23T07:31:46Z
-updated_at: 2026-05-25T05:34:15Z
+updated_at: 2026-05-25T11:29:34Z
 owner: wiki
 source_refs: ["sources/4DreamTeam/CHANGELOG.md", "sources/4DreamTeam/4dreamteam/references/release.md", "sources/4DreamTeam/README.md", "sources/4DreamTeam/README.ru.md", "sources/4DreamTeam/4dreamteam/SKILL.md"]
-task_refs: ["EPIC-0001", "EPIC-0002-TASK-0014", "EPIC-0002-TASK-0015", "TASK-0021", "TASK-0022"]
+task_refs: ["TASK-0023", "TASK-0024"]
 ---
 
 # Changelog
@@ -24,6 +24,12 @@ This workspace wiki changelog records notable managed-wiki changes for the 4Drea
 
 
 
+
+
+
+2026-05-25: Prepared 4DreamTeam v0.5.4 release packaging for agent-friendly CLI workflows. The release improves help across 4dt-wiki, 4dt-board, 4dt-sources, 4dt-search, and 4dt-memory; documents stdin-first wiki page apply for generated JSON; adds top-level command group descriptions; records the agent-friendly CLI contract; refreshes tests and exported docs; and bumps skill metadata/documented version to 0.5.4.
+
+2026-05-25: Updated 4DreamTeam CLI ergonomics for agents after accepted TASK-0023 work. Help text now documents safe defaults, payload sources, mode choices, focused reads, source approval requirements, deterministic board timeline entry ids, memory import dry-run/apply behavior, search query/index modes, and stdin-first `4dt-wiki page apply` usage for generated JSON while preserving file-based payload compatibility.
 
 2026-05-25: Prepared 4DreamTeam v0.5.3 release packaging for Wake Context and public README updates. The release adds Wakeup Recall startup guidance, makes installed skill wrappers the default startup launcher, adds a short human/agent wakeup analogy to English and Russian README files, updates quick-start prompts with direct GitHub skill installation, and bumps skill metadata/documented version to 0.5.3.
 

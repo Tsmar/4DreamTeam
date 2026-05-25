@@ -108,12 +108,20 @@ def command(args: argparse.Namespace) -> tuple[int, dict[str, Any]]:
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(prog="4dt-search")
-    parser.add_argument("--workspace", default=".")
-    parser.add_argument("--json", action="store_true")
+    parser = argparse.ArgumentParser(
+        prog="4dt-search",
+        description="Search 4DreamTeam wiki, sources, board, and memory with authoritative getCommand results.",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""Agent workflow:
+  - Start with query/search plus an explicit --domain.
+  - Use --match any for exploratory recall and fuzzy operator wording.
+  - Use --index readonly when missing results should reveal a stale index; use rebuild only for explicit refresh.""",
+    )
+    parser.add_argument("--workspace", default=".", help="Workspace path. Defaults to the current directory.")
+    parser.add_argument("--json", action="store_true", help="Emit structured JSON output for agents.")
     sub = parser.add_subparsers(dest="action", required=True)
 
-    index = sub.add_parser("index")
+    index = sub.add_parser("index", help="Build or check the unified search index.")
     add_runtime_arguments(index)
     index_sub = index.add_subparsers(dest="index_action", required=True)
     index_build = index_sub.add_parser("build")
@@ -124,27 +132,42 @@ def build_parser() -> argparse.ArgumentParser:
     index_check.set_defaults(action="index-check")
 
     for command_name in ("search", "query"):
-        search_parser = sub.add_parser(command_name)
+        search_parser = sub.add_parser(
+            command_name,
+            help="Search indexed workspace domains.",
+            formatter_class=argparse.RawDescriptionHelpFormatter,
+            epilog="""Query modes:
+  plain    token search, default for normal text
+  extended supports | alternatives and ! exclusions
+  json     structured query from --query-json or --query-file
+
+Payload sources: pass query text as an argument, inline JSON with --query-json, or an existing reusable file with --query-file.""",
+        )
         add_runtime_arguments(search_parser)
-        search_parser.add_argument("query", nargs="?")
-        search_parser.add_argument("--domain")
-        search_parser.add_argument("--limit", type=int, default=10)
-        search_parser.add_argument("--match", choices=["all", "any"], default="all")
-        search_parser.add_argument("--mode", choices=["plain", "extended", "json"])
-        search_parser.add_argument("--query-json")
-        search_parser.add_argument("--query-file")
-        search_parser.add_argument("--field", action="append")
-        search_parser.add_argument("--explain", action="store_true")
-        search_parser.add_argument("--max-candidates", type=int)
-        search_parser.add_argument("--index", choices=["auto", "readonly", "rebuild"], default="auto")
+        search_parser.add_argument("query", nargs="?", help="Plain or extended text query.")
+        search_parser.add_argument("--domain", help="Domain to search: wiki, sources, board, or memory. Repeat by comma if supported.")
+        search_parser.add_argument("--limit", type=int, default=10, help="Maximum matches to return.")
+        search_parser.add_argument("--match", choices=["all", "any"], default="all", help="Require all terms or allow any term.")
+        search_parser.add_argument("--mode", choices=["plain", "extended", "json"], help="Query parser mode.")
+        search_parser.add_argument("--query-json", help="Inline structured JSON query. Best for generated one-off JSON.")
+        search_parser.add_argument("--query-file", help="Structured JSON query file. Use for existing reusable artifacts.")
+        search_parser.add_argument("--field", action="append", help="Restrict search fields; repeat for multiple fields.")
+        search_parser.add_argument("--explain", action="store_true", help="Include scoring and index diagnostics.")
+        search_parser.add_argument("--max-candidates", type=int, help="Candidate cap, must be >= --limit.")
+        search_parser.add_argument(
+            "--index",
+            choices=["auto", "readonly", "rebuild"],
+            default="auto",
+            help="Index mode: auto refreshes stale indexes, readonly reports stale indexes, rebuild forces refresh.",
+        )
         search_parser.set_defaults(action="search")
 
-    get_parser = sub.add_parser("get")
+    get_parser = sub.add_parser("get", help="Resolve a search result id through its authoritative domain tool.")
     add_runtime_arguments(get_parser)
     get_parser.add_argument("result_id")
     get_parser.set_defaults(action="get")
 
-    stats_parser = sub.add_parser("stats")
+    stats_parser = sub.add_parser("stats", help="Show unified search index statistics.")
     add_runtime_arguments(stats_parser)
     return parser
 

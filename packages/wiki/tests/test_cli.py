@@ -13,14 +13,35 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 from fourdt_wiki.cli import main
 
 
-def run_cli(args: list[str]) -> tuple[int, dict[str, object], str]:
+def run_cli(args: list[str], stdin: str = "") -> tuple[int, dict[str, object], str]:
     stdout = io.StringIO()
     stderr = io.StringIO()
-    with contextlib.redirect_stdout(stdout), contextlib.redirect_stderr(stderr):
-        exit_code = main(args)
+    original_stdin = sys.stdin
+    try:
+        sys.stdin = io.StringIO(stdin)
+        with contextlib.redirect_stdout(stdout), contextlib.redirect_stderr(stderr):
+            exit_code = main(args)
+    finally:
+        sys.stdin = original_stdin
     output = stdout.getvalue().strip()
     payload = json.loads(output) if output else {}
     return exit_code, payload, stderr.getvalue()
+
+
+def run_help(args: list[str]) -> tuple[int, str]:
+    stdout = io.StringIO()
+    with contextlib.redirect_stdout(stdout), self_exit_to_code() as code:
+        main(args)
+    return code[0], stdout.getvalue()
+
+
+@contextlib.contextmanager
+def self_exit_to_code():
+    code = [0]
+    try:
+        yield code
+    except SystemExit as exc:
+        code[0] = int(exc.code or 0)
 
 
 class WikiCliTests(unittest.TestCase):
@@ -143,8 +164,32 @@ class WikiCliTests(unittest.TestCase):
             )
             self.assertEqual(exit_code, 0)
             self.assertEqual(payload["page"]["status"], "accepted")
+
+            stdin_payload = json.dumps(
+                {
+                    "status": "actual",
+                    "sections": {
+                        "summary": "Payments summary from stdin.",
+                        "related": ["- [Billing](../domains/billing.md)"],
+                    },
+                }
+            )
+            exit_code, payload, _stderr = run_cli(
+                [
+                    "--workspace",
+                    str(workspace),
+                    "--json",
+                    "page",
+                    "apply",
+                    "domains-payments",
+                ],
+                stdin=stdin_payload,
+            )
+            self.assertEqual(exit_code, 0)
+            self.assertEqual(payload["page"]["status"], "actual")
             exit_code, payload, _stderr = run_cli(["--workspace", str(workspace), "--json", "get", "domains-payments"])
             self.assertEqual(exit_code, 0)
+            self.assertIn("Payments summary from stdin.", payload["body"])
             self.assertIn("- It supports line arrays.", payload["body"])
 
             exit_code, payload, _stderr = run_cli(["--workspace", str(workspace), "--json", "search", "Payments"])
@@ -219,9 +264,24 @@ class WikiCliTests(unittest.TestCase):
                     "Updated overview.",
                 ]
             )
+
             exit_code, payload, _stderr = run_cli(["--workspace", str(workspace), "--json", "export", "--target", str(target)])
             self.assertEqual(exit_code, 0)
             self.assertIn("Updated overview.", (target / "overview.md").read_text(encoding="utf-8"))
+
+    def test_agent_help_mentions_stdin_first_page_apply(self) -> None:
+        exit_code, output = run_help(["--help"])
+        self.assertEqual(exit_code, 0)
+        self.assertIn("Create, update, section-edit, or atomically apply page", output)
+
+        exit_code, output = run_help(["page", "apply", "--help"])
+        self.assertEqual(exit_code, 0)
+        self.assertIn("Agent default: omit --file and pass generated JSON on stdin.", output)
+        self.assertIn("Use --file only when the payload already exists", output)
+
+        exit_code, output = run_help(["page", "section-set", "--help"])
+        self.assertEqual(exit_code, 0)
+        self.assertIn("If omitted, content is read", output)
 
     def test_export_rejects_targets_outside_workspace_sources(self) -> None:
         with tempfile.TemporaryDirectory() as raw_tmp:

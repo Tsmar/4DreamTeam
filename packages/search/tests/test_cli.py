@@ -26,7 +26,30 @@ def run(main_func, args: list[str]) -> tuple[int, dict[str, object]]:
     return exit_code, json.loads(output) if output else {}
 
 
+def run_help(main_func, args: list[str]) -> tuple[int, str]:
+    stdout = io.StringIO()
+    with contextlib.redirect_stdout(stdout), contextlib.redirect_stderr(io.StringIO()):
+        try:
+            main_func(args)
+        except SystemExit as exc:
+            return int(exc.code or 0), stdout.getvalue()
+    return 0, stdout.getvalue()
+
+
 class SearchCliTests(unittest.TestCase):
+    def test_agent_help_mentions_query_modes_and_index_modes(self) -> None:
+        exit_code, output = run_help(search_main, ["--help"])
+        self.assertEqual(exit_code, 0)
+        self.assertIn("Build or check the unified search index.", output)
+        self.assertIn("Resolve a search result id through its authoritative", output)
+
+        exit_code, output = run_help(search_main, ["query", "--help"])
+        self.assertEqual(exit_code, 0)
+        self.assertIn("Payload sources: pass query text as an argument", output)
+        self.assertIn("structured query from --query-json or --query-file", output)
+        self.assertIn("readonly", output)
+        self.assertIn("reports stale indexes", output)
+
     def test_build_search_get_sources_wiki_and_board(self) -> None:
         with tempfile.TemporaryDirectory() as raw_tmp:
             workspace = Path(raw_tmp)

@@ -23,7 +23,32 @@ def run_cli(args: list[str]) -> tuple[int, dict[str, object], str]:
     return exit_code, payload, stderr.getvalue()
 
 
+def run_help(args: list[str]) -> tuple[int, str]:
+    stdout = io.StringIO()
+    with contextlib.redirect_stdout(stdout):
+        try:
+            main(args)
+        except SystemExit as exc:
+            return int(exc.code or 0), stdout.getvalue()
+    return 0, stdout.getvalue()
+
+
 class BoardCliTests(unittest.TestCase):
+    def test_agent_help_mentions_timeline_entry_contract(self) -> None:
+        exit_code, output = run_help(["--help"])
+        self.assertEqual(exit_code, 0)
+        self.assertIn("Append role-scoped task or epic timeline entries.", output)
+        self.assertIn("Show full task details or concise task summaries.", output)
+
+        exit_code, output = run_help(["comment", "add", "--help"])
+        self.assertEqual(exit_code, 0)
+        self.assertIn("deterministic scripted", output)
+        self.assertIn("developer_implementation", output)
+
+        exit_code, output = run_help(["move", "--help"])
+        self.assertEqual(exit_code, 0)
+        self.assertIn("Target board column.", output)
+
     def test_create_index_move_section_and_summary(self) -> None:
         with tempfile.TemporaryDirectory() as raw_tmp:
             workspace = Path(raw_tmp)
