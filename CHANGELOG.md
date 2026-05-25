@@ -1,9 +1,12 @@
 # Changelog
 
-## Unreleased
+## 0.5.3 - 2026-05-25
 
 - Added Wake Context / Wakeup Recall startup guidance so agents read pending startup instructions, one-time operator messages, and latest session handoffs after contract defaults.
 - Changed startup tool launch guidance to use installed `4dreamteam/scripts/4dt-*.py` wrappers first, with universal installed-skill path resolution and console commands treated as optional shortcuts.
+- Added a short human/agent sleep-and-wakeup analogy to the English and Russian README files.
+- Updated README quick-start prompts with direct skill installation from the GitHub `4dreamteam` folder and a first `$4DreamTeam` startup prompt.
+- Bumped the skill metadata and documented README version to `0.5.3`.
 
 ## 0.5.2 - 2026-05-25
 

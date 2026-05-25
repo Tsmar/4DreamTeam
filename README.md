@@ -37,6 +37,8 @@ $4DreamTeam
 
 Work does not live only in the chat scroll. 4DreamTeam writes down what was decided, what was changed, what was checked, and what still matters so the project can be resumed later.
 
+People wake up each morning with yesterday's noise softened and the important things still within reach: who they are, what matters, and where to continue. 4DreamTeam treats agent sessions the same way. When a chat ends, the useful context can settle into memory, board notes, and wiki pointers; when a new chat starts, Wake Context helps the agent wake up with the next step in mind instead of dragging the whole tired conversation behind it.
+
 ### It learns from the operator
 
 When you point out something important, 4DreamTeam can turn it into a lesson for next time. If you say that tests work a certain way, that some logs are just noise, or that a mistake should not be repeated, the agent can remember the lesson and bring it back before similar work.
@@ -112,7 +114,11 @@ Prepare the accepted work for release.
 
 ## Quick Start
 
-Install the `4dreamteam/` skill package from [Tsmar/4DreamTeam](https://github.com/Tsmar/4DreamTeam/tree/main/4dreamteam).
+Ask Codex to install the `4dreamteam/` skill package directly from the repository:
+
+```txt
+установи скилл расположенный по этой ссылке [https://github.com/Tsmar/4DreamTeam/tree/main/4dreamteam](https://github.com/Tsmar/4DreamTeam/tree/main/4dreamteam)
+```
 
 Restart Codex, then ask:
 
@@ -120,10 +126,10 @@ Restart Codex, then ask:
 Is the 4DreamTeam skill available?
 ```
 
-From any project folder:
+From a new project workspace, start the skill:
 
 ```txt
-Run $4DreamTeam.
+привет $4DreamTeam
 ```
 
 If the folder is not ready for 4DreamTeam yet, it asks before creating project files.
@@ -156,9 +162,7 @@ Status checks are safe by default. Commits, pushes, tags, releases, server chang
 
 ## Documentation
 
-This README is the landing page. It explains why you might want to try 4DreamTeam.
-
-Detailed documentation lives in [docs/](docs/):
+Documentation is available in [docs/](docs/) in English:
 
 - [Workspace Overview](docs/overview.md)
 - [Product Overview](docs/product/overview.md)
@@ -179,8 +183,12 @@ Detailed documentation lives in [docs/](docs/):
 - it asks before risky file changes, server work, releases, and publication;
 - it does not invent marketing, operations, or security claims that are not backed by checked sources.
 
+## Thanks
+
+I am grateful to my colleagues and friends for their belief in 4DreamTeam, for entrusting their projects to a team of agents who work with them on real tasks. It is incredibly inspiring and motivates me to keep developing this project!
+
 ## Status
 
-Current documented version: `0.5.2`.
+Current documented version: `0.5.3`.
 
 See [CHANGELOG.md](CHANGELOG.md) for release history.
