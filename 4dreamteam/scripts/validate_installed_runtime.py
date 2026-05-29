@@ -42,6 +42,27 @@ def main() -> int:
                 print(result.stderr, file=sys.stderr)
                 print(f"runtime wrapper failed: {wrapper}", file=sys.stderr)
                 return result.returncode or 1
+        memory_workspace = Path(raw_tmp) / "memory-workspace"
+        memory_workspace.mkdir()
+        result = subprocess.run(
+            [
+                sys.executable,
+                str(target_skill / "scripts" / "4dt-memory.py"),
+                "init",
+                "--workspace",
+                str(memory_workspace),
+                "--json",
+            ],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            check=False,
+        )
+        if result.returncode != 0:
+            print(result.stdout)
+            print(result.stderr, file=sys.stderr)
+            print("runtime wrapper failed: 4dt-memory.py init", file=sys.stderr)
+            return result.returncode or 1
     return 0
 
 

@@ -1,11 +1,10 @@
 from __future__ import annotations
 
 import sqlite3
-from pathlib import Path
+from importlib import resources
 
 
 SCHEMA_VERSION = 3
-SCHEMA_PATH = Path(__file__).with_name("schema.sql")
 
 CONTRACT_SCHEMA_SQL = """
 CREATE TABLE IF NOT EXISTS memory_contract_entries (
@@ -24,7 +23,7 @@ CREATE INDEX IF NOT EXISTS idx_memory_contract_entries_workspace
 
 
 def schema_sql() -> str:
-    return SCHEMA_PATH.read_text(encoding="utf-8")
+    return resources.files(__package__).joinpath("schema.sql").read_text(encoding="utf-8")
 
 
 def schema_version(connection: sqlite3.Connection) -> int:

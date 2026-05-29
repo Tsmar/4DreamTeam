@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.5.5 - 2026-05-29
+
+- Fixed installed-skill `4dt-memory init` so memory schema SQL loads correctly from the generated `4dt-tools.pyz` runtime archive.
+- Added regression coverage for loading memory schema SQL from a zipimport package.
+- Strengthened installed runtime validation to run a real `4dt-memory.py init` smoke test instead of checking wrapper help output only.
+- Bumped the skill metadata and documented README version to `0.5.5`.
+
 ## 0.5.4 - 2026-05-25
 
 - Improved agent-facing CLI help across `4dt-wiki`, `4dt-board`, `4dt-sources`, `4dt-search`, and `4dt-memory` with safer defaults, payload-source guidance, mode explanations, and approval-sensitive workflow hints.
