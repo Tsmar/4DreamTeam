@@ -12,7 +12,9 @@ Use this mode when the workspace wiki must align with accepted changes, explicit
    - `4dt-wiki page section-set` for one section;
    - `4dt-wiki page update` for metadata-only changes;
    - `4dt-wiki page apply` for metadata plus multiple section changes.
-6. Rebuild and check the wiki index with `4dt-wiki`.
-7. Append wiki evidence to the task through `4dt-board` when the sync belongs to a task.
+6. Do not run multiple wiki writes in parallel for the same page; combine same-page section changes into one `page apply` payload or run them sequentially.
+7. Keep each section at or below 32,000 UTF-8 bytes. Split larger material into separate managed wiki pages and link them through `related`.
+8. Rebuild and check the wiki index with `4dt-wiki`.
+9. Append wiki evidence to the task through `4dt-board` when the sync belongs to a task.
 
 Do not read or write wiki storage directly.

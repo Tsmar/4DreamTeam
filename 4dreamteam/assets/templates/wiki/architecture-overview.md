@@ -1,44 +1,47 @@
+---
+id: architecture-overview
+kind: architecture
+title: Architecture Overview
+status: draft
+created_at: <created-at>
+updated_at: <updated-at>
+owner: wiki
+source_refs: []
+task_refs: []
+---
+
 # Architecture Overview
 
-<!-- wiki-meta
-status: actual
-mode: bootstrap
-backing: approved-sources
-source_state: backed-by-code
--->
+## Summary
 
-## Status
+<what role the system plays technically, in one short paragraph>
 
-actual
+## Content
 
-## Project Type
+Describe project type, runtime entrypoints, main modules, contracts, schemas, integrations, and product-to-technical links.
 
-backend / frontend / fullstack / library / mixed workspace / unknown
+Suggested structure:
 
-## System Role
+- Project type
+- Runtime and entrypoints
+- Main modules
+- Contracts and schemas
+- Integrations
+- Product links
 
-<what role the project plays in the overall system>
+## Evidence
 
-## Runtime And Entrypoints
+- <approved source path, accepted task evidence, or explicit operator confirmation>
 
-- `<path>` - <role>
+## Decisions
 
-## Main Modules
+- <durable architecture or documentation decision>
 
-- <module> - <responsibility>
+## Open Questions
 
-## Product Links
+- <technical behavior, dependency, or source-backed claim that is still unknown>
 
-- <technical area> -> <product capability or workflow>
+## Related
 
-## Contracts And Schemas
-
-- <contract or schema> - <where documented>
-
-## Integrations
-
-- <integration> - <role>
-
-## Requires Source Access
-
-- <what cannot be confirmed from approved sources>
+- [Workspace Overview](../overview.md)
+- [Product Overview](../product/overview.md)

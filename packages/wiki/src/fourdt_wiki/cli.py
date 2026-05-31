@@ -36,6 +36,8 @@ SECTION_KEYS = {
     "open_questions": "Open Questions",
     "related": "Related",
 }
+MAX_SECTION_BYTES = 32_000
+MAX_SECTION_BYTES_LABEL = f"{MAX_SECTION_BYTES:,}"
 REQUIRED_FRONTMATTER = {"id", "kind", "title", "status", "created_at", "updated_at", "owner", "source_refs", "task_refs"}
 BASELINE_DIRS = [
     "product",
@@ -211,8 +213,6 @@ def wiki_pages(workspace: Path) -> list[WikiPage]:
     for path in sorted(root.rglob("*.md")):
         if "/.index/" in path.as_posix():
             continue
-        if path.relative_to(root).as_posix() == "sources.md":
-            continue
         pages.append(read_page(workspace, path))
     return pages
 
@@ -296,6 +296,7 @@ def normalized_refs(raw: str | None, *, field: str) -> str | None:
 def replace_section_body(body: str, section_key: str, content: str) -> str:
     if section_key not in SECTION_KEYS:
         raise UserError("invalid_section", f"Unknown section key: {section_key}")
+    validate_section_size(section_key, content)
     heading = SECTION_KEYS[section_key]
     match = re.search(rf"^## {re.escape(heading)}\s*$", body, re.MULTILINE)
     if not match:
@@ -305,6 +306,18 @@ def replace_section_body(body: str, section_key: str, content: str) -> str:
     end = start + next_match.start() if next_match else len(body)
     replacement = "\n\n" + content.strip() + "\n\n"
     return body[:start] + replacement + body[end:].lstrip("\n")
+
+
+def validate_section_size(section_key: str, content: str) -> None:
+    size = len(content.encode("utf-8"))
+    if size > MAX_SECTION_BYTES:
+        raise UserError(
+            "section_too_large",
+            (
+                f"Section content is larger than {MAX_SECTION_BYTES_LABEL} bytes: "
+                f"{section_key} ({size} bytes). Split the material across multiple wiki pages."
+            ),
+        )
 
 
 def create_page(workspace: Path, relpath: str, title: str, kind: str) -> dict[str, Any]:
@@ -553,7 +566,7 @@ def build_parser() -> argparse.ArgumentParser:
     get = sub.add_parser("get", help="Read a whole page or one stable section.")
     get.add_argument("page", help="Page id or path.")
     get.add_argument("--section", choices=sorted(SECTION_KEYS), help="Read only one stable section.")
-    page = sub.add_parser("page", help="Create, update, section-edit, or atomically apply page changes.")
+    page = sub.add_parser("page", help="Create, update, section-edit, or apply combined page changes.")
     page_sub = page.add_subparsers(dest="page_action", required=True)
     page_create = page_sub.add_parser("create", help="Create a managed wiki page with required frontmatter and sections.")
     page_create.add_argument("path", help="Workspace-wiki page path such as domains/payments.md.")
@@ -569,7 +582,10 @@ def build_parser() -> argparse.ArgumentParser:
     page_section_set = page_sub.add_parser(
         "section-set",
         help="Replace one stable section. Omit --content to read generated content from stdin.",
-        epilog="Agent default: pipe generated Markdown through stdin. Use --content for short inline text.",
+        epilog=(
+            "Agent default: pipe generated Markdown through stdin. Use --content for short inline text. "
+            f"Section content must be {MAX_SECTION_BYTES_LABEL} bytes or smaller."
+        ),
     )
     page_section_set.add_argument("page", help="Page id or path.")
     page_section_set.add_argument("section", choices=sorted(SECTION_KEYS), help="Stable section key to replace.")
@@ -586,7 +602,8 @@ Example:
   {"status":"accepted","sections":{"summary":"Updated summary."}}
   JSON
 
-Use --file only when the payload already exists as a reusable or reviewed artifact.""",
+Use --file only when the payload already exists as a reusable or reviewed artifact.
+Each section value must be 32,000 bytes or smaller.""",
     )
     page_apply.add_argument("page", help="Page id or path.")
     page_apply.add_argument("--file", help="Optional JSON payload file. If omitted, payload is read from stdin.")

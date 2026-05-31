@@ -1,55 +1,57 @@
-# ADR-XXXX: <decision title>
+---
+id: decisions-<yyyymmdd>-<decision-slug>
+kind: decision
+title: <Decision Title>
+status: draft
+created_at: <created-at>
+updated_at: <updated-at>
+owner: wiki
+source_refs: []
+task_refs: []
+---
 
-<!-- wiki-meta
-status: proposed
-mode: post-acceptance
-backing: accepted-quality-report
-source_state: backed-by-accepted-change
--->
+# <Decision Title>
 
-## Status
+## Summary
 
-proposed / accepted / superseded / deprecated
+<the decision and why it matters, in one short paragraph>
 
-## Context
+## Content
 
-<what problem, constraint, or tradeoff required a decision>
+Context:
 
-## Decision
+- <problem, constraint, or tradeoff>
 
-<the decision that was made>
+Decision:
 
-## Rationale
+- <the chosen direction>
 
-<why this decision was chosen>
+Rationale:
 
-## Alternatives Considered
+- <why this direction was chosen>
+
+Alternatives considered:
 
 1. <alternative> - <why it was not chosen>
-2. <alternative> - <why it was not chosen>
 
-## Consequences
+Consequences:
 
-### Positive
+- Positive: <expected benefit>
+- Negative: <cost or tradeoff>
+- Follow-up: <future work or monitoring>
 
-1. <expected benefit>
+## Evidence
 
-### Negative
+- <accepted quality evidence, task evidence, source path, or explicit operator confirmation>
 
-1. <cost or tradeoff>
+## Decisions
 
-### Follow-Up
+- <the durable decision statement>
 
-1. <future work or monitoring>
+## Open Questions
 
-## Source And Backing
+- <unknown, risk, or follow-up decision>
 
-- Accepted quality report: `<path>`
-- Related task: `<path>`
-- Developer report: `<path>`
-- Approved sources: `<path>`
+## Related
 
-## Links
-
-- Related product/workflow page: `<relative link>`
-- Related architecture page: `<relative link>`
+- <relative link to related product, architecture, flow, contract, or task-backed page>

@@ -39,13 +39,13 @@ CHANGELOG.md records release history for the source repository. Managed wiki pag
 
 
 
-- sources/4DreamTeam/README.md documents Wake Context, the direct install prompt, the first startup prompt, English docs location, thanks, and version 0.5.3.
+- sources/4DreamTeam/README.md documents Wake Context, the direct install prompt, the first startup prompt, English docs location, thanks, and version 0.5.6.
 - sources/4DreamTeam/README.ru.md is the Russian localized README with matching structure and claims, including the operator-provided thanks text.
-- sources/4DreamTeam/CHANGELOG.md includes the 0.5.3 release entry.
-- sources/4DreamTeam/4dreamteam/SKILL.md carries skill metadata version 0.5.3.
+- sources/4DreamTeam/CHANGELOG.md includes the 0.5.6 release entry.
+- sources/4DreamTeam/4dreamteam/SKILL.md carries skill metadata version 0.5.6.
 - sources/4DreamTeam/4dreamteam/references/wiki.md defines managed wiki modes and rules.
 - sources/4DreamTeam/4dreamteam/references/release.md defines release documentation and changelog policy.
-- TASK-0022 contains accepted quality evidence for the README and version update.
+- TASK-0035 contains accepted quality evidence for the wiki write safety, legacy cleanup, README version, and changelog update.
 
 ## Decisions
 

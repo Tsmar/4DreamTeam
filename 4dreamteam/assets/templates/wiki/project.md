@@ -1,50 +1,48 @@
-# <project-name>
+---
+id: overview
+kind: overview
+title: Workspace Overview
+status: draft
+created_at: <created-at>
+updated_at: <updated-at>
+owner: wiki
+source_refs: []
+task_refs: []
+---
 
-<!-- wiki-meta
-status: actual
-mode: bootstrap
-backing: approved-sources
-source_state: backed-by-code
--->
+# Workspace Overview
 
-## Status
+## Summary
 
-actual
+<what this workspace is for, in one short paragraph>
 
-## Purpose
+## Content
 
-<what the project is>
+Describe the project purpose, primary audiences, main areas, and recommended reading path.
 
-## Audiences
-
-- Product audience - <who benefits from the product layer>
-- Technical audience - <who benefits from the technical layer>
-
-## Approved Sources
-
-See `sources.md`.
-
-## Reading Path
+Suggested reading path:
 
 1. `product/overview.md`
-2. `product/capabilities.md`
-3. `product/workflows/`
-4. `architecture/overview.md`
-5. `domains/`
-6. `flows/`
-7. `contracts/`
-8. `schemas/`
-9. `frontend/` or `backend/`
-10. `integrations/`
+2. `architecture/overview.md`
+3. `domains/`
+4. `flows/`
+5. `contracts/`
+6. `schemas/`
+7. `decisions/`
 
-## Main Areas
+## Evidence
 
-- <area> - <role>
+- <approved source path, accepted task evidence, or explicit operator confirmation>
 
-## Product To Technical Drilldown
+## Decisions
 
-- <capability or workflow> -> <technical flow / contract / module>
+- <durable project or documentation decision>
 
-## Unknowns
+## Open Questions
 
-- <what requires additional source access>
+- <unknown that still needs source access, operator confirmation, or implementation evidence>
+
+## Related
+
+- [Product Overview](product/overview.md)
+- [Architecture Overview](architecture/overview.md)

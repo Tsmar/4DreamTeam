@@ -27,6 +27,8 @@ This workspace wiki changelog records notable managed-wiki changes for the 4Drea
 
 
 
+2026-05-31: Prepared 4DreamTeam v0.5.6 patch packaging for wiki write safety and legacy wiki cleanup. The release adds a 32,000 byte managed wiki section limit, documents serialized same-page wiki writes, updates bundled wiki templates to the current managed frontmatter and stable section contract, removes the legacy sources.md wiki template and source-map wiki index script, and bumps skill metadata/documented version to 0.5.6.
+
 2026-05-25: Prepared 4DreamTeam v0.5.4 release packaging for agent-friendly CLI workflows. The release improves help across 4dt-wiki, 4dt-board, 4dt-sources, 4dt-search, and 4dt-memory; documents stdin-first wiki page apply for generated JSON; adds top-level command group descriptions; records the agent-friendly CLI contract; refreshes tests and exported docs; and bumps skill metadata/documented version to 0.5.4.
 
 2026-05-25: Updated 4DreamTeam CLI ergonomics for agents after accepted TASK-0023 work. Help text now documents safe defaults, payload sources, mode choices, focused reads, source approval requirements, deterministic board timeline entry ids, memory import dry-run/apply behavior, search query/index modes, and stdin-first `4dt-wiki page apply` usage for generated JSON while preserving file-based payload compatibility.
@@ -50,10 +52,10 @@ This wiki changelog is not a replacement for the source repository changelog. Re
 
 
 
-- sources/4DreamTeam/CHANGELOG.md is the source repository release history and includes 0.5.3.
+- sources/4DreamTeam/CHANGELOG.md is the source repository release history and includes 0.5.6.
 - sources/4DreamTeam/4dreamteam/references/release.md defines workspace and source changelog policy, including wiki export before packaging when source-shipped docs are needed.
-- README.md, README.ru.md, and 4dreamteam/SKILL.md carry the 0.5.3 public documentation and metadata changes.
-- TASK-0021 and TASK-0022 contain accepted timeline evidence for Wake Context startup, README, version, validation, and release packaging.
+- README.md, README.ru.md, and 4dreamteam/SKILL.md carry the 0.5.6 public documentation and metadata changes.
+- TASK-0035 contains accepted timeline evidence for wiki write safety, legacy wiki cleanup, version, validation, and release packaging.
 
 ## Decisions
 

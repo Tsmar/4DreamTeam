@@ -27,7 +27,7 @@ The instruction/template boundary is explicit. Role instructions define mandator
 
 Workspace bootstrap templates are special. In an empty workspace, after confirmation, 4DreamTeam may create only `AGENTS.md` from the workspace template, `sources/.gitignore` from the sources template, and tool-managed artifacts through board/wiki/sources/memory tools. It must not create a local installed-skill copy in a normal workspace; the installed package is `4dreamteam/`.
 
-Marketing templates are selected by mode: value review, README positioning review, release narrative, GTM brief, and claim audit each have specific entry conditions. Wiki templates include project, product overview, architecture overview, ADR, and sources. DevOps templates include server index and server card.
+Marketing templates are selected by mode: value review, README positioning review, release narrative, GTM brief, and claim audit each have specific entry conditions. Wiki templates include project, product overview, architecture overview, and ADR. They follow the current managed wiki page contract: frontmatter plus the stable Summary, Content, Evidence, Decisions, Open Questions, and Related sections. Source registry and source inventory artifacts are managed through `4dt-sources`, not through a wiki `sources.md` template. DevOps templates include server index and server card.
 
 When changing a template that affects behavior, treat it as a framework behavior change requiring corresponding reference updates and quality review. When changing workspace bootstrap behavior, update related templates.
 
@@ -39,6 +39,7 @@ When changing a template that affects behavior, treat it as a framework behavior
 - `sources/4DreamTeam/4dreamteam/references/lead/contracts.md` defines template and artifact expectations.
 - `sources/4DreamTeam/4dreamteam/assets/templates/analytic/task.md` defines analytic task structure.
 - `sources/4DreamTeam/4dreamteam/assets/templates/product/epic.md` defines product epic structure.
+- `sources/4DreamTeam/4dreamteam/assets/templates/wiki/project.md` defines the current managed wiki starter shape.
 - `sources/4DreamTeam/4dreamteam/assets/templates/workspace/AGENTS.md` defines workspace instruction bootstrap content.
 
 ## Decisions
@@ -46,6 +47,7 @@ When changing a template that affects behavior, treat it as a framework behavior
 
 
 - Templates shape artifacts; references define behavior.
+- Wiki templates must stay aligned with `4dt-wiki` managed frontmatter and stable sections; old `wiki-meta`, `sources.md`, and source-map template shapes are legacy.
 - Bootstrap templates must stay aligned with the hard guarantee that normal workspaces do not get a local installed-skill copy; the installed package is `4dreamteam/`.
 - Behavior-affecting template changes require reference alignment and quality review.
 

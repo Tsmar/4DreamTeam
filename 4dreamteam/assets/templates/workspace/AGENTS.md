@@ -54,6 +54,8 @@ Agents do not read or write managed board storage directly. Use `4dt-board` for 
 
 Agents do not read or write managed wiki storage directly. Use `4dt-wiki` for wiki pages and `4dt-sources` for source registry and approved-source inventory.
 
+Do not run multiple `4dt-wiki` writes in parallel for the same page. Combine same-page section changes into one `4dt-wiki page apply` payload or run them sequentially. Each wiki section is limited to 32,000 UTF-8 bytes; split larger material into separate managed wiki pages and link them through `related`.
+
 Storage layout is an implementation detail owned by the tools. The scripts are the only supported mutation and query interface for agents.
 
 Allowed workspace artifacts:

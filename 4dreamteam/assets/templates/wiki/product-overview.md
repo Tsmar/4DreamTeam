@@ -1,40 +1,46 @@
+---
+id: product-overview
+kind: product
+title: Product Overview
+status: draft
+created_at: <created-at>
+updated_at: <updated-at>
+owner: wiki
+source_refs: []
+task_refs: []
+---
+
 # Product Overview
 
-<!-- wiki-meta
-status: actual
-mode: bootstrap
-backing: approved-sources
-source_state: backed-by-code
--->
+## Summary
 
-## Status
+<what the product does and what problem it solves, in one short paragraph>
 
-actual
+## Content
 
-## Product Purpose
+Describe users, audiences, capabilities, main workflows, terms, and product constraints.
 
-<what the project does and what problem it solves>
+Suggested structure:
 
-## Users And Audiences
+- Users and audiences
+- Capabilities
+- Main workflows
+- Terms
+- Constraints
 
-- <audience> - <why they use the system>
+## Evidence
 
-## Capabilities
+- <approved source path, accepted task evidence, or explicit operator confirmation>
 
-- <capability> - <value and boundaries>
+## Decisions
 
-## Main Workflows
+- <durable product or documentation decision>
 
-- `<workflow>` - <short description and link to product workflow page>
+## Open Questions
 
-## Terms
+- <product behavior, audience, or source-backed claim that is still unknown>
 
-- <term> - <meaning>
+## Related
 
-## Constraints
-
-- <product constraint>
-
-## Requires Source Access
-
-- <what cannot be confirmed from approved sources>
+- [Workspace Overview](../overview.md)
+- [Architecture Overview](../architecture/overview.md)

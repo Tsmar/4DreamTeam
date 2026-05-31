@@ -9,7 +9,6 @@
     "search:validate": "PYTHONPATH=packages/search/src:packages/sources/src:packages/wiki/src:packages/board/src:packages/memory/src python3 -m fourdt_search.validate",
     "sources": "python3 packages/sources/src/fourdt_sources/cli.py",
     "4dt-wiki": "python3 packages/wiki/src/fourdt_wiki/cli.py",
-    "wiki": "python3 4dreamteam/scripts/wiki_index.py",
     "rules": "python3 4dreamteam/scripts/validate_workflow_rules.py",
     "test": "npm run test:board && npm run test:wiki && npm run test:sources && npm run test:search && npm run test:memory",
     "test:board": "PYTHONPYCACHEPREFIX=/tmp/4dt-pycache python3 -m unittest discover packages/board/tests",

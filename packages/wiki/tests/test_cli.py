@@ -200,6 +200,73 @@ class WikiCliTests(unittest.TestCase):
             self.assertEqual(exit_code, 0)
             self.assertEqual(payload["page"]["kind"], "decision")
 
+    def test_page_section_writes_reject_sections_larger_than_32kb(self) -> None:
+        with tempfile.TemporaryDirectory() as raw_tmp:
+            workspace = Path(raw_tmp)
+            run_cli(["--workspace", str(workspace), "--json", "init"])
+            run_cli(
+                [
+                    "--workspace",
+                    str(workspace),
+                    "--json",
+                    "page",
+                    "create",
+                    "domains/payments.md",
+                    "--title",
+                    "Payments",
+                    "--type",
+                    "domain",
+                ]
+            )
+
+            at_limit = "x" * 32_000
+            exit_code, payload, _stderr = run_cli(
+                [
+                    "--workspace",
+                    str(workspace),
+                    "--json",
+                    "page",
+                    "section-set",
+                    "domains-payments",
+                    "content",
+                    "--content",
+                    at_limit,
+                ]
+            )
+            self.assertEqual(exit_code, 0)
+
+            oversized = "x" * 32_001
+            exit_code, payload, _stderr = run_cli(
+                [
+                    "--workspace",
+                    str(workspace),
+                    "--json",
+                    "page",
+                    "section-set",
+                    "domains-payments",
+                    "content",
+                    "--content",
+                    oversized,
+                ]
+            )
+            self.assertEqual(exit_code, 1)
+            self.assertEqual(payload["error"]["code"], "section_too_large")
+
+            stdin_payload = json.dumps({"sections": {"content": oversized}})
+            exit_code, payload, _stderr = run_cli(
+                [
+                    "--workspace",
+                    str(workspace),
+                    "--json",
+                    "page",
+                    "apply",
+                    "domains-payments",
+                ],
+                stdin=stdin_payload,
+            )
+            self.assertEqual(exit_code, 1)
+            self.assertEqual(payload["error"]["code"], "section_too_large")
+
     def test_docs_index_is_rejected_by_validation_and_page_create(self) -> None:
         with tempfile.TemporaryDirectory() as raw_tmp:
             workspace = Path(raw_tmp)
@@ -217,6 +284,20 @@ class WikiCliTests(unittest.TestCase):
             self.assertEqual(exit_code, 2)
             codes = {issue["code"] for issue in payload["issues"]}
             self.assertIn("removed_registry", codes)
+
+    def test_legacy_sources_page_is_validated_not_silently_skipped(self) -> None:
+        with tempfile.TemporaryDirectory() as raw_tmp:
+            workspace = Path(raw_tmp)
+            run_cli(["--workspace", str(workspace), "--json", "init"])
+
+            legacy = workspace / ".4dt" / "wiki" / "pages" / "sources.md"
+            legacy.write_text("# Legacy Sources\n", encoding="utf-8")
+
+            exit_code, payload, _stderr = run_cli(["--workspace", str(workspace), "--json", "validate"])
+            self.assertEqual(exit_code, 2)
+            issues = [issue for issue in payload["issues"] if issue["path"] == "sources.md"]
+            self.assertTrue(issues)
+            self.assertIn("missing_frontmatter", {issue["code"] for issue in issues})
 
     def test_export_copies_only_wiki_pages_to_sources_target(self) -> None:
         with tempfile.TemporaryDirectory() as raw_tmp:
@@ -272,7 +353,7 @@ class WikiCliTests(unittest.TestCase):
     def test_agent_help_mentions_stdin_first_page_apply(self) -> None:
         exit_code, output = run_help(["--help"])
         self.assertEqual(exit_code, 0)
-        self.assertIn("Create, update, section-edit, or atomically apply page", output)
+        self.assertIn("Create, update, section-edit, or apply combined page", output)
 
         exit_code, output = run_help(["page", "apply", "--help"])
         self.assertEqual(exit_code, 0)
