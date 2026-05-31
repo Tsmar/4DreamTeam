@@ -4,7 +4,7 @@ description: Coordinate the 4DreamTeam tool-managed agent framework for Codex. U
 license: MIT
 metadata:
   author: Tsmar
-  version: 0.5.7
+  version: 0.5.8
   repository: https://github.com/Tsmar/4DreamTeam
 ---
 

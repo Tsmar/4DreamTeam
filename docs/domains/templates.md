@@ -3,23 +3,21 @@ id: domains-templates
 kind: domain
 title: Templates Domain
 status: actual
-created_at: 2026-05-23T07:32:19Z
-updated_at: 2026-05-24T12:24:08Z
+created_at: "2026-05-23T07:32:19Z"
+updated_at: "2026-06-01T00:00:00Z"
 owner: wiki
 source_refs: ["sources/4DreamTeam/4dreamteam/SKILL.md", "sources/4DreamTeam/4dreamteam/references/lead/contracts.md", "sources/4DreamTeam/4dreamteam/assets/templates/analytic/task.md", "sources/4DreamTeam/4dreamteam/assets/templates/product/epic.md", "sources/4DreamTeam/4dreamteam/assets/templates/workspace/AGENTS.md"]
 task_refs: []
+tags: ["bootstrap", "instructions", "templates"]
 ---
 
 # Templates Domain
 
 ## Summary
 
-
 Templates define artifact shape for epics, tasks, reports, wiki pages, marketing artifacts, DevOps docs, release plans, lead handoffs, and workspace bootstrap files. They do not replace behavior rules.
 
 ## Content
-
-
 
 `SKILL.md` lists the bundled templates under `assets/templates/`. The list covers analytic task specs, product epics, lead epic handoffs, marketing artifacts, release plans, wiki starter pages, DevOps server docs, and workspace `AGENTS.md`.
 
@@ -33,18 +31,15 @@ When changing a template that affects behavior, treat it as a framework behavior
 
 ## Evidence
 
-
-
 - `sources/4DreamTeam/4dreamteam/SKILL.md` lists bundled templates.
 - `sources/4DreamTeam/4dreamteam/references/lead/contracts.md` defines template and artifact expectations.
 - `sources/4DreamTeam/4dreamteam/assets/templates/analytic/task.md` defines analytic task structure.
 - `sources/4DreamTeam/4dreamteam/assets/templates/product/epic.md` defines product epic structure.
 - `sources/4DreamTeam/4dreamteam/assets/templates/wiki/project.md` defines the current managed wiki starter shape.
 - `sources/4DreamTeam/4dreamteam/assets/templates/workspace/AGENTS.md` defines workspace instruction bootstrap content.
+- `sources/4DreamTeam/4dreamteam/references/wiki/shared/source-boundaries.md` documents that bootstrap must not create `sources/.gitignore` automatically.
 
 ## Decisions
-
-
 
 - Templates shape artifacts; references define behavior.
 - Wiki templates must stay aligned with `4dt-wiki` managed frontmatter and stable sections; old `wiki-meta`, `sources.md`, and source-map template shapes are legacy.
@@ -53,12 +48,10 @@ When changing a template that affects behavior, treat it as a framework behavior
 
 ## Open Questions
 
-
 - Whether every template should include a short source comment pointing to the role reference that governs it.
 - Whether template validation should check for outdated role names or legacy standalone report-file wording.
 
 ## Related
-
 
 - [Agent Instructions Contract](../contracts/agent-instructions.md)
 - [Documentation Domain](documentation.md)

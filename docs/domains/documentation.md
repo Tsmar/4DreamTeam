@@ -3,27 +3,21 @@ id: domains-documentation
 kind: domain
 title: Documentation Domain
 status: actual
-created_at: 2026-05-23T07:31:56Z
-updated_at: 2026-05-25T05:35:56Z
+created_at: "2026-05-23T07:31:56Z"
+updated_at: "2026-05-31T18:11:24Z"
 owner: wiki
 source_refs: ["sources/4DreamTeam/AGENTS.md", "sources/4DreamTeam/README.md", "sources/4DreamTeam/README.ru.md", "sources/4DreamTeam/CHANGELOG.md", "sources/4DreamTeam/4dreamteam/SKILL.md", "sources/4DreamTeam/4dreamteam/references/wiki.md", "sources/4DreamTeam/4dreamteam/references/release.md"]
 task_refs: ["TASK-0022"]
+tags: ["docs-export", "documentation", "release"]
 ---
 
 # Documentation Domain
 
 ## Summary
 
-
-
-
 Documentation is split between public user-facing README files, localized README translation, source-of-truth skill instructions, generated workspace templates, source release history, exported English docs, and this managed agent wiki.
 
 ## Content
-
-
-
-
 
 Repository documentation has a strict language policy. Source-of-truth skill instructions, templates, and repository rules stay English. Localized README translations such as README.ru.md may use Russian.
 
@@ -35,23 +29,15 @@ CHANGELOG.md records release history for the source repository. Managed wiki pag
 
 ## Evidence
 
-
-
-
-
-- sources/4DreamTeam/README.md documents Wake Context, the direct install prompt, the first startup prompt, English docs location, thanks, and version 0.5.6.
+- sources/4DreamTeam/README.md documents Wake Context, the direct install prompt, the first startup prompt, English docs location, thanks, and version 0.5.8.
 - sources/4DreamTeam/README.ru.md is the Russian localized README with matching structure and claims, including the operator-provided thanks text.
-- sources/4DreamTeam/CHANGELOG.md includes the 0.5.6 release entry.
-- sources/4DreamTeam/4dreamteam/SKILL.md carries skill metadata version 0.5.6.
+- sources/4DreamTeam/CHANGELOG.md includes the 0.5.8 release entry.
+- sources/4DreamTeam/4dreamteam/SKILL.md carries skill metadata version 0.5.8.
 - sources/4DreamTeam/4dreamteam/references/wiki.md defines managed wiki modes and rules.
 - sources/4DreamTeam/4dreamteam/references/release.md defines release documentation and changelog policy.
-- TASK-0035 contains accepted quality evidence for the wiki write safety, legacy cleanup, README version, and changelog update.
+- v0.5.7 and v0.5.8 source changes update shared SQLite storage, backup/export/import, schema status, controlled migrations, README version, and changelog documentation.
 
 ## Decisions
-
-
-
-
 
 - Keep README.md as public-facing orientation, not a full internal manual.
 - Point README readers to docs/ as English documentation without describing the README as a landing page.
@@ -61,15 +47,9 @@ CHANGELOG.md records release history for the source repository. Managed wiki pag
 
 ## Open Questions
 
-
-
-
 - Whether README.ru.md should be synchronized immediately after every English README change or only before release.
 
 ## Related
-
-
-
 
 - [README Maintenance Flow](../flows/readme-maintenance.md)
 - [Agent Instructions Contract](../contracts/agent-instructions.md)

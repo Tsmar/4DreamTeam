@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import hashlib
 import sqlite3
 from pathlib import Path
 from typing import Any
@@ -9,6 +10,9 @@ from .records import SearchChunk
 
 RUNTIME_ROOT = Path(".4dt")
 SEARCH_MANIFEST_ID = "default"
+SCHEMA_VERSION = 1
+SCHEMA_DOMAIN = "search"
+TOOL_VERSION = "0.5.8"
 
 
 def sqlite_path(workspace: Path) -> Path:
@@ -25,8 +29,7 @@ def connect(workspace: Path) -> sqlite3.Connection:
 
 
 def ensure_schema(connection: sqlite3.Connection) -> None:
-    connection.execute(
-        """
+    schema_text = """
         CREATE TABLE IF NOT EXISTS search_chunks (
           id TEXT PRIMARY KEY,
           domain TEXT NOT NULL,
@@ -44,21 +47,48 @@ def ensure_schema(connection: sqlite3.Connection) -> None:
           metadata_json TEXT NOT NULL DEFAULT '{}',
           text TEXT NOT NULL,
           content_hash TEXT NOT NULL
-        )
-        """
-    )
-    connection.execute("CREATE INDEX IF NOT EXISTS idx_search_chunks_domain ON search_chunks(domain)")
-    connection.execute("CREATE INDEX IF NOT EXISTS idx_search_chunks_content_hash ON search_chunks(content_hash)")
-    connection.execute(
-        """
+        );
+        CREATE INDEX IF NOT EXISTS idx_search_chunks_domain ON search_chunks(domain);
+        CREATE INDEX IF NOT EXISTS idx_search_chunks_content_hash ON search_chunks(content_hash);
         CREATE TABLE IF NOT EXISTS search_manifest (
           id TEXT PRIMARY KEY,
           manifest_json TEXT NOT NULL,
           generated_at TEXT NOT NULL
+        );
+        """
+    connection.executescript(schema_text)
+    record_schema_version(connection, schema_text)
+    connection.commit()
+
+
+def ensure_schema_registry(connection: sqlite3.Connection) -> None:
+    connection.execute(
+        """
+        CREATE TABLE IF NOT EXISTS tool_schema_versions (
+          domain TEXT PRIMARY KEY,
+          schema_version INTEGER NOT NULL,
+          schema_hash TEXT NOT NULL,
+          tool_version TEXT NOT NULL DEFAULT '',
+          applied_at TEXT NOT NULL
         )
         """
     )
-    connection.commit()
+
+
+def record_schema_version(connection: sqlite3.Connection, schema_text: str) -> None:
+    ensure_schema_registry(connection)
+    connection.execute(
+        """
+        INSERT INTO tool_schema_versions (domain, schema_version, schema_hash, tool_version, applied_at)
+        VALUES (?, ?, ?, ?, datetime('now'))
+        ON CONFLICT(domain) DO UPDATE SET
+          schema_version = excluded.schema_version,
+          schema_hash = excluded.schema_hash,
+          tool_version = excluded.tool_version,
+          applied_at = excluded.applied_at
+        """,
+        (SCHEMA_DOMAIN, SCHEMA_VERSION, hashlib.sha256(schema_text.encode("utf-8")).hexdigest(), TOOL_VERSION),
+    )
 
 
 def chunk_values(chunk: SearchChunk) -> tuple[Any, ...]:

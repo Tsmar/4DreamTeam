@@ -3,22 +3,21 @@ id: flows-readme-maintenance
 kind: flow
 title: README Maintenance Flow
 status: actual
-created_at: 2026-05-23T07:31:59Z
-updated_at: 2026-05-23T07:36:36Z
+created_at: "2026-05-23T07:31:59Z"
+updated_at: "2026-06-01T00:00:00Z"
 owner: wiki
 source_refs: ["sources/4DreamTeam/README.md", "sources/4DreamTeam/README.ru.md", "sources/4DreamTeam/AGENTS.md", "sources/4DreamTeam/4dreamteam/references/marketing.md", "sources/4DreamTeam/4dreamteam/assets/templates/marketing/readme-positioning-review.md", "sources/4DreamTeam/4dreamteam/references/release.md"]
 task_refs: []
+tags: ["documentation", "readme", "release"]
 ---
 
 # README Maintenance Flow
 
 ## Summary
 
-
 README maintenance keeps the public promise, examples, commands, documentation map, safety claims, localized README, and release history aligned with confirmed source behavior.
 
 ## Content
-
 
 Start README work by identifying whether the change is product positioning, feature documentation, installation guidance, usage examples, safety claims, or release/version status. The README is public-facing, so it should explain what 4DreamTeam is, who it helps, why files matter, and how to try it before exposing deep internals.
 
@@ -32,7 +31,6 @@ A practical README review sequence: read `README.md`; compare claims against `SK
 
 ## Evidence
 
-
 - `sources/4DreamTeam/README.md` is the English public entrypoint.
 - `sources/4DreamTeam/README.ru.md` is the localized Russian README.
 - `sources/4DreamTeam/AGENTS.md` defines the English source documentation policy and localized README exception.
@@ -41,19 +39,16 @@ A practical README review sequence: read `README.md`; compare claims against `SK
 
 ## Decisions
 
-
 - Treat README work as public documentation plus positioning, not as the sole behavior contract.
 - Keep behavioral rules in references and update README only with confirmed claims.
 - Review localized README drift whenever English README claims or structure change.
 
 ## Open Questions
 
-
 - The repository does not yet define an automatic synchronization policy for localized README files.
 - It may be useful to add a dedicated README maintenance checklist to public docs or templates.
 
 ## Related
-
 
 - [Documentation Domain](../domains/documentation.md)
 - [Product Overview](../product/overview.md)

@@ -49,6 +49,22 @@ class SourcesCliTests(unittest.TestCase):
         self.assertEqual(exit_code, 0)
         self.assertIn("Recommended for focused agent reads.", output)
 
+    def test_registry_validate_initializes_tables_without_legacy_sources_directories(self) -> None:
+        with tempfile.TemporaryDirectory() as raw_tmp:
+            workspace = Path(raw_tmp)
+
+            exit_code, payload, _stderr = run_cli(["--workspace", str(workspace), "--json", "registry", "validate"])
+
+            self.assertEqual(exit_code, 2)
+            self.assertEqual(payload["status"], "issues")
+            self.assertTrue((workspace / ".4dt" / "db.sqlite3").exists())
+            self.assertFalse((workspace / ".4dt" / "sources").exists())
+            with sqlite3.connect(workspace / ".4dt" / "db.sqlite3") as connection:
+                tables = {row[0] for row in connection.execute("SELECT name FROM sqlite_master WHERE type = 'table'")}
+            self.assertIn("source_registry", tables)
+            self.assertIn("source_inventory", tables)
+            self.assertIn("source_index", tables)
+
     def test_registry_add_requires_operator_approval_and_supports_file_and_directory(self) -> None:
         with tempfile.TemporaryDirectory() as raw_tmp:
             workspace = Path(raw_tmp)

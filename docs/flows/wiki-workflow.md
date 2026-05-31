@@ -3,27 +3,21 @@ id: flows-wiki-workflow
 kind: flow
 title: Wiki Workflow
 status: actual
-created_at: 2026-05-23T07:32:13Z
-updated_at: 2026-05-25T11:09:27Z
+created_at: "2026-05-23T07:32:13Z"
+updated_at: "2026-06-01T00:00:00Z"
 owner: wiki
-source_refs: ["sources/4DreamTeam/4dreamteam/references/wiki.md", "sources/4DreamTeam/4dreamteam/references/wiki/index.md", "sources/4DreamTeam/4dreamteam/references/wiki/shared/page-shape.md", "sources/4DreamTeam/4dreamteam/references/wiki/bootstrap.md", "sources/4DreamTeam/packages/wiki/src/fourdt_wiki/cli.py", "sources/4DreamTeam/packages/search/src/fourdt_search/cli.py"]
+source_refs: ["sources/4DreamTeam/4dreamteam/references/wiki.md", "sources/4DreamTeam/4dreamteam/references/wiki/index.md", "sources/4DreamTeam/4dreamteam/references/wiki/shared/page-shape.md", "sources/4DreamTeam/4dreamteam/references/wiki/bootstrap.md", "sources/4DreamTeam/packages/wiki/src/fourdt_wiki/cli.py", "sources/4DreamTeam/packages/search/src/fourdt_search/cli.py", "sources/4DreamTeam/packages/db/src/fourdt_db/cli.py"]
 task_refs: ["TASK-0023"]
+tags: ["fts", "sqlite", "tags", "wiki", "workflow"]
 ---
 
 # Wiki Workflow
 
 ## Summary
 
-
-
 The wiki workflow maintains the single workspace knowledge base through `4dt-wiki`, using `4dt-sources` for approved source navigation and mode-specific rules for bootstrap, sync, audit, check, blueprint, and deepening.
 
 ## Content
-
-
-
-
-
 
 Wiki work starts by reading `references/wiki.md`, then `references/wiki/index.md`, then shared modules, then the smallest mode file needed for the request. The role supports a single workspace wiki; old multi-project wiki registry and source-map workflows are legacy for new work.
 
@@ -39,13 +33,9 @@ Managed pages have stable frontmatter and required sections: Summary, Content, E
 
 For release documentation, `4dt-wiki export --target <path>` renders managed SQLite pages as Markdown into an explicit target under workspace `sources/`, preserving relative paths. Export prepares source-shipped documentation but does not bypass release approval gates for staging, committing, pushing, tagging, or publishing.
 
+Before release packaging, use `4dt-wiki export --target sources/4DreamTeam/docs` to render the current managed SQLite wiki into source-shipped Markdown. If exported docs contradict current source behavior, update the managed wiki first and export again; direct edits to exported docs will be overwritten by the next managed export. Full JSON export/import is available for wiki backup or workspace transfer, with import dry-run by default and `--apply` required to replace pages.
+
 ## Evidence
-
-
-
-
-
-
 
 - `sources/4DreamTeam/4dreamteam/references/wiki/shared/page-shape.md`
 - `sources/4DreamTeam/packages/wiki/tests/test_cli.py`
@@ -53,24 +43,18 @@ For release documentation, `4dt-wiki export --target <path>` renders managed SQL
 
 ## Decisions
 
-
-
-
 - Use `4dt-search query` for wiki/source discovery before broad reads.
 - Use `4dt-wiki` for all managed wiki page writes and exact wiki reads.
 - Use `4dt-sources` for source registry, inventory, exact snippets, and boundary validation.
 - Keep managed wiki English-only and agent-facing.
+- Treat `docs/` as exported release documentation; fix stale content in managed wiki and re-export.
 
 ## Open Questions
-
-
 
 - Whether post-acceptance wiki updates should automatically include page source refs from related task evidence.
 - Whether wiki validation should detect unresolved `TBD` placeholders after bootstrap.
 
 ## Related
-
-
 
 - [Workspace Tools Contract](../contracts/workspace-tools.md)
 - [Source Boundaries Domain](../domains/source-boundaries.md)

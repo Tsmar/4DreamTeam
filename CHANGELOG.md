@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.5.8 - 2026-06-01
+
+- Added per-domain schema recording in shared `.4dt/db.sqlite3` table `tool_schema_versions`, with schema version, schema hash, tool version, and applied timestamp for board, wiki, sources, search, and memory.
+- Added `4dt-db schema status` so agents can inspect recorded schema state without manually comparing SQL first.
+- Changed `4dt-memory` schema setup to create only the current packaged schema and report `schema_mismatch` for older or incomplete memory schemas instead of silently migrating them.
+- Added operator-controlled schema upgrade guidance: backup first, create a clean current schema, compare recorded domain schema versions and hashes, and ask for operator approval before migration or reset.
+- Added `4dt-db migrate plan/apply` for declarative SQL-side data movement without exposing row contents to agents.
+- Added migration operations for column-to-column table copy, default values, table rename/drop with explicit `--allow-drop`, count validation, not-null validation, foreign-key validation, and schema registry updates.
+- Stopped `4dt-board validate` from creating legacy `.4dt/board/tasks` directories now that board state is SQLite-authoritative.
+- Added regression coverage for startup schema bootstrap without legacy domain directories across board, wiki, sources, search, and memory.
+- Bumped the skill metadata and documented README version to `0.5.8`.
+
 ## 0.5.7 - 2026-05-31
 
 - Moved managed workspace state toward one SQLite authority at `.4dt/db.sqlite3`.

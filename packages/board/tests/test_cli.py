@@ -4,6 +4,7 @@ import contextlib
 import io
 import json
 import os
+import sqlite3
 import subprocess
 import sys
 import tempfile
@@ -12,7 +13,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
-from fourdt_board.cli import main
+from fourdt_board.cli import BOARD_COLUMNS, main
 
 
 def run_cli(args: list[str]) -> tuple[int, dict[str, object], str]:
@@ -173,6 +174,25 @@ TBD
             codes = {issue["code"] for issue in payload["issues"]}
             self.assertIn("deprecated_field", codes)
             self.assertIn("deprecated_section", codes)
+
+    def test_validate_does_not_create_legacy_task_directories(self) -> None:
+        with tempfile.TemporaryDirectory() as raw_tmp:
+            workspace = Path(raw_tmp)
+
+            exit_code, payload, _stderr = run_cli(["--workspace", str(workspace), "--json", "validate"])
+
+            self.assertEqual(exit_code, 0)
+            self.assertEqual(payload["status"], "ready")
+            self.assertTrue((workspace / ".4dt" / "db.sqlite3").exists())
+            self.assertFalse((workspace / ".4dt" / "board").exists())
+            self.assertFalse((workspace / ".4dt" / "board" / "tasks").exists())
+            for column in BOARD_COLUMNS:
+                self.assertFalse((workspace / ".4dt" / "board" / "tasks" / column).exists())
+            with sqlite3.connect(workspace / ".4dt" / "db.sqlite3") as connection:
+                tables = {row[0] for row in connection.execute("SELECT name FROM sqlite_master WHERE type = 'table'")}
+            self.assertIn("board_items", tables)
+            self.assertIn("board_comments", tables)
+            self.assertIn("board_index", tables)
 
     def test_metadata_set_rejects_uncontrolled_fields(self) -> None:
         with tempfile.TemporaryDirectory() as raw_tmp:

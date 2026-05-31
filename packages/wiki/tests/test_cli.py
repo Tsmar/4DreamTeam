@@ -48,6 +48,22 @@ def self_exit_to_code():
 
 
 class WikiCliTests(unittest.TestCase):
+    def test_validate_initializes_tables_without_legacy_wiki_directories(self) -> None:
+        with tempfile.TemporaryDirectory() as raw_tmp:
+            workspace = Path(raw_tmp)
+
+            exit_code, payload, _stderr = run_cli(["--workspace", str(workspace), "--json", "validate"])
+
+            self.assertEqual(exit_code, 0)
+            self.assertEqual(payload["status"], "ready")
+            self.assertTrue((workspace / ".4dt" / "db.sqlite3").exists())
+            self.assertFalse((workspace / ".4dt" / "wiki").exists())
+            with sqlite3.connect(workspace / ".4dt" / "db.sqlite3") as connection:
+                tables = {row[0] for row in connection.execute("SELECT name FROM sqlite_master WHERE type = 'table'")}
+            self.assertIn("wiki_pages", tables)
+            self.assertIn("wiki_sections", tables)
+            self.assertIn("wiki_index", tables)
+
     def test_init_creates_single_workspace_wiki_and_queries_sections(self) -> None:
         with tempfile.TemporaryDirectory() as raw_tmp:
             workspace = Path(raw_tmp)

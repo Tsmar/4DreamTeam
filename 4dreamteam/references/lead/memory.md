@@ -26,6 +26,8 @@ At the start of a new session, always check memory readiness and load contract d
 
 If memory is not initialized and the current folder is already a confirmed 4DreamTeam workspace, run `4dt-memory init --workspace . --json`; it creates SQLite storage and seeds only missing baseline contract keys. Do not initialize memory in an unconfirmed empty workspace without operator approval.
 
+`4dt-memory doctor` and `init` create the current memory tables from the packaged schema when they are missing. They must not silently migrate older memory table shapes. If memory reports `schema_mismatch`, stop normal memory use, keep the database intact, create a backup, compare schemas, and ask the operator to approve a migration or reset plan.
+
 Apply contract project rules, operator preferences, active modes, and workflow constraints before proposing actions. If defaults load as `ready`, do not ask the operator to repeat context. If defaults are incomplete or invalid, run `4dt-memory onboarding questions --workspace . --json` and ask only the returned repair or setup questions before treating a mode or rule as active. If memory is empty, low-signal, or unavailable, report that state and continue from current workspace instructions without inventing remembered rules.
 
 Use additional local 4DT Memory searches only as supplemental recall when they are likely to reduce context loss:

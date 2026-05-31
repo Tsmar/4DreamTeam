@@ -7,7 +7,7 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
 
-from .migrations import migrate, schema_version
+from .migrations import ensure_current_schema, schema_version
 from .paths import WorkspaceIdentity, WorkspacePaths, workspace_identity, workspace_paths
 
 
@@ -55,7 +55,7 @@ class MemoryStore:
 
     def initialize(self) -> None:
         connection = self.connect()
-        migrate(connection)
+        ensure_current_schema(connection)
         self.audit("init", payload={"schemaVersion": self.schema_version()})
 
     def schema_version(self) -> int:

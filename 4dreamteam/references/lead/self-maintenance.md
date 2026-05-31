@@ -42,6 +42,37 @@ Rules:
 5. Tell the user to restart Codex so the updated skill and workspace instructions are loaded in a clean session.
 6. After restart, recommend `$4DreamTeam validate workspace` if the user wants to verify the workspace.
 
+## Data Schema Upgrade Control
+
+Use this workflow when updating the installed 4DreamTeam skill version may change managed SQLite storage schemas.
+
+Managed tools create the current `.4dt/db.sqlite3` tables from the skill's packaged schema definitions when the tables are missing and record per-domain schema metadata in `tool_schema_versions`. Runtime tools must not silently migrate old table shapes into new table shapes. Schema-changing upgrades are operator-controlled.
+
+Authoritative schema inputs live with the tool source packages. At minimum, memory schema is `packages/memory/src/fourdt_memory/schema.sql`; other package schema definitions must be treated as source-backed tool contracts until they are split into dedicated schema files. Agents should prefer dedicated schema files whenever a package provides them.
+
+Before deleting legacy storage or replacing an existing shared database during a skill update:
+
+1. Run `4dt-db backup create --workspace . --json` and record the backup path.
+2. Preserve the original `.4dt/db.sqlite3` until the operator approves any destructive step.
+3. Create a temporary clean workspace or temporary database.
+4. Run the current installed validation/startup commands so tools create their current tables:
+
+```bash
+4dt-board --workspace <tmp> --json validate
+4dt-sources --workspace <tmp> --json registry validate
+4dt-wiki --workspace <tmp> --json validate
+4dt-search --workspace <tmp> --json stats
+4dt-memory doctor --workspace <tmp> --json
+```
+
+5. Run `4dt-db --workspace <tmp> --json schema status` and `4dt-db --workspace . --json schema status` to compare recorded per-domain versions and hashes.
+6. If a domain is missing, unknown, mismatched, or unsupported, compare the original database schema with the clean current schema: table names, columns, indexes, FTS objects, `PRAGMA user_version`, and row counts for managed tables.
+7. If schemas match or only missing empty tables need creation, run the normal tool validation commands in the real workspace.
+8. If schemas differ for tables that contain data, stop and ask the operator what to do. Present a migration plan that names source backup, target schema, affected tables, expected data mapping, validation commands, rollback path, and risks.
+9. Prefer `4dt-db migrate plan --workspace . --file <spec> --json` for migration review. A migration spec must move data inside SQLite with declarative operations such as column-to-column table copy, defaults, validation, table rename, and schema recording; it must not expose row contents to the agent.
+10. Run `4dt-db migrate apply --workspace . --file <spec> --backup --json` only after operator approval of the exact plan. Use `--allow-drop` only when the operator explicitly approves dropping tables.
+11. Do not run ad-hoc SQL migration, delete `.4dt/db.sqlite3`, or remove legacy stores until the operator approves the exact migration or reset plan.
+
 ## Self-Improvement Workflow
 
 Use this workflow when the user wants 4DreamTeam to improve the `4DreamTeam` skill itself from a 4DreamTeam workspace.

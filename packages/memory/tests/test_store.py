@@ -8,6 +8,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
 from fourdt_memory.sqlite_store import MemoryStore
+from fourdt_memory.migrations import SchemaMismatch
 
 
 def make_store(tmp_path: Path) -> tuple[MemoryStore, Path, Path]:
@@ -62,7 +63,7 @@ class StoreTests(unittest.TestCase):
             finally:
                 store.close()
 
-    def test_v1_database_migrates_contract_entries(self) -> None:
+    def test_v1_database_requires_operator_controlled_schema_update(self) -> None:
         with tempfile.TemporaryDirectory() as raw_tmp:
             tmp_path = Path(raw_tmp)
             workspace = tmp_path / "workspace"
@@ -88,10 +89,8 @@ class StoreTests(unittest.TestCase):
 
             migrated = MemoryStore(workspace, storage)
             try:
-                migrated.initialize()
-                self.assertEqual(migrated.schema_version(), 3)
-                entry = migrated.set_contract_entry("project.rules", "Use contract onboarding.", value_type="text")
-                self.assertEqual(entry["value"], "Use contract onboarding.")
+                with self.assertRaises(SchemaMismatch):
+                    migrated.initialize()
             finally:
                 migrated.close()
 

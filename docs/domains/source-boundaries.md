@@ -3,25 +3,21 @@ id: domains-source-boundaries
 kind: domain
 title: Source Boundaries Domain
 status: actual
-created_at: 2026-05-23T07:32:25Z
-updated_at: 2026-05-24T10:42:40Z
+created_at: "2026-05-23T07:32:25Z"
+updated_at: "2026-06-01T00:00:00Z"
 owner: wiki
 source_refs: ["sources/4DreamTeam/4dreamteam/SKILL.md", "sources/4DreamTeam/4dreamteam/references/lead/preflight.md", "sources/4DreamTeam/4dreamteam/references/wiki.md", "sources/4DreamTeam/packages/sources/src/fourdt_sources/cli.py", "sources/4DreamTeam/packages/search/src/fourdt_search/domains/sources.py"]
 task_refs: ["TASK-0001", "EPIC-0001-TASK-0010"]
+tags: ["gitignore", "source-boundaries", "sources", "sqlite"]
 ---
 
 # Source Boundaries Domain
 
 ## Summary
 
-
-
 Source boundaries control what agents may read for project facts. Workspace `sources/` is built in; external paths must be registered explicitly through `4dt-sources` with operator approval.
 
 ## Content
-
-
-
 
 The skill treats approved source paths as hard read boundaries. It must not infer access to parent directories, sibling projects, secrets, dumps, or unrelated user files. The workspace `sources/` folder is readable by default, and external file or directory boundaries are added only through `4dt-sources registry add --operator-approved`.
 
@@ -33,11 +29,9 @@ Wiki and documentation claims must be backed by approved sources, accepted timel
 
 In this workspace, `4dt-sources registry list` reports the built-in `workspace-sources` boundary at `sources`. The active source repository for this wiki is `sources/4DreamTeam/`. Legacy docs under `sources/old_docs/` are inside the boundary but should be treated as legacy reference material, not the current model for new wiki storage.
 
+Workspace bootstrap must not create `sources/.gitignore`. `4dt-sources` honors project-provided `.gitignore` files when they already exist, but generated ignore rules in the built-in source boundary can hide files from source study and make agent discovery less reliable.
+
 ## Evidence
-
-
-
-
 
 - `sources/4DreamTeam/4dreamteam/SKILL.md` defines hard source-boundary guarantees.
 - `sources/4DreamTeam/4dreamteam/references/lead/preflight.md` defines workspace `sources/` and external source registration policy.
@@ -48,25 +42,18 @@ In this workspace, `4dt-sources registry list` reports the built-in `workspace-s
 
 ## Decisions
 
-
-
-
 - Use `4dt-search query --domain sources` for source discovery.
 - Use `4dt-sources` as the source registry, inventory, and exact-read API.
 - Treat source registry boundaries as hard limits, not suggestions.
 - Keep old multi-project wiki registry/source-map material as legacy, not new-work guidance.
+- Do not create or repair `sources/.gitignore` during workspace bootstrap.
 
 ## Open Questions
-
-
-
 
 - Whether old docs should remain inside the broad workspace `sources/` boundary or be archived outside active source inventory.
 - Whether additional source-domain ranking fixtures are needed after CI is added.
 
 ## Related
-
-
 
 - [Workspace Tools Contract](../contracts/workspace-tools.md)
 - [Wiki Workflow](../flows/wiki-workflow.md)

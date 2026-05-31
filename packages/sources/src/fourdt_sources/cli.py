@@ -16,6 +16,9 @@ from typing import Any
 
 REGISTRY_VERSION = 1
 INDEX_VERSION = 1
+SCHEMA_VERSION = 1
+SCHEMA_DOMAIN = "sources"
+TOOL_VERSION = "0.5.8"
 RUNTIME_ROOT = Path(".4dt")
 DEFAULT_LIMIT = 50
 MAX_GET_BYTES = 32_000
@@ -76,6 +79,36 @@ def sha256(value: str) -> str:
     return hashlib.sha256(value.encode("utf-8")).hexdigest()
 
 
+def ensure_schema_registry(connection: sqlite3.Connection) -> None:
+    connection.execute(
+        """
+        CREATE TABLE IF NOT EXISTS tool_schema_versions (
+          domain TEXT PRIMARY KEY,
+          schema_version INTEGER NOT NULL,
+          schema_hash TEXT NOT NULL,
+          tool_version TEXT NOT NULL DEFAULT '',
+          applied_at TEXT NOT NULL
+        )
+        """
+    )
+
+
+def record_schema_version(connection: sqlite3.Connection, schema_text: str) -> None:
+    ensure_schema_registry(connection)
+    connection.execute(
+        """
+        INSERT INTO tool_schema_versions (domain, schema_version, schema_hash, tool_version, applied_at)
+        VALUES (?, ?, ?, ?, ?)
+        ON CONFLICT(domain) DO UPDATE SET
+          schema_version = excluded.schema_version,
+          schema_hash = excluded.schema_hash,
+          tool_version = excluded.tool_version,
+          applied_at = excluded.applied_at
+        """,
+        (SCHEMA_DOMAIN, SCHEMA_VERSION, sha256(schema_text), TOOL_VERSION, iso_now()),
+    )
+
+
 def kebab(value: str) -> str:
     value = value.strip().lower()
     value = re.sub(r"[^a-z0-9]+", "-", value)
@@ -96,19 +129,14 @@ def connect(workspace: Path) -> sqlite3.Connection:
 
 
 def ensure_schema(connection: sqlite3.Connection) -> None:
-    connection.execute(
-        """
+    schema_text = """
         CREATE TABLE IF NOT EXISTS source_registry (
           id TEXT PRIMARY KEY,
           path TEXT NOT NULL UNIQUE,
           label TEXT NOT NULL,
           kind TEXT NOT NULL,
           added_at TEXT NOT NULL
-        )
-        """
-    )
-    connection.execute(
-        """
+        );
         CREATE TABLE IF NOT EXISTS source_inventory (
           source_id TEXT NOT NULL,
           path TEXT NOT NULL,
@@ -120,13 +148,9 @@ def ensure_schema(connection: sqlite3.Connection) -> None:
           size INTEGER,
           mtime REAL,
           PRIMARY KEY (source_id, path)
-        )
-        """
-    )
-    connection.execute("CREATE INDEX IF NOT EXISTS idx_source_inventory_kind ON source_inventory(kind)")
-    connection.execute("CREATE INDEX IF NOT EXISTS idx_source_inventory_relative_path ON source_inventory(relative_path)")
-    connection.execute(
-        """
+        );
+        CREATE INDEX IF NOT EXISTS idx_source_inventory_kind ON source_inventory(kind);
+        CREATE INDEX IF NOT EXISTS idx_source_inventory_relative_path ON source_inventory(relative_path);
         CREATE TABLE IF NOT EXISTS source_index (
           id TEXT PRIMARY KEY,
           index_json TEXT NOT NULL,
@@ -135,9 +159,10 @@ def ensure_schema(connection: sqlite3.Connection) -> None:
           registry_sha256 TEXT NOT NULL,
           source_count INTEGER NOT NULL,
           entry_count INTEGER NOT NULL
-        )
+        );
         """
-    )
+    connection.executescript(schema_text)
+    record_schema_version(connection, schema_text)
     connection.commit()
 
 

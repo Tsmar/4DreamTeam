@@ -3,22 +3,21 @@ id: domains-memory-human-analogy
 kind: domain
 title: Memory Human Analogy
 status: actual
-created_at: 2026-05-25T03:36:03Z
-updated_at: 2026-05-25T03:44:47Z
+created_at: "2026-05-25T03:36:03Z"
+updated_at: "2026-06-01T00:00:00Z"
 owner: wiki
 source_refs: ["sources/4DreamTeam/4dreamteam/references/lead/memory.md", "sources/4DreamTeam/4dreamteam/references/lead/preflight.md", "sources/4DreamTeam/packages/memory/src/fourdt_memory/cli.py", "sources/4DreamTeam/packages/memory/src/fourdt_memory/sqlite_store.py", "sources/4DreamTeam/packages/memory/src/fourdt_memory/search_backend.py", "sources/4DreamTeam/packages/search/src/fourdt_search/scoring.py", "https://pubmed.ncbi.nlm.nih.gov/11058819/", "https://pmc.ncbi.nlm.nih.gov/articles/PMC6993580/", "https://pmc.ncbi.nlm.nih.gov/articles/PMC3416886/", "https://arxiv.org/abs/2310.08560", "https://arxiv.org/abs/2304.03442", "https://openai.github.io/openai-agents-js/guides/sandbox-agents/memory/", "https://docs.langchain.com/oss/python/langgraph/persistence"]
 task_refs: ["TASK-0017", "TASK-0018", "TASK-0019"]
+tags: ["memory", "recall", "wake-context"]
 ---
 
 # Memory Human Analogy
 
 ## Summary
 
-
 4DT Memory is designed as an engineering analogue of human memory, not as a biological simulation. The useful parallel is functional: humans do not keep every experience in active attention, and 4DreamTeam should not load every memory into context. Instead, both systems benefit from a small working set, durable long-term stores, selective retrieval, consolidation of lessons, and safeguards against stale or misleading memories.
 
 ## Content
-
 
 ### Why The Analogy Matters
 
@@ -120,7 +119,6 @@ The framework should keep this boundary explicit so memory design stays testable
 
 ## Evidence
 
-
 - `4dreamteam/references/lead/memory.md` defines authority order, operator memory intent, English-first durable memory, placement policy, role-scoped recall, bounded startup/task recall, save flow, and stale-memory handling.
 - `4dreamteam/references/lead/preflight.md` defines contract defaults and bounded supplemental recall after defaults.
 - `packages/memory/src/fourdt_memory/cli.py` defines durable memory commands, scopes, roles, types, contract defaults, session state, and safety checks.
@@ -139,7 +137,6 @@ The framework should keep this boundary explicit so memory design stays testable
 
 ## Decisions
 
-
 - Use the human-memory analogy as an engineering model, not a biological claim.
 - Keep active recall bounded; never load all memory into context by default.
 - Treat board timeline as episodic evidence and wiki as consolidated semantic knowledge.
@@ -151,13 +148,11 @@ The framework should keep this boundary explicit so memory design stays testable
 
 ## Open Questions
 
-
 - Should a future `4dt-memory classify-intent` helper expose the analogy as machine-readable categories?
 - Should memory benchmarks measure "context saved" and "irrelevant recall avoided" alongside correctness?
 - Should future memory entries include explicit `startupRelevant` or `roleRelevant` metadata, or is scope/type/role enough?
 
 ## Related
-
 
 - [Memory Domain](memory.md)
 - [Search Domain](search.md)

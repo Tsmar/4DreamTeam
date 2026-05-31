@@ -3,23 +3,21 @@ id: flows-task-lifecycle
 kind: flow
 title: Task Lifecycle Flow
 status: actual
-created_at: 2026-05-23T07:32:10Z
-updated_at: 2026-05-23T08:40:33Z
+created_at: "2026-05-23T07:32:10Z"
+updated_at: "2026-06-01T00:00:00Z"
 owner: wiki
 source_refs: ["sources/4DreamTeam/4dreamteam/references/lead/lifecycle.md", "sources/4DreamTeam/4dreamteam/references/lead/routing.md", "sources/4DreamTeam/4dreamteam/references/lead/safety.md", "sources/4DreamTeam/4dreamteam/references/developer.md", "sources/4DreamTeam/4dreamteam/references/quality.md", "sources/4DreamTeam/4dreamteam/references/release.md"]
 task_refs: []
+tags: ["board", "lifecycle", "roles"]
 ---
 
 # Task Lifecycle Flow
 
 ## Summary
 
-
 The task lifecycle is board-column driven and evidence-gated. A task moves through role ownership only when required timeline evidence exists, not merely because status text changed.
 
 ## Content
-
-
 
 The board columns are `backlog`, `analytic`, `developer`, `quality`, `wiki`, `release`, `released`, `done`, and `rejected`. The current column determines the next owner role. The lifecycle rules explicitly say not to use `next_owner`.
 
@@ -35,8 +33,6 @@ Before an epic is closed or the next epic becomes active implementation focus, l
 
 ## Evidence
 
-
-
 - `sources/4DreamTeam/4dreamteam/references/lead/lifecycle.md` defines board columns, movement rules, state machine, and handoff requirements.
 - `sources/4DreamTeam/4dreamteam/references/lead/routing.md` defines role route selection.
 - `sources/4DreamTeam/4dreamteam/references/lead/safety.md` defines approval gates and controlled-mode stops.
@@ -45,8 +41,6 @@ Before an epic is closed or the next epic becomes active implementation focus, l
 - `sources/4DreamTeam/4dreamteam/references/release.md` defines release entry conditions, changelog policy, commit plan gate, and git rules.
 
 ## Decisions
-
-
 
 - Role transitions are evidence-gated and tool-managed.
 - Developer implementation requires a visible plan and operator comparison/approval before the first patch unless scoped auto implementation was explicitly approved.
@@ -57,12 +51,10 @@ Before an epic is closed or the next epic becomes active implementation focus, l
 
 ## Open Questions
 
-
 - This source workspace currently has an empty board; no real skill-improvement epic/task has been created for this wiki bootstrap.
 - A future task could decide whether skill-source documentation-only work should always get a formal board lifecycle.
 
 ## Related
-
 
 - [Product Overview](../product/overview.md)
 - [Wiki Workflow](wiki-workflow.md)

@@ -35,7 +35,7 @@ class PerformanceTests(unittest.TestCase):
             uninitialized_exit, _payload, doctor_cold_ms = run_cli(
                 ["doctor", "--workspace", str(workspace), "--storage-root", str(storage), "--json"]
             )
-            self.assertEqual(uninitialized_exit, 3)
+            self.assertEqual(uninitialized_exit, 0)
 
             exit_code, _payload, remember_ms = run_cli(
                 [

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import re
 import sqlite3
@@ -69,6 +70,9 @@ SECTION_KEYS = {
 }
 CONTROLLED_METADATA = {"board_column", "status", "updated_at", "title"}
 INDEX_VERSION = 1
+SCHEMA_VERSION = 1
+SCHEMA_DOMAIN = "board"
+TOOL_VERSION = "0.5.8"
 RUNTIME_ROOT = Path(".4dt")
 
 
@@ -85,6 +89,40 @@ class BoardFile:
 
 def iso_now() -> str:
     return datetime.now(timezone.utc).isoformat(timespec="seconds").replace("+00:00", "Z")
+
+
+def schema_hash(value: str) -> str:
+    return hashlib.sha256(value.encode("utf-8")).hexdigest()
+
+
+def ensure_schema_registry(connection: sqlite3.Connection) -> None:
+    connection.execute(
+        """
+        CREATE TABLE IF NOT EXISTS tool_schema_versions (
+          domain TEXT PRIMARY KEY,
+          schema_version INTEGER NOT NULL,
+          schema_hash TEXT NOT NULL,
+          tool_version TEXT NOT NULL DEFAULT '',
+          applied_at TEXT NOT NULL
+        )
+        """
+    )
+
+
+def record_schema_version(connection: sqlite3.Connection, schema_text: str) -> None:
+    ensure_schema_registry(connection)
+    connection.execute(
+        """
+        INSERT INTO tool_schema_versions (domain, schema_version, schema_hash, tool_version, applied_at)
+        VALUES (?, ?, ?, ?, ?)
+        ON CONFLICT(domain) DO UPDATE SET
+          schema_version = excluded.schema_version,
+          schema_hash = excluded.schema_hash,
+          tool_version = excluded.tool_version,
+          applied_at = excluded.applied_at
+        """,
+        (SCHEMA_DOMAIN, SCHEMA_VERSION, schema_hash(schema_text), TOOL_VERSION, iso_now()),
+    )
 
 
 def kebab(value: str) -> str:
@@ -192,11 +230,6 @@ def sqlite_path(workspace: Path) -> Path:
     return workspace / RUNTIME_ROOT / "db.sqlite3"
 
 
-def ensure_board_dirs(workspace: Path) -> None:
-    for column in BOARD_COLUMNS:
-        (tasks_dir(workspace) / column).mkdir(parents=True, exist_ok=True)
-
-
 def connect(workspace: Path) -> sqlite3.Connection:
     (workspace / RUNTIME_ROOT).mkdir(parents=True, exist_ok=True)
     connection = sqlite3.connect(sqlite_path(workspace))
@@ -208,8 +241,7 @@ def connect(workspace: Path) -> sqlite3.Connection:
 
 
 def ensure_schema(connection: sqlite3.Connection) -> None:
-    connection.execute(
-        """
+    schema_text = """
         CREATE TABLE IF NOT EXISTS board_items (
           id TEXT PRIMARY KEY,
           kind TEXT NOT NULL,
@@ -222,16 +254,9 @@ def ensure_schema(connection: sqlite3.Connection) -> None:
           filename TEXT NOT NULL,
           body TEXT NOT NULL,
           extra_frontmatter_json TEXT NOT NULL DEFAULT '{}'
-        )
-        """
-    )
-    columns = {row["name"] for row in connection.execute("PRAGMA table_info(board_items)").fetchall()}
-    if "extra_frontmatter_json" not in columns:
-        connection.execute("ALTER TABLE board_items ADD COLUMN extra_frontmatter_json TEXT NOT NULL DEFAULT '{}'")
-    connection.execute("CREATE INDEX IF NOT EXISTS idx_board_items_column ON board_items(board_column)")
-    connection.execute("CREATE INDEX IF NOT EXISTS idx_board_items_epic ON board_items(epic)")
-    connection.execute(
-        """
+        );
+        CREATE INDEX IF NOT EXISTS idx_board_items_column ON board_items(board_column);
+        CREATE INDEX IF NOT EXISTS idx_board_items_epic ON board_items(epic);
         CREATE TABLE IF NOT EXISTS board_comments (
           entry_id TEXT PRIMARY KEY,
           item_id TEXT NOT NULL,
@@ -246,19 +271,19 @@ def ensure_schema(connection: sqlite3.Connection) -> None:
           body TEXT NOT NULL,
           sequence INTEGER NOT NULL,
           FOREIGN KEY (item_id) REFERENCES board_items(id) ON DELETE CASCADE
-        )
-        """
-    )
-    connection.execute("CREATE INDEX IF NOT EXISTS idx_board_comments_item ON board_comments(item_id, sequence)")
-    connection.execute(
-        """
+        );
+        CREATE INDEX IF NOT EXISTS idx_board_comments_item ON board_comments(item_id, sequence);
         CREATE TABLE IF NOT EXISTS board_index (
           id TEXT PRIMARY KEY,
           index_json TEXT NOT NULL,
           generated_at TEXT NOT NULL
-        )
+        );
         """
-    )
+    connection.executescript(schema_text)
+    columns = {row["name"] for row in connection.execute("PRAGMA table_info(board_items)").fetchall()}
+    if "extra_frontmatter_json" not in columns:
+        connection.execute("ALTER TABLE board_items ADD COLUMN extra_frontmatter_json TEXT NOT NULL DEFAULT '{}'")
+    record_schema_version(connection, schema_text)
     connection.commit()
 
 
@@ -455,7 +480,6 @@ def item_from_file(file: BoardFile) -> dict[str, Any]:
 
 
 def build_index(workspace: Path) -> dict[str, Any]:
-    ensure_board_dirs(workspace)
     files = board_files(workspace)
     items = [item_from_file(file) for file in files]
     issues = [entry for file in files for entry in file.issues]

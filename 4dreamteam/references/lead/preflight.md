@@ -78,6 +78,8 @@ Rule: do not dump all memory into context. Outside Wakeup Recall, use bounded su
 4dt-memory doctor --workspace . --json
 ```
 
+These startup checks are also schema bootstrap checks. Each tool should create its current tables in `.4dt/db.sqlite3` when they are missing, without creating legacy domain storage directories. If a tool reports a schema mismatch for existing populated tables, do not repair or migrate automatically; follow `references/lead/self-maintenance.md` Data Schema Upgrade Control.
+
 6. Report one status line for each tool: `4dt-board`, `4dt-sources`, `4dt-wiki`, and `4dt-memory`.
 7. Name the workspace state: `no_workspace`, `uninitialized`, `partially_initialized`, `degraded_tooling`, or `ready`.
 8. Offer situation-aware next actions for the operator to choose from.

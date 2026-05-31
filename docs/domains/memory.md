@@ -3,33 +3,21 @@ id: domains-memory
 kind: domain
 title: Memory Domain
 status: actual
-created_at: 2026-05-23T07:32:22Z
-updated_at: 2026-05-25T05:34:15Z
+created_at: "2026-05-23T07:32:22Z"
+updated_at: "2026-06-01T00:00:00Z"
 owner: wiki
-source_refs: ["sources/4DreamTeam/4dreamteam/references/lead/memory.md", "sources/4DreamTeam/4dreamteam/references/lead/preflight.md", "sources/4DreamTeam/README.md", "sources/4DreamTeam/README.ru.md", "sources/4DreamTeam/packages/memory/src/fourdt_memory/cli.py", "sources/4DreamTeam/packages/memory/src/fourdt_memory/sqlite_store.py", "sources/4DreamTeam/packages/memory/src/fourdt_memory/search_backend.py", "sources/4DreamTeam/packages/search/src/fourdt_search/scoring.py"]
+source_refs: ["sources/4DreamTeam/4dreamteam/references/lead/memory.md", "sources/4DreamTeam/4dreamteam/references/lead/preflight.md", "sources/4DreamTeam/README.md", "sources/4DreamTeam/README.ru.md", "sources/4DreamTeam/packages/memory/src/fourdt_memory/cli.py", "sources/4DreamTeam/packages/memory/src/fourdt_memory/sqlite_store.py", "sources/4DreamTeam/packages/memory/src/fourdt_memory/search_backend.py", "sources/4DreamTeam/packages/search/src/fourdt_search/scoring.py", "sources/4DreamTeam/packages/memory/src/fourdt_memory/migrations.py", "sources/4DreamTeam/packages/db/src/fourdt_db/cli.py"]
 task_refs: ["EPIC-0001-TASK-0013", "TASK-0017", "TASK-0021", "TASK-0022"]
+tags: ["memory", "schema-control", "sqlite", "wake-context"]
 ---
 
 # Memory Domain
 
 ## Summary
 
-
-
-
-
-
-
 4DT Memory is optional local recall. SQLite is authoritative for storage, memory retrieval uses the shared 4dt-search runtime backend, and Wake Context is the startup continuation layer that lets a new session resume from compact handoffs instead of a noisy transcript.
 
 ## Content
-
-
-
-
-
-
-
 
 The memory authority order is current user request and explicit approvals, current workspace instructions and tool-managed artifacts, approved source files, then 4DT Memory recalls and session state. Memory is a navigation and continuity layer, not a source of truth.
 
@@ -45,14 +33,11 @@ Storage is workspace-local and tool-managed in the shared `.4dt/db.sqlite3` data
 
 Write confirmations are intentionally compact. Commands that save memory items, session state, imports, or contract keys return ids, counts, metadata, timestamps, or byte sizes rather than echoing the saved prose or JSON value. Full content is available only through explicit read surfaces such as get, keys get, defaults load, or export.
 
+Memory schema control is explicit. Startup `doctor` and initialization create current memory tables in the shared database when they are missing. If existing populated memory tables do not match the packaged current schema, the tool reports `schema_mismatch` instead of silently migrating. Agents should back up the database, inspect `4dt-db schema status`, create a clean current schema for comparison when needed, and propose an operator-approved migration or reset plan before changing old memory data.
+
+For data movement, agents should use `4dt-db migrate plan/apply` with reviewed JSON migration specs. The migration runner performs SQL-side column mapping and validation without reading old row contents into the conversation.
+
 ## Evidence
-
-
-
-
-
-
-
 
 - 4dreamteam/references/lead/memory.md defines authority order, Wake Context, Wakeup Recall, operator memory intent, placement policy, role-scoped recall, save flow, stale-memory handling, and unified search usage.
 - 4dreamteam/references/lead/preflight.md defines startup defaults loading, wrapper-first tool launch, and Wakeup Recall after contract defaults.
@@ -61,14 +46,10 @@ Write confirmations are intentionally compact. Commands that save memory items, 
 - TASK-0022 accepted quality evidence backs README and release documentation updates.
 - EPIC-0001-TASK-0013 accepted quality evidence backs removal of vector retrieval from active memory code.
 - TASK-0017 accepted quality evidence backs operator-intent, placement, role-scoped recall, and bounded startup/task recall policy.
+- `packages/memory/src/fourdt_memory/migrations.py` defines current-schema setup, schema hash recording, and `schema_mismatch` behavior.
+- `packages/db/src/fourdt_db/cli.py` defines backup, schema status, and controlled migration plan/apply commands.
 
 ## Decisions
-
-
-
-
-
-
 
 - Do not fail 4DreamTeam workflow because memory is degraded or unavailable.
 - Treat contract defaults as stricter than supplemental recall when memory is ready.
@@ -78,25 +59,15 @@ Write confirmations are intentionally compact. Commands that save memory items, 
 - Recognize natural-language operator memory intent, but classify it before saving and keep normal workflow gates intact.
 - Place memory in the narrowest durable scope: workspace, project, role, or user.
 - Verify memory hits against board, wiki, or approved sources before making strong claims.
+- Do not silently migrate populated older memory schemas during normal startup or doctor checks.
+- Use database backup, schema status, and operator-approved migration specs for memory schema upgrades.
 
 ## Open Questions
-
-
-
-
-
-
 
 - Decide whether additional benchmark fixtures are needed for long-term memory retrieval quality.
 - Decide whether a future 4dt-memory classify-intent or plan-save helper is needed if policy-only memory-intent behavior is not reliable enough.
 
 ## Related
-
-
-
-
-
-
 
 - [Memory Human Analogy](memory-human-analogy.md)
 - [Search Domain](search.md)

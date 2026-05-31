@@ -3,6 +3,7 @@ from __future__ import annotations
 import contextlib
 import io
 import json
+import sqlite3
 import sys
 import tempfile
 import unittest
@@ -49,6 +50,21 @@ class SearchCliTests(unittest.TestCase):
         self.assertIn("structured query from --query-json or --query-file", output)
         self.assertIn("readonly", output)
         self.assertIn("reports stale indexes", output)
+
+    def test_stats_initializes_tables_without_legacy_search_directories(self) -> None:
+        with tempfile.TemporaryDirectory() as raw_tmp:
+            workspace = Path(raw_tmp)
+
+            exit_code, payload = run(search_main, ["--workspace", str(workspace), "--json", "stats"])
+
+            self.assertEqual(exit_code, 0)
+            self.assertEqual(payload["status"], "ready")
+            self.assertTrue((workspace / ".4dt" / "db.sqlite3").exists())
+            self.assertFalse((workspace / ".4dt" / "search").exists())
+            with sqlite3.connect(workspace / ".4dt" / "db.sqlite3") as connection:
+                tables = {row[0] for row in connection.execute("SELECT name FROM sqlite_master WHERE type = 'table'")}
+            self.assertIn("search_chunks", tables)
+            self.assertIn("search_manifest", tables)
 
     def test_build_search_get_sources_wiki_and_board(self) -> None:
         with tempfile.TemporaryDirectory() as raw_tmp:

@@ -10,7 +10,7 @@ from typing import Any
 from fourdt_search.scoring import SearchOptions, query_text
 
 from .benchmark import retrieval_quality_benchmark
-from .migrations import migrate, schema_version
+from .migrations import SchemaMismatch, ensure_current_schema, schema_version
 from .paths import workspace_identity, workspace_paths
 from .redaction import check_memory_content
 from .search_backend import normalize_memory_fields, search_memory_rows
@@ -210,6 +210,12 @@ def recovery_guidance(status: str) -> list[str]:
         return [
             "Run 4dt-memory init --workspace . --json if storage is not initialized.",
             "Verify with 4dt-memory doctor --workspace . --json.",
+        ]
+    if status == "schema_mismatch":
+        return [
+            "Create a shared database backup before changing data.",
+            "Recreate a clean database with current tool validation commands.",
+            "Compare old and new schemas, then ask the operator to approve a migration plan before moving old data.",
         ]
     return []
 
@@ -482,6 +488,8 @@ def handle_init(args: argparse.Namespace) -> tuple[int, dict[str, Any]]:
             schemaVersion=store.schema_version(),
             seededContracts=seeded_contracts,
         )
+    except SchemaMismatch as exc:
+        return EXIT_STORAGE, error_response("schema_mismatch", str(exc), status="schema_mismatch")
     except sqlite3.Error:
         return EXIT_STORAGE, error_response("storage_error", "Unable to initialize memory storage.")
     finally:
@@ -491,38 +499,24 @@ def handle_init(args: argparse.Namespace) -> tuple[int, dict[str, Any]]:
 def handle_doctor(args: argparse.Namespace) -> tuple[int, dict[str, Any]]:
     identity = workspace_identity(args.workspace)
     paths = workspace_paths(args.workspace, args.storage_root)
-    if not paths.sqlite_path.exists():
-        status = "degraded_setup_required"
-        return EXIT_DEGRADED, response(
-            ok=False,
-            status=status,
-            workspaceId=identity.id,
-            storageRoot=str(paths.storage_root),
-            sqlitePath=str(paths.sqlite_path),
-            sqlite={"ok": False, "path": str(paths.sqlite_path), "schemaVersion": None},
-            warnings=["memory_store_not_initialized"],
-            recovery=recovery_guidance(status),
-        )
-
-    try:
-        version, sqlite_ok = sqlite_info(paths.sqlite_path)
-    except sqlite3.Error:
-        return EXIT_STORAGE, response(
-            ok=False,
-            status="storage_error",
-            workspaceId=identity.id,
-            storageRoot=str(paths.storage_root),
-            sqlitePath=str(paths.sqlite_path),
-            sqlite={"ok": False, "path": str(paths.sqlite_path), "schemaVersion": None},
-            warnings=["sqlite_unreadable"],
-        )
-
     store = MemoryStore(args.workspace, args.storage_root)
     try:
-        connection = store.connect()
-        migrate(connection)
+        store.initialize()
         version = store.schema_version()
         rows = store.list_live_memory_items()
+    except SchemaMismatch as exc:
+        store.close()
+        return EXIT_STORAGE, response(
+            ok=False,
+            status="schema_mismatch",
+            workspaceId=identity.id,
+            storageRoot=str(paths.storage_root),
+            sqlitePath=str(paths.sqlite_path),
+            sqlite={"ok": False, "path": str(paths.sqlite_path), "schemaVersion": None},
+            warnings=["memory_schema_mismatch"],
+            recovery=recovery_guidance("schema_mismatch"),
+            error={"code": "schema_mismatch", "message": str(exc)},
+        )
     except sqlite3.Error:
         store.close()
         return EXIT_STORAGE, response(
@@ -536,6 +530,10 @@ def handle_doctor(args: argparse.Namespace) -> tuple[int, dict[str, Any]]:
         )
     finally:
         store.close()
+    try:
+        _version, sqlite_ok = sqlite_info(paths.sqlite_path)
+    except sqlite3.Error:
+        sqlite_ok = False
 
     return EXIT_OK, response(
         ok=True,
@@ -570,8 +568,11 @@ def open_existing_store(args: argparse.Namespace) -> tuple[MemoryStore | None, d
     store = MemoryStore(args.workspace, args.storage_root)
     try:
         connection = store.connect()
-        migrate(connection)
+        ensure_current_schema(connection)
         return store, None, EXIT_OK
+    except SchemaMismatch as exc:
+        store.close()
+        return None, error_response("schema_mismatch", str(exc), status="schema_mismatch"), EXIT_STORAGE
     except sqlite3.Error:
         store.close()
         return None, error_response("storage_error", "Unable to open memory storage."), EXIT_STORAGE

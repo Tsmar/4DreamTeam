@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import re
 import sqlite3
@@ -12,6 +13,9 @@ from typing import Any
 
 
 INDEX_VERSION = 1
+SCHEMA_VERSION = 1
+SCHEMA_DOMAIN = "wiki"
+TOOL_VERSION = "0.5.8"
 RUNTIME_ROOT = Path(".4dt")
 PAGE_STATUSES = {"draft", "actual", "accepted", "superseded", "deprecated", "unknown"}
 PAGE_KINDS = {
@@ -70,6 +74,42 @@ class UserError(Exception):
 
 def iso_now() -> str:
     return datetime.now(timezone.utc).isoformat(timespec="seconds").replace("+00:00", "Z")
+
+
+def ensure_schema_registry(connection: sqlite3.Connection) -> None:
+    connection.execute(
+        """
+        CREATE TABLE IF NOT EXISTS tool_schema_versions (
+          domain TEXT PRIMARY KEY,
+          schema_version INTEGER NOT NULL,
+          schema_hash TEXT NOT NULL,
+          tool_version TEXT NOT NULL DEFAULT '',
+          applied_at TEXT NOT NULL
+        )
+        """
+    )
+
+
+def record_schema_version(connection: sqlite3.Connection, schema_text: str) -> None:
+    ensure_schema_registry(connection)
+    connection.execute(
+        """
+        INSERT INTO tool_schema_versions (domain, schema_version, schema_hash, tool_version, applied_at)
+        VALUES (?, ?, ?, ?, ?)
+        ON CONFLICT(domain) DO UPDATE SET
+          schema_version = excluded.schema_version,
+          schema_hash = excluded.schema_hash,
+          tool_version = excluded.tool_version,
+          applied_at = excluded.applied_at
+        """,
+        (
+            SCHEMA_DOMAIN,
+            SCHEMA_VERSION,
+            hashlib.sha256(schema_text.encode("utf-8")).hexdigest(),
+            TOOL_VERSION,
+            iso_now(),
+        ),
+    )
 
 
 def kebab(value: str) -> str:
@@ -286,6 +326,14 @@ def migrate_frontmatter_json_pages(connection: sqlite3.Connection) -> None:
 
 
 def ensure_schema(connection: sqlite3.Connection) -> None:
+    schema_text = """
+    wiki_pages(relpath,id,kind,title,status,owner,source_refs_json,task_refs_json,created_at,updated_at,extra_frontmatter_json)
+    wiki_sections(page_relpath,section_key,content,updated_at)
+    wiki_tags(name,created_at,updated_at)
+    wiki_page_tags(page_relpath,tag_name,created_at)
+    wiki_index(id,index_json,generated_at)
+    wiki_fts(relpath,page_id,section_key,title,tags,content)
+    """
     create_wiki_pages_table(connection)
     migrate_frontmatter_json_pages(connection)
     connection.execute("CREATE UNIQUE INDEX IF NOT EXISTS idx_wiki_pages_id ON wiki_pages(id)")
@@ -350,6 +398,7 @@ def ensure_schema(connection: sqlite3.Connection) -> None:
         )
     except sqlite3.OperationalError:
         pass
+    record_schema_version(connection, schema_text)
     connection.commit()
 
 

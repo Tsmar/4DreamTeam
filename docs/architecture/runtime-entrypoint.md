@@ -3,22 +3,21 @@ id: architecture-runtime-entrypoint
 kind: architecture
 title: Runtime Entrypoint
 status: actual
-created_at: 2026-05-23T07:31:52Z
-updated_at: 2026-05-23T07:35:55Z
+created_at: "2026-05-23T07:31:52Z"
+updated_at: "2026-06-01T00:00:00Z"
 owner: wiki
 source_refs: ["sources/4DreamTeam/4dreamteam/SKILL.md", "sources/4DreamTeam/4dreamteam/references/lead.md", "sources/4DreamTeam/4dreamteam/references/lead/preflight.md", "sources/4DreamTeam/4dreamteam/references/lead/routing.md", "sources/4DreamTeam/4dreamteam/references/lead/context-budget.md"]
 task_refs: []
+tags: ["preflight", "runtime", "schema-control", "startup"]
 ---
 
 # Runtime Entrypoint
 
 ## Summary
 
-
 The runtime entrypoint is `$4DreamTeam`. It starts with `SKILL.md`, then `references/lead.md`, then preflight, route selection, and the smallest role-specific reference set needed for the request.
 
 ## Content
-
 
 The first-step sequence is explicit: read `references/lead.md`; for a new session, read `references/lead/preflight.md` and run command-based onboarding; follow the lead module map; confirm the current folder is a 4DreamTeam workspace before writing; route the request; then load only the selected role reference and any mode-specific references.
 
@@ -30,8 +29,9 @@ Routing is reference-driven. Product, analytic, developer, quality, wiki, market
 
 The entrypoint is conservative. It cannot bypass 4DreamTeam workflow where a route applies, cannot write before preflight or explicit workspace confirmation, cannot read/write managed board or wiki storage directly, and cannot run release, destructive, infrastructure, or publication actions without the required approval gates.
 
-## Evidence
+Startup validation commands are expected to bootstrap missing current tables in the shared database. They should not silently migrate populated mismatched schemas; schema drift is handled by backup, `4dt-db schema status`, and operator-approved migration planning.
 
+## Evidence
 
 - `sources/4DreamTeam/4dreamteam/SKILL.md` defines first steps and hard guarantees.
 - `sources/4DreamTeam/4dreamteam/references/lead.md` defines context economy, module map, role routing, default flow, and framework-wide hard guarantees.
@@ -40,19 +40,17 @@ The entrypoint is conservative. It cannot bypass 4DreamTeam workflow where a rou
 
 ## Decisions
 
-
 - Load references progressively rather than copying the whole framework into context.
 - Use command outputs, exact ids, and wiki/source search results before broad file reads.
 - Treat preflight status as part of the user-facing startup response.
+- Treat schema mismatch as an operator-controlled upgrade event, not a routine startup repair.
 
 ## Open Questions
-
 
 - Contract memory defaults still need operator-approved values for this development workspace.
 - The local PATH currently lacks global `4dt-board`, `4dt-sources`, and `4dt-wiki`; source-local npm scripts are used here.
 
 ## Related
-
 
 - [Architecture Overview](overview.md)
 - [Task Lifecycle Flow](../flows/task-lifecycle.md)

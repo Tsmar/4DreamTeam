@@ -3,29 +3,25 @@ id: changelog
 kind: changelog
 title: Changelog
 status: actual
-created_at: 2026-05-23T07:31:46Z
-updated_at: 2026-05-25T11:29:34Z
+created_at: "2026-05-23T07:31:46Z"
+updated_at: "2026-06-01T00:00:00Z"
 owner: wiki
 source_refs: ["sources/4DreamTeam/CHANGELOG.md", "sources/4DreamTeam/4dreamteam/references/release.md", "sources/4DreamTeam/README.md", "sources/4DreamTeam/README.ru.md", "sources/4DreamTeam/4dreamteam/SKILL.md"]
-task_refs: ["TASK-0023", "TASK-0024"]
+task_refs: ["TASK-0023", "TASK-0024", "v0.5.8"]
+tags: ["changelog", "release", "v0.5.8"]
 ---
 
 # Changelog
 
 ## Summary
 
-
-
 This workspace wiki changelog records notable managed-wiki changes for the 4DreamTeam skill workspace. Source release history remains in the repository `CHANGELOG.md`.
 
 ## Content
 
+2026-06-01: Prepared 4DreamTeam v0.5.8 release packaging for shared-database schema control. The release records per-domain schema versions and hashes in `tool_schema_versions`, adds `4dt-db schema status`, adds `4dt-db migrate plan/apply` for SQL-side operator-approved data movement, changes memory setup to report `schema_mismatch` instead of silently migrating populated old schemas, and stops `4dt-board validate` from creating legacy board folders.
 
-
-
-
-
-
+2026-05-31: Released 4DreamTeam v0.5.7 with shared `.4dt/db.sqlite3` authority for wiki, board, memory, search, and sources. The release moved wiki pages into relational metadata, sections, tags, and FTS rows; moved board items and comments into SQLite transactions; moved sources registry and search chunks/manifests into the shared database; added database backup plus full JSON export/import cycles for wiki, board, and memory; stopped bootstrap from creating `sources/.gitignore`; and kept release-facing Markdown docs generated from managed wiki export.
 
 2026-05-31: Prepared 4DreamTeam v0.5.6 patch packaging for wiki write safety and legacy wiki cleanup. The release adds a 32,000 byte managed wiki section limit, documents serialized same-page wiki writes, updates bundled wiki templates to the current managed frontmatter and stable section contract, removes the legacy sources.md wiki template and source-map wiki index script, and bumps skill metadata/documented version to 0.5.6.
 
@@ -47,20 +43,13 @@ This wiki changelog is not a replacement for the source repository changelog. Re
 
 ## Evidence
 
-
-
-
-
-
-- sources/4DreamTeam/CHANGELOG.md is the source repository release history and includes 0.5.6.
+- sources/4DreamTeam/CHANGELOG.md is the source repository release history and includes 0.5.8.
 - sources/4DreamTeam/4dreamteam/references/release.md defines workspace and source changelog policy, including wiki export before packaging when source-shipped docs are needed.
-- README.md, README.ru.md, and 4dreamteam/SKILL.md carry the 0.5.6 public documentation and metadata changes.
-- TASK-0035 contains accepted timeline evidence for wiki write safety, legacy wiki cleanup, version, validation, and release packaging.
+- README.md, README.ru.md, and 4dreamteam/SKILL.md carry the 0.5.8 public documentation and metadata changes.
+- v0.5.7 source changes moved managed wiki, board, memory, search, and sources state into the shared database and added backup/import/export support.
+- v0.5.8 source changes add per-domain schema recording, controlled migration planning/apply commands, strict memory schema mismatch handling, and startup bootstrap regressions.
 
 ## Decisions
-
-
-
 
 - Use this page for workspace wiki history only.
 - Keep source release history in the approved source repository changelog.
@@ -68,14 +57,9 @@ This wiki changelog is not a replacement for the source repository changelog. Re
 
 ## Open Questions
 
-
-
 - Whether future accepted wiki-only changes should create formal board timeline evidence before changelog entries.
 
 ## Related
-
-
-
 
 - [Workspace Overview](overview.md)
 - [Search Domain](domains/search.md)
