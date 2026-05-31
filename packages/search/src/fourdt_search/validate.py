@@ -9,7 +9,7 @@ from typing import Any, Callable, TypeVar
 
 from .indexer import build_index, check_index, get, normalize_domains, search, stats
 from .scoring import SearchOptions, normalize_fields
-from .storage import chunks_path, manifest_path
+from .storage import index_bytes
 
 T = TypeVar("T")
 
@@ -191,8 +191,7 @@ def validate_workspace(workspace: Path, *, limit: int) -> dict[str, Any]:
             "checkStatus": check_status,
             "checkIssues": check_issues,
             "checkManifest": check_manifest,
-            "chunksBytes": file_size(chunks_path(workspace)),
-            "manifestBytes": file_size(manifest_path(workspace)),
+            "indexBytes": index_bytes(workspace),
         },
         "stats": stats_payload,
         "qualityCases": cases,

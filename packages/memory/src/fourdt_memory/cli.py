@@ -14,7 +14,7 @@ from .migrations import migrate, schema_version
 from .paths import workspace_identity, workspace_paths
 from .redaction import check_memory_content
 from .search_backend import normalize_memory_fields, search_memory_rows
-from .sqlite_store import MemoryStore
+from .sqlite_store import MemoryStore, utc_now
 
 
 EXIT_OK = 0
@@ -109,7 +109,7 @@ DEFAULT_CONTRACT_VALUES: dict[str, tuple[Any, str]] = {
             "project": "4DreamTeam workspace",
             "purpose": "Use the current request, workspace instructions, managed tools, and accepted task/wiki state before proposing work.",
             "language_policy": "Source Markdown docs/templates/references stay English. Operator-facing chat can be Russian when preferred.",
-            "memory_search_backend": "4dt-memory uses SQLite as the authoritative store and 4dt-search as the runtime retrieval backend.",
+            "memory_search_backend": "4dt-memory uses the shared .4dt/db.sqlite3 SQLite database as the authoritative store and 4dt-search as the runtime retrieval backend.",
             "knowledge_base": "Use managed workspace wiki first via 4dt-wiki search/get when it is available.",
         },
         "json",
@@ -161,7 +161,7 @@ DEFAULT_CONTRACT_VALUES: dict[str, tuple[Any, str]] = {
                 "For workflow/reference/template changes: npm run rules when practical",
                 "For board/source/memory/search tool changes: run the affected unittest suite and relevant validate/doctor commands",
             ],
-            "known_current_status": "Memory SQLite is authoritative; 4dt-memory search uses the shared 4dt-search runtime backend.",
+            "known_current_status": "Memory tables live in the shared .4dt/db.sqlite3 SQLite database; 4dt-memory search uses the shared 4dt-search runtime backend.",
             "quality_gate": "Implementation workflows require independent quality before acceptance. Documentation work should verify source backing, status correctness, link integrity, product readability, technical precision, scope control, and safety guarantees.",
         },
         "json",
@@ -280,19 +280,19 @@ def build_parser() -> argparse.ArgumentParser:
     reindex_parser = subparsers.add_parser("reindex", help="Refresh memory search indexes.")
     add_common_arguments(reindex_parser)
 
-    export_parser = subparsers.add_parser("export", help="Export durable memory rows as JSONL.")
+    export_parser = subparsers.add_parser("export", help="Export memory rows as JSONL or full memory JSON.")
     add_common_arguments(export_parser)
-    export_parser.add_argument("--format", default="jsonl", choices=["jsonl"])
+    export_parser.add_argument("--format", default="jsonl", choices=["jsonl", "json"])
     export_parser.add_argument("--output")
 
     import_parser = subparsers.add_parser(
         "import",
-        help="Import JSONL memory rows. Dry-run by default; add --apply to write.",
-        description="Import JSONL memory rows. Dry-run by default; add --apply to write.",
+        help="Import memory JSONL or full JSON. Dry-run by default; add --apply to write.",
+        description="Import memory JSONL or full JSON. Dry-run by default; add --apply to write.",
     )
     add_common_arguments(import_parser)
     import_parser.add_argument("input", help="JSONL input file.")
-    import_parser.add_argument("--format", default="jsonl", choices=["jsonl"], help="Import format.")
+    import_parser.add_argument("--format", default="jsonl", choices=["jsonl", "json"], help="Import format.")
     import_parser.add_argument("--apply", action="store_true", help="Write rows. Without --apply, import only validates and reports dry_run.")
 
     session_parser = subparsers.add_parser("session", help="Read or write temporary session state.")
@@ -521,6 +521,7 @@ def handle_doctor(args: argparse.Namespace) -> tuple[int, dict[str, Any]]:
     try:
         connection = store.connect()
         migrate(connection)
+        version = store.schema_version()
         rows = store.list_live_memory_items()
     except sqlite3.Error:
         store.close()
@@ -949,6 +950,36 @@ def handle_export(args: argparse.Namespace) -> tuple[int, dict[str, Any]]:
         return exit_code, error or error_response("storage_error", "Unable to open memory storage.")
 
     try:
+        if args.format == "json":
+            connection = store.connect()
+            tables = (
+                "memory_items",
+                "memory_evidence",
+                "memory_agent_sessions",
+                "memory_audit_log",
+                "memory_contract_entries",
+            )
+            data = {
+                "schemaVersion": store.schema_version(),
+                "generatedAt": utc_now(),
+                "tables": {
+                    table: [dict(row) for row in connection.execute(f"SELECT * FROM {table}").fetchall()]
+                    for table in tables
+                },
+            }
+            raw_json = json.dumps(data, indent=2, ensure_ascii=False, sort_keys=True) + "\n"
+            if args.output:
+                Path(args.output).write_text(raw_json, encoding="utf-8")
+            store.audit("export", payload={"format": args.format, "tables": list(tables)})
+            return EXIT_OK, response(
+                ok=True,
+                status="exported",
+                workspaceId=store.identity.id,
+                format=args.format,
+                output=args.output,
+                json=None if args.output else data,
+                warnings=["export_contains_sensitive_accepted_memory"],
+            )
         rows = store.live_memory_export_rows()
         jsonl = "".join(json.dumps(row, sort_keys=True) + "\n" for row in rows)
         if args.output:
@@ -1043,10 +1074,74 @@ def validate_import_jsonl(raw_jsonl: str) -> tuple[list[dict[str, Any]], list[di
 
 def handle_import(args: argparse.Namespace) -> tuple[int, dict[str, Any]]:
     try:
-        raw_jsonl = Path(args.input).read_text(encoding="utf-8")
+        raw_input = Path(args.input).read_text(encoding="utf-8")
     except OSError:
         return EXIT_USER_CONFIG, error_response("input_not_found", "Import input could not be read.")
 
+    if args.format == "json":
+        try:
+            data = json.loads(raw_input)
+        except json.JSONDecodeError:
+            return EXIT_USER_CONFIG, error_response("invalid_import", "Memory JSON import input is invalid.")
+        tables = data.get("tables") if isinstance(data, dict) else None
+        expected_tables = (
+            "memory_items",
+            "memory_evidence",
+            "memory_agent_sessions",
+            "memory_audit_log",
+            "memory_contract_entries",
+        )
+        if not isinstance(tables, dict) or any(not isinstance(tables.get(table), list) for table in expected_tables):
+            return EXIT_USER_CONFIG, error_response("invalid_import", "Memory JSON import must contain all memory tables.")
+        row_count = sum(len(tables[table]) for table in expected_tables)
+        if not args.apply:
+            return EXIT_OK, response(ok=True, status="dry_run", format=args.format, apply=False, validRecords=row_count, written=0)
+        store = MemoryStore(args.workspace, args.storage_root)
+        try:
+            store.initialize()
+            connection = store.connect()
+            connection.execute("BEGIN IMMEDIATE")
+            for table in reversed(expected_tables):
+                connection.execute(f"DELETE FROM {table}")
+            columns = {
+                "memory_items": (
+                    "id",
+                    "scope",
+                    "type",
+                    "role",
+                    "content",
+                    "summary",
+                    "metadata_json",
+                    "confidence",
+                    "source_type",
+                    "source_ref",
+                    "evidence_hash",
+                    "ttl_at",
+                    "created_at",
+                    "updated_at",
+                    "deleted_at",
+                ),
+                "memory_evidence": ("id", "memory_id", "source_type", "source_ref", "quote_hash", "created_at"),
+                "memory_agent_sessions": ("id", "state_json", "created_at", "updated_at"),
+                "memory_audit_log": ("id", "action", "memory_id", "payload_json", "created_at"),
+                "memory_contract_entries": ("key", "value_json", "value_type", "created_at", "updated_at"),
+            }
+            for table in expected_tables:
+                table_columns = columns[table]
+                placeholders = ", ".join("?" for _ in table_columns)
+                connection.executemany(
+                    f"INSERT INTO {table} ({', '.join(table_columns)}) VALUES ({placeholders})",
+                    [tuple(row.get(column) for column in table_columns) for row in tables[table]],
+                )
+            connection.commit()
+            return EXIT_OK, response(ok=True, status="imported", format=args.format, apply=True, written=row_count)
+        except sqlite3.Error:
+            store.connect().rollback()
+            return EXIT_STORAGE, error_response("storage_error", "Unable to import memory.")
+        finally:
+            store.close()
+
+    raw_jsonl = raw_input
     records, errors, unsafe = validate_import_jsonl(raw_jsonl)
     if errors:
         return_code = EXIT_UNSAFE_SAVE if unsafe else EXIT_USER_CONFIG

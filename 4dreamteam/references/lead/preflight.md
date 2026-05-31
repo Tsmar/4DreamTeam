@@ -105,7 +105,6 @@ If `4dt-board` is unavailable, task workflow modes require `recovery`. If `4dt-m
 After confirmation, create only:
 
 - `AGENTS.md` from `assets/templates/workspace/AGENTS.md`;
-- `sources/.gitignore` from `assets/templates/workspace/sources.gitignore`;
 - board artifacts through `4dt-board`;
 - wiki artifacts through `4dt-wiki`;
 - source registry through `4dt-sources`;

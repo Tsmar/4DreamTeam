@@ -5,7 +5,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 
-DEFAULT_STORAGE_ROOT = Path(".4dt") / "memory"
+DEFAULT_STORAGE_ROOT = Path(".4dt")
 
 
 @dataclass(frozen=True)
@@ -59,5 +59,5 @@ def workspace_paths(workspace: str | Path, storage_root: str | Path | None = Non
     return WorkspacePaths(
         storage_root=resolved_storage_root,
         workspace_dir=workspace_dir,
-        sqlite_path=workspace_dir / "db" / "state.sqlite3",
+        sqlite_path=workspace_dir / "db.sqlite3",
     )

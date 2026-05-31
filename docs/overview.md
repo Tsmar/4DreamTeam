@@ -24,7 +24,7 @@ This workspace wiki documents the 4DreamTeam Codex skill source repository: its 
 
 
 
-4DreamTeam is a Codex skill for turning rough product intent, half-finished work, stale documentation, and release pressure into a traceable file-based workflow. The README describes the promise as a path from idea to epic, task, implementation, quality review, documentation, and release.
+4DreamTeam is a Codex skill for turning rough product intent, half-finished work, stale documentation, and release pressure into a traceable tool-managed workflow. The README describes the promise as a path from idea to epic, task, implementation, quality review, documentation, and release.
 
 The skill exposes one main entrypoint, `$4DreamTeam`. The installed skill should let the operator ask for work in natural language while the lead role chooses the smallest relevant route and loads only the required references. The user should not need to remember individual role names.
 

@@ -32,7 +32,7 @@ class RememberTests(unittest.TestCase):
             exit_code, payload = run_cli(
                 [
                     "remember",
-                    "Source-approved decision: store memory outside the workspace.",
+                    "Source-approved decision: store memory in the shared workspace database.",
                     "--workspace",
                     str(workspace),
                     "--storage-root",

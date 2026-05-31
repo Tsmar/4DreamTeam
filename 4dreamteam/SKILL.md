@@ -1,10 +1,10 @@
 ---
 name: 4dreamteam
-description: Coordinate the 4DreamTeam file-based agent framework for Codex. Use when the user wants product, analytic, developer, quality, wiki, marketing, devops, or release roles; task intake, feature decomposition, implementation, independent quality, changelog and commit prep; press releases or product messaging; project knowledge-base bootstrap, audit, sync, blueprint, deepening, indexing, or search; infrastructure, deployment, logs, migrations, SSH, or runbook documentation; or 4DreamTeam workspace initialization, validation, summaries, and skill improvements.
+description: Coordinate the 4DreamTeam tool-managed agent framework for Codex. Use when the user wants product, analytic, developer, quality, wiki, marketing, devops, or release roles; task intake, feature decomposition, implementation, independent quality, changelog and commit prep; press releases or product messaging; project knowledge-base bootstrap, audit, sync, blueprint, deepening, indexing, or search; infrastructure, deployment, logs, migrations, SSH, or runbook documentation; or 4DreamTeam workspace initialization, validation, summaries, and skill improvements.
 license: MIT
 metadata:
   author: Tsmar
-  version: 0.5.6
+  version: 0.5.7
   repository: https://github.com/Tsmar/4DreamTeam
 ---
 
@@ -54,7 +54,6 @@ Use bundled templates from `assets/templates/`:
 - `assets/templates/devops/server-index.md`
 - `assets/templates/devops/server-card.md`
 - `assets/templates/workspace/AGENTS.md`
-- `assets/templates/workspace/sources.gitignore`
 
 ## Reference Loading
 
@@ -80,7 +79,7 @@ Use route-specific references to reduce unnecessary context:
 
 1. Do not bypass 4DreamTeam workflow with ad-hoc work when a 4DreamTeam route applies.
 2. Do not write files until workspace preflight passes or the user explicitly confirms using the current folder as a 4DreamTeam workspace.
-3. In an empty folder, create only workspace artifacts after confirmation: `AGENTS.md`, tool-managed workspace state, and `sources/.gitignore`. Use `assets/templates/workspace/AGENTS.md` for `AGENTS.md`, `assets/templates/workspace/sources.gitignore` for `sources/.gitignore`, `4dt-board` for board artifacts, `4dt-wiki` for wiki artifacts, and `4dt-sources` for source registry artifacts. Do not create a local installed-skill copy there; the installed package is `4dreamteam/`.
+3. In an empty folder, create only workspace artifacts after confirmation: `AGENTS.md` and tool-managed workspace state. Use `assets/templates/workspace/AGENTS.md` for `AGENTS.md`, `4dt-board` for board artifacts, `4dt-wiki` for wiki artifacts, and `4dt-sources` for source registry artifacts. Do not create a local installed-skill copy there; the installed package is `4dreamteam/`.
 4. Do not skip independent quality for task implementation workflows.
 5. Do not run wiki post-acceptance updates before an accepted quality timeline entry.
 6. For wiki bootstrap, show intake summary and wait for confirmation before creating files unless the user explicitly accepts defaults/auto.

@@ -15,6 +15,7 @@ WRAPPERS = (
     "4dt-memory.py",
     "4dt-search.py",
     "4dt-search-validate.py",
+    "4dt-db.py",
 )
 
 

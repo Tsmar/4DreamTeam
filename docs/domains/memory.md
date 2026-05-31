@@ -41,7 +41,7 @@ Startup tooling is wrapper-first in Codex workspaces. Agents resolve the install
 
 Operator memory intent may be expressed in any language. Durable memory content is stored in English for portability, cross-agent recall, and consistent 4dt-search ranking. Exact commands, file paths, task ids, CLI names, code identifiers, and localized user-facing text are preserved when they are the fact being remembered.
 
-Storage is workspace-local and tool-managed. SQLite stores memory items, evidence, workspace identity, session state, audit logs, and default contract keys. Search is live: 4dt-search query --domain memory reads SQLite rows and ranks them through the shared 4dt-search scoring backend.
+Storage is workspace-local and tool-managed in the shared `.4dt/db.sqlite3` database. Memory is single-workspace state for the current folder; SQLite stores memory items, evidence, session state, audit logs, and default contract keys without `workspace_id` namespacing. Search is live: 4dt-search query --domain memory reads SQLite rows and ranks them through the shared 4dt-search scoring backend.
 
 Write confirmations are intentionally compact. Commands that save memory items, session state, imports, or contract keys return ids, counts, metadata, timestamps, or byte sizes rather than echoing the saved prose or JSON value. Full content is available only through explicit read surfaces such as get, keys get, defaults load, or export.
 

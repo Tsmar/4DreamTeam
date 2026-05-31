@@ -3,7 +3,7 @@ from __future__ import annotations
 import argparse
 import json
 import re
-import shutil
+import sqlite3
 import sys
 from dataclasses import dataclass
 from datetime import datetime, timezone
@@ -184,8 +184,12 @@ def tasks_dir(workspace: Path) -> Path:
     return workspace / RUNTIME_ROOT / "board" / "tasks"
 
 
-def index_path(workspace: Path) -> Path:
-    return workspace / RUNTIME_ROOT / "board" / ".index.json"
+def board_dir(workspace: Path) -> Path:
+    return workspace / RUNTIME_ROOT / "board"
+
+
+def sqlite_path(workspace: Path) -> Path:
+    return workspace / RUNTIME_ROOT / "db.sqlite3"
 
 
 def ensure_board_dirs(workspace: Path) -> None:
@@ -193,18 +197,246 @@ def ensure_board_dirs(workspace: Path) -> None:
         (tasks_dir(workspace) / column).mkdir(parents=True, exist_ok=True)
 
 
+def connect(workspace: Path) -> sqlite3.Connection:
+    (workspace / RUNTIME_ROOT).mkdir(parents=True, exist_ok=True)
+    connection = sqlite3.connect(sqlite_path(workspace))
+    connection.row_factory = sqlite3.Row
+    connection.execute("PRAGMA foreign_keys = ON")
+    connection.execute("PRAGMA busy_timeout = 5000")
+    ensure_schema(connection)
+    return connection
+
+
+def ensure_schema(connection: sqlite3.Connection) -> None:
+    connection.execute(
+        """
+        CREATE TABLE IF NOT EXISTS board_items (
+          id TEXT PRIMARY KEY,
+          kind TEXT NOT NULL,
+          title TEXT NOT NULL,
+          epic TEXT NOT NULL DEFAULT '',
+          board_column TEXT NOT NULL,
+          status TEXT NOT NULL,
+          created_at TEXT NOT NULL,
+          updated_at TEXT NOT NULL,
+          filename TEXT NOT NULL,
+          body TEXT NOT NULL,
+          extra_frontmatter_json TEXT NOT NULL DEFAULT '{}'
+        )
+        """
+    )
+    columns = {row["name"] for row in connection.execute("PRAGMA table_info(board_items)").fetchall()}
+    if "extra_frontmatter_json" not in columns:
+        connection.execute("ALTER TABLE board_items ADD COLUMN extra_frontmatter_json TEXT NOT NULL DEFAULT '{}'")
+    connection.execute("CREATE INDEX IF NOT EXISTS idx_board_items_column ON board_items(board_column)")
+    connection.execute("CREATE INDEX IF NOT EXISTS idx_board_items_epic ON board_items(epic)")
+    connection.execute(
+        """
+        CREATE TABLE IF NOT EXISTS board_comments (
+          entry_id TEXT PRIMARY KEY,
+          item_id TEXT NOT NULL,
+          role TEXT NOT NULL,
+          type TEXT NOT NULL,
+          status TEXT NOT NULL,
+          created_at TEXT NOT NULL,
+          actor TEXT NOT NULL,
+          task_id TEXT NOT NULL,
+          supersedes TEXT NOT NULL,
+          summary TEXT NOT NULL,
+          body TEXT NOT NULL,
+          sequence INTEGER NOT NULL,
+          FOREIGN KEY (item_id) REFERENCES board_items(id) ON DELETE CASCADE
+        )
+        """
+    )
+    connection.execute("CREATE INDEX IF NOT EXISTS idx_board_comments_item ON board_comments(item_id, sequence)")
+    connection.execute(
+        """
+        CREATE TABLE IF NOT EXISTS board_index (
+          id TEXT PRIMARY KEY,
+          index_json TEXT NOT NULL,
+          generated_at TEXT NOT NULL
+        )
+        """
+    )
+    connection.commit()
+
+
+def board_item_count(connection: sqlite3.Connection) -> int:
+    row = connection.execute("SELECT COUNT(*) AS count FROM board_items").fetchone()
+    return int(row["count"])
+
+
+def frontmatter_from_row(row: sqlite3.Row) -> dict[str, str]:
+    meta = {
+        "id": row["id"],
+        "kind": row["kind"],
+        "title": row["title"],
+        "board_column": row["board_column"],
+        "status": row["status"],
+        "created_at": row["created_at"],
+        "updated_at": row["updated_at"],
+    }
+    if row["kind"] == "task":
+        meta["epic"] = row["epic"]
+    try:
+        extra = json.loads(row["extra_frontmatter_json"])
+    except (KeyError, json.JSONDecodeError):
+        extra = {}
+    if isinstance(extra, dict):
+        meta.update({str(key): str(value) for key, value in extra.items()})
+    return meta
+
+
+def comment_block(row: sqlite3.Row) -> str:
+    meta = {
+        "entry_id": row["entry_id"],
+        "role": row["role"],
+        "type": row["type"],
+        "status": row["status"],
+        "created_at": row["created_at"],
+        "actor": row["actor"],
+        "task_id": row["task_id"],
+        "supersedes": row["supersedes"],
+    }
+    block = ["", f"### {row['type']}: {row['summary']}", "", "```yaml"]
+    block.extend(f"{key}: {value}" for key, value in meta.items())
+    block.extend(["```", "", row["body"].strip(), ""])
+    return "\n".join(block)
+
+
+def body_with_comments(connection: sqlite3.Connection, item_id: str, base_body: str) -> str:
+    rows = connection.execute("SELECT * FROM board_comments WHERE item_id = ? ORDER BY sequence, created_at", (item_id,)).fetchall()
+    body = base_body.rstrip()
+    if rows:
+        body += "\n" + "\n".join(comment_block(row) for row in rows)
+    return body.rstrip() + "\n"
+
+
+def row_to_board_file(workspace: Path, connection: sqlite3.Connection, row: sqlite3.Row) -> BoardFile:
+    relpath = f"{row['board_column']}/{row['filename']}"
+    body = body_with_comments(connection, row["id"], row["body"])
+    meta = frontmatter_from_row(row)
+    content = dump_frontmatter(meta) + body.rstrip() + "\n"
+    path = tasks_dir(workspace) / relpath
+    return validate_board_file(BoardFile(path, relpath, row["board_column"], content, meta, body, []))
+
+
+def validate_board_file(file: BoardFile, *, has_frontmatter: bool = True) -> BoardFile:
+    meta = file.frontmatter
+    body = file.body
+    relpath = file.relpath
+    column = file.column
+    issues: list[dict[str, str]] = []
+    if not has_frontmatter:
+        issues.append(issue("missing_frontmatter", "error", relpath, "Add required frontmatter using 4dt-board recovery."))
+    kind = meta.get("kind", "")
+    required = ["id", "kind", "title", "board_column", "status", "created_at", "updated_at"]
+    if kind == "task":
+        required.append("epic")
+    for key in required:
+        if key not in meta:
+            issues.append(issue("missing_field", "error", relpath, f"Missing frontmatter field: {key}."))
+    if "next_owner" in meta:
+        issues.append(issue("deprecated_field", "warning", relpath, "Remove next_owner; routing is workflow controlled."))
+    if re.search(r"^## Board State\s*$", body, re.MULTILINE):
+        issues.append(issue("deprecated_section", "warning", relpath, "Remove Board State body section from new-format files."))
+    if column in BOARD_COLUMNS and meta.get("board_column") and meta.get("board_column") != column:
+        issues.append(issue("column_mismatch", "error", relpath, "board_column must match the item's board column."))
+    if kind and kind not in {"task", "epic"}:
+        issues.append(issue("invalid_kind", "error", relpath, "kind must be task or epic."))
+    filename = Path(relpath).name
+    if kind == "epic" and not re.match(r"^EPIC-\d{4}-.+\.md$", filename):
+        issues.append(issue("invalid_filename", "error", relpath, "Epic filename must be EPIC-XXXX-short-kebab-title.md."))
+    if kind == "task":
+        standalone = re.match(r"^TASK-\d{4}-.+\.md$", filename)
+        epic_owned = re.match(r"^EPIC-\d{4}-TASK-\d{4}-.+\.md$", filename)
+        if not standalone and not epic_owned:
+            issues.append(
+                issue(
+                    "invalid_filename",
+                    "error",
+                    relpath,
+                    "Task filename must be TASK-XXXX-title.md or EPIC-XXXX-TASK-XXXX-title.md.",
+                )
+            )
+    status = meta.get("status", "")
+    if kind == "epic" and status and status not in EPIC_STATUSES:
+        issues.append(issue("invalid_status", "error", relpath, f"Invalid epic status: {status}."))
+    if kind == "task" and status and status not in TASK_STATUSES:
+        issues.append(issue("invalid_status", "error", relpath, f"Invalid task status: {status}."))
+    return BoardFile(file.path, relpath, column, file.content, meta, body, issues)
+
+
 def board_files(workspace: Path) -> list[BoardFile]:
+    connection = connect(workspace)
+    try:
+        migrate_legacy_board_files(workspace, connection)
+        rows = connection.execute("SELECT * FROM board_items ORDER BY board_column, filename").fetchall()
+        return [row_to_board_file(workspace, connection, row) for row in rows]
+    finally:
+        connection.close()
+
+
+def migrate_legacy_board_files(workspace: Path, connection: sqlite3.Connection) -> None:
     root = tasks_dir(workspace)
-    if not root.exists():
-        return []
-    files: list[BoardFile] = []
+    if board_item_count(connection) > 0 or not root.exists():
+        return
     for column in sorted(BOARD_COLUMNS):
         directory = root / column
         if not directory.exists():
             continue
         for path in sorted(directory.glob("*.md")):
-            files.append(read_board_file(workspace, path))
-    return files
+            file = read_board_file(workspace, path)
+            meta = file.frontmatter
+            if not meta.get("id"):
+                continue
+            base_body = re.split(r"^###\s+[^:\n]+:\s*.*$", file.body, maxsplit=1, flags=re.MULTILINE)[0].rstrip() + "\n"
+            connection.execute(
+                """
+                INSERT OR REPLACE INTO board_items
+                (id, kind, title, epic, board_column, status, created_at, updated_at, filename, body, extra_frontmatter_json)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    meta.get("id", ""),
+                    meta.get("kind", ""),
+                    meta.get("title", ""),
+                    meta.get("epic", ""),
+                    meta.get("board_column", column),
+                    meta.get("status", ""),
+                    meta.get("created_at", iso_now()),
+                    meta.get("updated_at", iso_now()),
+                    path.name,
+                    base_body,
+                    json.dumps({key: value for key, value in meta.items() if key not in {"id", "kind", "title", "epic", "board_column", "status", "created_at", "updated_at"}}, ensure_ascii=False),
+                ),
+            )
+            for index, comment in enumerate(parse_comments(file), start=1):
+                comment_meta = comment.get("metadata", {})
+                entry_id = comment_meta.get("entry_id") or f"{meta.get('id')}-entry-{index:04d}"
+                connection.execute(
+                    """
+                    INSERT OR REPLACE INTO board_comments
+                    (entry_id, item_id, role, type, status, created_at, actor, task_id, supersedes, summary, body, sequence)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    """,
+                    (
+                        entry_id,
+                        meta.get("id", ""),
+                        comment_meta.get("role", ""),
+                        comment_meta.get("type", comment.get("heading_type", "")),
+                        comment_meta.get("status", ""),
+                        comment_meta.get("created_at", iso_now()),
+                        comment_meta.get("actor", ""),
+                        comment_meta.get("task_id", meta.get("id", "")),
+                        comment_meta.get("supersedes", "null"),
+                        comment.get("summary", ""),
+                        comment.get("body", ""),
+                        index,
+                    ),
+                )
+    connection.commit()
 
 
 def item_from_file(file: BoardFile) -> dict[str, Any]:
@@ -241,34 +473,52 @@ def build_index(workspace: Path) -> dict[str, Any]:
         "schemaVersion": INDEX_VERSION,
         "generatedAt": iso_now(),
         "workspace": str(workspace),
+        "indexStore": ".4dt/db.sqlite3:board_index",
         "numbering": {"lastEpicNumber": last_epic, "lastTaskNumber": last_task},
         "items": items,
         "issues": issues,
     }
-    write_json(index_path(workspace), index)
+    connection = connect(workspace)
+    try:
+        connection.execute(
+            """
+            INSERT INTO board_index (id, index_json, generated_at)
+            VALUES ('default', ?, ?)
+            ON CONFLICT(id) DO UPDATE SET
+              index_json = excluded.index_json,
+              generated_at = excluded.generated_at
+            """,
+            (json.dumps(index, ensure_ascii=False, sort_keys=True), index["generatedAt"]),
+        )
+        connection.commit()
+    finally:
+        connection.close()
     return index
 
 
 def load_or_build_index(workspace: Path) -> dict[str, Any]:
-    path = index_path(workspace)
-    if not path.exists():
+    connection = connect(workspace)
+    try:
+        row = connection.execute("SELECT index_json FROM board_index WHERE id = 'default'").fetchone()
+    finally:
+        connection.close()
+    if row is None:
         return build_index(workspace)
     try:
-        return json.loads(path.read_text(encoding="utf-8"))
+        value = json.loads(row["index_json"])
     except json.JSONDecodeError:
         return build_index(workspace)
-
-
-def write_json(path: Path, value: Any) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(value, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    return value if isinstance(value, dict) else build_index(workspace)
 
 
 def find_item(workspace: Path, item_id: str) -> BoardFile | None:
-    for file in board_files(workspace):
-        if file.frontmatter.get("id") == item_id:
-            return file
-    return None
+    connection = connect(workspace)
+    try:
+        migrate_legacy_board_files(workspace, connection)
+        row = connection.execute("SELECT * FROM board_items WHERE id = ?", (item_id,)).fetchone()
+        return row_to_board_file(workspace, connection, row) if row else None
+    finally:
+        connection.close()
 
 
 def require_item(workspace: Path, item_id: str) -> BoardFile:
@@ -293,12 +543,43 @@ def next_id(index: dict[str, Any], kind: str) -> str:
     raise UserError("invalid_kind", "next-id expects epic or task.")
 
 
-def update_file(file: BoardFile, meta: dict[str, str] | None = None, body: str | None = None) -> None:
-    new_meta = dict(file.frontmatter)
+def update_item_row(
+    connection: sqlite3.Connection,
+    item_id: str,
+    *,
+    meta: dict[str, str] | None = None,
+    body: str | None = None,
+) -> None:
+    row = connection.execute("SELECT * FROM board_items WHERE id = ?", (item_id,)).fetchone()
+    if not row:
+        raise UserError("not_found", f"No board item found for id: {item_id}")
+    current = frontmatter_from_row(row)
     if meta:
-        new_meta.update(meta)
-    new_body = file.body if body is None else body
-    file.path.write_text(dump_frontmatter(new_meta) + new_body.rstrip() + "\n", encoding="utf-8")
+        current.update(meta)
+    updated_at = current.get("updated_at") or iso_now()
+    current["updated_at"] = updated_at
+    filename = row["filename"]
+    if "title" in current and current["title"] != row["title"]:
+        filename = f"{item_id}-{kebab(current['title'])}.md"
+    connection.execute(
+        """
+        UPDATE board_items
+        SET kind = ?, title = ?, epic = ?, board_column = ?, status = ?, updated_at = ?, filename = ?, body = ?, extra_frontmatter_json = ?
+        WHERE id = ?
+        """,
+        (
+            current.get("kind", row["kind"]),
+            current.get("title", row["title"]),
+            current.get("epic", row["epic"]),
+            current.get("board_column", row["board_column"]),
+            current.get("status", row["status"]),
+            updated_at,
+            filename,
+            body if body is not None else row["body"],
+            row["extra_frontmatter_json"],
+            item_id,
+        ),
+    )
 
 
 def section_body(body: str, section_key: str) -> str:
@@ -375,32 +656,64 @@ def create_item(workspace: Path, kind: str, title: str, epic: str | None = None,
         }
     else:
         raise UserError("invalid_kind", f"Invalid kind: {kind}")
-    path = tasks_dir(workspace) / "backlog" / filename
-    path.parent.mkdir(parents=True, exist_ok=True)
-    if path.exists():
-        raise UserError("already_exists", f"File already exists: {path}")
-    path.write_text(dump_frontmatter(meta) + standard_body(title, kind), encoding="utf-8")
+    connection = connect(workspace)
+    try:
+        migrate_legacy_board_files(workspace, connection)
+        connection.execute("BEGIN IMMEDIATE")
+        if connection.execute("SELECT 1 FROM board_items WHERE id = ?", (item_id,)).fetchone():
+            raise UserError("already_exists", f"Board item already exists: {item_id}")
+        connection.execute(
+            """
+            INSERT INTO board_items
+            (id, kind, title, epic, board_column, status, created_at, updated_at, filename, body, extra_frontmatter_json)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            (
+                item_id,
+                meta["kind"],
+                meta["title"],
+                meta.get("epic", ""),
+                meta["board_column"],
+                meta["status"],
+                meta["created_at"],
+                meta["updated_at"],
+                filename,
+                standard_body(title, kind),
+                "{}",
+            ),
+        )
+        connection.commit()
+    except Exception:
+        connection.rollback()
+        raise
+    finally:
+        connection.close()
     index = build_index(workspace)
-    return {"item": item_from_file(read_board_file(workspace, path)), "index": index}
+    return {"item": item_from_file(require_item(workspace, item_id)), "index": index}
 
 
 def move_item(workspace: Path, item_id: str, column: str, status: str | None) -> dict[str, Any]:
     if column not in BOARD_COLUMNS:
         raise UserError("invalid_column", f"Invalid board column: {column}")
-    file = require_item(workspace, item_id)
-    target = tasks_dir(workspace) / column / file.path.name
-    target.parent.mkdir(parents=True, exist_ok=True)
     meta = {"board_column": column, "updated_at": iso_now()}
     if status:
         meta["status"] = status
-    update_file(file, meta)
-    shutil.move(str(file.path), str(target))
+    connection = connect(workspace)
+    try:
+        migrate_legacy_board_files(workspace, connection)
+        connection.execute("BEGIN IMMEDIATE")
+        update_item_row(connection, item_id, meta=meta)
+        connection.commit()
+    except Exception:
+        connection.rollback()
+        raise
+    finally:
+        connection.close()
     index = build_index(workspace)
-    return {"item": item_from_file(read_board_file(workspace, target)), "index": index}
+    return {"item": item_from_file(require_item(workspace, item_id)), "index": index}
 
 
 def add_comment(args: argparse.Namespace, workspace: Path) -> dict[str, Any]:
-    file = require_item(workspace, args.id)
     if args.role not in ROLES:
         raise UserError("invalid_role", f"Invalid role: {args.role}")
     if args.type not in TIMELINE_TYPES:
@@ -421,11 +734,44 @@ def add_comment(args: argparse.Namespace, workspace: Path) -> dict[str, Any]:
         "task_id": args.id,
         "supersedes": args.supersedes or "null",
     }
-    block = ["", f"### {args.type}: {summary}", "", "```yaml"]
-    block.extend(f"{key}: {value}" for key, value in meta.items())
-    block.extend(["```", "", body.strip(), ""])
-    new_body = file.body.rstrip() + "\n" + "\n".join(block)
-    update_file(file, {"updated_at": iso_now()}, new_body)
+    connection = connect(workspace)
+    try:
+        migrate_legacy_board_files(workspace, connection)
+        connection.execute("BEGIN IMMEDIATE")
+        if not connection.execute("SELECT 1 FROM board_items WHERE id = ?", (args.id,)).fetchone():
+            raise UserError("not_found", f"No board item found for id: {args.id}")
+        next_sequence = connection.execute(
+            "SELECT COALESCE(MAX(sequence), 0) + 1 AS next_sequence FROM board_comments WHERE item_id = ?",
+            (args.id,),
+        ).fetchone()["next_sequence"]
+        connection.execute(
+            """
+            INSERT INTO board_comments
+            (entry_id, item_id, role, type, status, created_at, actor, task_id, supersedes, summary, body, sequence)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            (
+                entry_id,
+                args.id,
+                args.role,
+                args.type,
+                args.status,
+                meta["created_at"],
+                args.actor,
+                args.id,
+                args.supersedes or "null",
+                summary,
+                body.strip(),
+                next_sequence,
+            ),
+        )
+        update_item_row(connection, args.id, meta={"updated_at": iso_now()})
+        connection.commit()
+    except Exception:
+        connection.rollback()
+        raise
+    finally:
+        connection.close()
     build_index(workspace)
     return {"entry": meta}
 
@@ -445,6 +791,104 @@ def parse_comments(file: BoardFile) -> list[dict[str, Any]]:
 
 def payload(ok: bool, status: str, **extra: Any) -> dict[str, Any]:
     return {"ok": ok, "status": status, **extra}
+
+
+def export_board_json(workspace: Path, output: str | None) -> dict[str, Any]:
+    build_index(workspace)
+    connection = connect(workspace)
+    try:
+        items = [dict(row) for row in connection.execute("SELECT * FROM board_items ORDER BY id").fetchall()]
+        comments = [dict(row) for row in connection.execute("SELECT * FROM board_comments ORDER BY item_id, sequence, created_at").fetchall()]
+    finally:
+        connection.close()
+    data = {
+        "schemaVersion": INDEX_VERSION,
+        "generatedAt": iso_now(),
+        "items": items,
+        "comments": comments,
+    }
+    if output:
+        path = Path(output).expanduser()
+        if not path.is_absolute():
+            path = (workspace / path).resolve(strict=False)
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(json.dumps(data, indent=2, ensure_ascii=False, sort_keys=True) + "\n", encoding="utf-8")
+        output = path.as_posix()
+    return {"format": "json", "output": output, "itemCount": len(items), "commentCount": len(comments), "data": None if output else data}
+
+
+def load_board_import(path_value: str) -> dict[str, Any]:
+    try:
+        value = json.loads(Path(path_value).expanduser().read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        raise UserError("invalid_import", "Board import input must be a readable JSON export.") from exc
+    if not isinstance(value, dict) or not isinstance(value.get("items"), list) or not isinstance(value.get("comments"), list):
+        raise UserError("invalid_import", "Board import input must contain items and comments arrays.")
+    return value
+
+
+def import_board_json(workspace: Path, input_path: str, apply: bool) -> dict[str, Any]:
+    data = load_board_import(input_path)
+    items = data["items"]
+    comments = data["comments"]
+    if not apply:
+        return {"format": "json", "apply": False, "itemCount": len(items), "commentCount": len(comments), "written": 0}
+    connection = connect(workspace)
+    try:
+        connection.execute("BEGIN IMMEDIATE")
+        connection.execute("DELETE FROM board_comments")
+        connection.execute("DELETE FROM board_items")
+        for item in items:
+            connection.execute(
+                """
+                INSERT INTO board_items
+                (id, kind, title, epic, board_column, status, created_at, updated_at, filename, body, extra_frontmatter_json)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    item["id"],
+                    item["kind"],
+                    item["title"],
+                    item.get("epic", ""),
+                    item["board_column"],
+                    item["status"],
+                    item["created_at"],
+                    item["updated_at"],
+                    item["filename"],
+                    item["body"],
+                    item.get("extra_frontmatter_json", "{}"),
+                ),
+            )
+        for comment in comments:
+            connection.execute(
+                """
+                INSERT INTO board_comments
+                (entry_id, item_id, role, type, status, created_at, actor, task_id, supersedes, summary, body, sequence)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    comment["entry_id"],
+                    comment["item_id"],
+                    comment["role"],
+                    comment["type"],
+                    comment["status"],
+                    comment["created_at"],
+                    comment["actor"],
+                    comment["task_id"],
+                    comment["supersedes"],
+                    comment["summary"],
+                    comment["body"],
+                    comment["sequence"],
+                ),
+            )
+        connection.commit()
+    except Exception:
+        connection.rollback()
+        raise
+    finally:
+        connection.close()
+    build_index(workspace)
+    return {"format": "json", "apply": True, "itemCount": len(items), "commentCount": len(comments), "written": len(items)}
 
 
 def print_result(value: dict[str, Any], json_output: bool) -> None:
@@ -503,17 +947,35 @@ def command(args: argparse.Namespace) -> tuple[int, dict[str, Any]]:
     if action == "move":
         return 0, payload(True, "ready", **move_item(workspace, args.id, args.column, args.status_value))
     if action == "set-status":
-        file = require_item(workspace, args.id)
-        update_file(file, {"status": args.status_value, "updated_at": iso_now()})
+        connection = connect(workspace)
+        try:
+            migrate_legacy_board_files(workspace, connection)
+            connection.execute("BEGIN IMMEDIATE")
+            update_item_row(connection, args.id, meta={"status": args.status_value, "updated_at": iso_now()})
+            connection.commit()
+        except Exception:
+            connection.rollback()
+            raise
+        finally:
+            connection.close()
         build_index(workspace)
-        return 0, payload(True, "ready", item=item_from_file(read_board_file(workspace, file.path)))
+        return 0, payload(True, "ready", item=item_from_file(require_item(workspace, args.id)))
     if action == "metadata-set":
         if args.field not in CONTROLLED_METADATA:
             raise UserError("invalid_field", f"Metadata field is not controlled by 4dt-board: {args.field}")
-        file = require_item(workspace, args.id)
-        update_file(file, {args.field: args.value, "updated_at": iso_now()})
+        connection = connect(workspace)
+        try:
+            migrate_legacy_board_files(workspace, connection)
+            connection.execute("BEGIN IMMEDIATE")
+            update_item_row(connection, args.id, meta={args.field: args.value, "updated_at": iso_now()})
+            connection.commit()
+        except Exception:
+            connection.rollback()
+            raise
+        finally:
+            connection.close()
         build_index(workspace)
-        return 0, payload(True, "ready", item=item_from_file(read_board_file(workspace, file.path)))
+        return 0, payload(True, "ready", item=item_from_file(require_item(workspace, args.id)))
     if action == "comment-add":
         return 0, payload(True, "ready", **add_comment(args, workspace))
     if action == "types-list":
@@ -540,6 +1002,11 @@ def command(args: argparse.Namespace) -> tuple[int, dict[str, Any]]:
     if action == "recover":
         file = require_item(workspace, args.id)
         return 0, payload(True, "needs_operator", item=item_from_file(file), issues=file.issues)
+    if action == "export":
+        return 0, payload(True, "ready", export=export_board_json(workspace, args.output))
+    if action == "import":
+        result = import_board_json(workspace, args.input, args.apply)
+        return 0, payload(True, "imported" if args.apply else "dry_run", **{"import": result})
     raise UserError("unknown_command", f"Unknown command: {action}")
 
 
@@ -652,6 +1119,13 @@ Run `4dt-board types list --json` for the authoritative list.""",
     task_summary.set_defaults(action="task-summary")
     recover = sub.add_parser("recover", help="Inspect an invalid item that needs operator-guided recovery.")
     recover.add_argument("id")
+    export = sub.add_parser("export", help="Export full board state as JSON.")
+    export.add_argument("--output", help="Output JSON file. If omitted, JSON is included in the response.")
+    export.set_defaults(action="export")
+    import_parser = sub.add_parser("import", help="Import full board JSON. Dry-run by default; add --apply to replace board state.")
+    import_parser.add_argument("input", help="Board JSON export file.")
+    import_parser.add_argument("--apply", action="store_true", help="Replace current board state with the import.")
+    import_parser.set_defaults(action="import")
     return parser
 
 

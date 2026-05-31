@@ -18,12 +18,12 @@ class PathTests(unittest.TestCase):
     def test_default_storage_root_is_workspace_local(self) -> None:
         import tempfile
 
-        self.assertEqual(DEFAULT_STORAGE_ROOT, Path(".4dt") / "memory")
+        self.assertEqual(DEFAULT_STORAGE_ROOT, Path(".4dt"))
         with tempfile.TemporaryDirectory() as raw_tmp:
             workspace = Path(raw_tmp) / "workspace"
             workspace.mkdir()
 
-            self.assertEqual(resolve_storage_root(workspace=workspace), workspace.resolve() / ".4dt" / "memory")
+            self.assertEqual(resolve_storage_root(workspace=workspace), workspace.resolve() / ".4dt")
 
     def test_explicit_storage_root_controls_workspace_layout(self) -> None:
         with self.subTest("workspace layout"):
@@ -39,7 +39,7 @@ class PathTests(unittest.TestCase):
 
                 self.assertEqual(paths.storage_root, storage.resolve())
                 self.assertEqual(paths.workspace_dir, storage.resolve())
-                self.assertEqual(paths.sqlite_path, paths.workspace_dir / "db" / "state.sqlite3")
+                self.assertEqual(paths.sqlite_path, paths.workspace_dir / "db.sqlite3")
                 self.assertNotIn(workspace.resolve(), paths.sqlite_path.parents)
 
     def test_default_workspace_layout_stays_inside_workspace(self) -> None:
@@ -51,7 +51,8 @@ class PathTests(unittest.TestCase):
 
             paths = workspace_paths(workspace)
 
-            self.assertEqual(paths.storage_root, workspace.resolve() / ".4dt" / "memory")
+            self.assertEqual(paths.storage_root, workspace.resolve() / ".4dt")
+            self.assertEqual(paths.sqlite_path, workspace.resolve() / ".4dt" / "db.sqlite3")
             self.assertIn(workspace.resolve(), paths.sqlite_path.parents)
 
     def test_workspace_identity_is_stable_and_does_not_store_raw_path(self) -> None:

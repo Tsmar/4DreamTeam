@@ -1,9 +1,10 @@
 from __future__ import annotations
 
+import sqlite3
 from pathlib import Path
 from typing import Any
 
-from fourdt_wiki.cli import SECTION_KEYS, find_page, section_body, wiki_pages
+from fourdt_wiki.cli import SECTION_KEYS, connect, find_page, fts_query_for, migrate_legacy_pages, section_body, wiki_pages
 
 from ..records import SearchChunk, sha256_text, stable_chunk_id
 
@@ -20,6 +21,7 @@ def collect(workspace: Path) -> list[SearchChunk]:
                 continue
             if not body.strip():
                 continue
+            tags = page.tags or []
             locator = f"{page_id}:{section_key}"
             chunks.append(
                 SearchChunk(
@@ -31,9 +33,9 @@ def collect(workspace: Path) -> list[SearchChunk]:
                     path=page.relpath,
                     title=title,
                     section=section_key,
-                    text=body,
+                    text=f"{' '.join(tags)}\n{body}" if tags else body,
                     content_hash=sha256_text(body.strip()),
-                    metadata={"pageKind": page.frontmatter.get("kind", ""), "status": page.frontmatter.get("status", "")},
+                    metadata={"pageKind": page.frontmatter.get("kind", ""), "status": page.frontmatter.get("status", ""), "tags": tags},
                 )
             )
     return chunks
@@ -53,3 +55,28 @@ def read(workspace: Path, chunk: SearchChunk) -> dict[str, Any]:
         "section": chunk.section,
         "content": content,
     }
+
+
+def fts_candidate_keys(workspace: Path, query: str, limit: int) -> set[tuple[str, str]] | None:
+    fts_query = fts_query_for(query)
+    if not fts_query:
+        return None
+    connection = connect(workspace)
+    try:
+        migrate_legacy_pages(workspace, connection)
+        if not connection.execute("SELECT 1 FROM sqlite_master WHERE name = 'wiki_fts'").fetchone():
+            return None
+        rows = connection.execute(
+            """
+            SELECT page_id, section_key
+            FROM wiki_fts
+            WHERE wiki_fts MATCH ?
+            LIMIT ?
+            """,
+            (fts_query, limit),
+        ).fetchall()
+        return {(row["page_id"], row["section_key"]) for row in rows}
+    except sqlite3.OperationalError:
+        return None
+    finally:
+        connection.close()

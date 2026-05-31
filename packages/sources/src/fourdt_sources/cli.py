@@ -5,6 +5,7 @@ import hashlib
 import json
 import os
 import re
+import sqlite3
 import sys
 from dataclasses import dataclass
 from datetime import datetime, timezone
@@ -81,24 +82,63 @@ def kebab(value: str) -> str:
     return value.strip("-") or "source"
 
 
-def sources_runtime_dir(workspace: Path) -> Path:
-    return workspace / RUNTIME_ROOT / "sources"
+def sqlite_path(workspace: Path) -> Path:
+    return workspace / RUNTIME_ROOT / "db.sqlite3"
 
 
-def registry_path(workspace: Path) -> Path:
-    return sources_runtime_dir(workspace) / "registry.md"
+def connect(workspace: Path) -> sqlite3.Connection:
+    (workspace / RUNTIME_ROOT).mkdir(parents=True, exist_ok=True)
+    connection = sqlite3.connect(sqlite_path(workspace))
+    connection.row_factory = sqlite3.Row
+    connection.execute("PRAGMA busy_timeout = 5000")
+    ensure_schema(connection)
+    return connection
 
 
-def index_dir(workspace: Path) -> Path:
-    return sources_runtime_dir(workspace) / "index"
-
-
-def index_path(workspace: Path) -> Path:
-    return index_dir(workspace) / "index.json"
-
-
-def manifest_path(workspace: Path) -> Path:
-    return index_dir(workspace) / "manifest.json"
+def ensure_schema(connection: sqlite3.Connection) -> None:
+    connection.execute(
+        """
+        CREATE TABLE IF NOT EXISTS source_registry (
+          id TEXT PRIMARY KEY,
+          path TEXT NOT NULL UNIQUE,
+          label TEXT NOT NULL,
+          kind TEXT NOT NULL,
+          added_at TEXT NOT NULL
+        )
+        """
+    )
+    connection.execute(
+        """
+        CREATE TABLE IF NOT EXISTS source_inventory (
+          source_id TEXT NOT NULL,
+          path TEXT NOT NULL,
+          relative_path TEXT NOT NULL,
+          source_path TEXT NOT NULL,
+          kind TEXT NOT NULL,
+          status TEXT NOT NULL,
+          reason TEXT NOT NULL,
+          size INTEGER,
+          mtime REAL,
+          PRIMARY KEY (source_id, path)
+        )
+        """
+    )
+    connection.execute("CREATE INDEX IF NOT EXISTS idx_source_inventory_kind ON source_inventory(kind)")
+    connection.execute("CREATE INDEX IF NOT EXISTS idx_source_inventory_relative_path ON source_inventory(relative_path)")
+    connection.execute(
+        """
+        CREATE TABLE IF NOT EXISTS source_index (
+          id TEXT PRIMARY KEY,
+          index_json TEXT NOT NULL,
+          manifest_json TEXT NOT NULL,
+          generated_at TEXT NOT NULL,
+          registry_sha256 TEXT NOT NULL,
+          source_count INTEGER NOT NULL,
+          entry_count INTEGER NOT NULL
+        )
+        """
+    )
+    connection.commit()
 
 
 def workspace_source(workspace: Path) -> Source:
@@ -128,35 +168,23 @@ def source_id(path: str, label: str | None = None) -> str:
 
 
 def ensure_registry(workspace: Path) -> None:
-    file = registry_path(workspace)
-    if file.exists():
-        return
-    file.parent.mkdir(parents=True, exist_ok=True)
-    write_registry(workspace, [])
+    connection = connect(workspace)
+    connection.close()
 
 
 def read_registry(workspace: Path) -> list[Source]:
-    ensure_registry(workspace)
-    text = registry_path(workspace).read_text(encoding="utf-8")
-    sources: list[Source] = []
-    for match in re.finditer(r"<!--\s*source\s+([\s\S]*?)-->", text):
-        meta: dict[str, str] = {}
-        for line in match.group(1).splitlines():
-            if ":" not in line:
-                continue
-            key, value = line.split(":", 1)
-            meta[key.strip()] = value.strip()
-        if meta.get("id") and meta.get("path"):
-            sources.append(
-                Source(
-                    id=meta["id"],
-                    path=meta["path"],
-                    label=meta.get("label", meta["id"]),
-                    kind=meta.get("kind", "unknown"),
-                    added_at=meta.get("added_at", ""),
-                )
-            )
-    return sources
+    connection = connect(workspace)
+    try:
+        rows = connection.execute(
+            """
+            SELECT id, path, label, kind, added_at
+            FROM source_registry
+            ORDER BY id
+            """
+        ).fetchall()
+        return [Source(id=row["id"], path=row["path"], label=row["label"], kind=row["kind"], added_at=row["added_at"]) for row in rows]
+    finally:
+        connection.close()
 
 
 def all_sources(workspace: Path) -> list[Source]:
@@ -164,35 +192,28 @@ def all_sources(workspace: Path) -> list[Source]:
 
 
 def write_registry(workspace: Path, sources: list[Source]) -> None:
-    lines = [
-        "# Source Registry",
-        "",
-        "This file is maintained by `4dt-sources`. Agents use `4dt-sources` commands instead of editing it directly.",
-        "",
-        "Workspace `sources/` is always an allowed source boundary. External file and directory boundaries are listed below.",
-        "",
-        "## External Sources",
-        "",
-    ]
-    if not sources:
-        lines.append("No external sources are registered.")
-        lines.append("")
-    for source in sources:
-        lines.extend(
-            [
-                f"### {source.label}",
-                "",
-                "<!-- source",
-                f"id: {source.id}",
-                f"path: {source.path}",
-                f"label: {source.label}",
-                f"kind: {source.kind}",
-                f"added_at: {source.added_at}",
-                "-->",
-                "",
-            ]
+    connection = connect(workspace)
+    try:
+        connection.execute("BEGIN IMMEDIATE")
+        connection.execute("DELETE FROM source_registry")
+        connection.executemany(
+            """
+            INSERT INTO source_registry (id, path, label, kind, added_at)
+            VALUES (?, ?, ?, ?, ?)
+            """,
+            [(source.id, source.path, source.label, source.kind, source.added_at) for source in sources],
         )
-    registry_path(workspace).write_text("\n".join(lines).rstrip() + "\n", encoding="utf-8")
+        connection.commit()
+    except Exception:
+        connection.rollback()
+        raise
+    finally:
+        connection.close()
+
+
+def registry_sha256(workspace: Path) -> str:
+    value = [source.__dict__ for source in read_registry(workspace)]
+    return sha256(json.dumps(value, ensure_ascii=False, sort_keys=True))
 
 
 def source_kind(path: Path) -> str:
@@ -439,50 +460,121 @@ def build_index(workspace: Path) -> dict[str, Any]:
     entries: list[dict[str, Any]] = []
     for source in all_sources(workspace):
         entries.extend(walk_entries(workspace, source))
-    registry_text = registry_path(workspace).read_text(encoding="utf-8") if registry_path(workspace).exists() else ""
     index = {
         "schemaVersion": INDEX_VERSION,
         "generatedAt": iso_now(),
-        "registryPath": "sources",
-        "registrySha256": sha256(registry_text),
+        "registryStore": ".4dt/db.sqlite3:source_registry",
+        "registrySha256": registry_sha256(workspace),
+        "indexStore": ".4dt/db.sqlite3:source_inventory",
         "sourceCount": len(all_sources(workspace)),
         "entryCount": len(entries),
         "entries": entries,
         "issues": {"errors": errors, "warnings": warnings},
     }
-    index_dir(workspace).mkdir(parents=True, exist_ok=True)
-    write_json(index_path(workspace), index)
     manifest = {
         "schemaVersion": INDEX_VERSION,
         "generatedAt": index["generatedAt"],
-        "registryPath": "sources",
+        "registryStore": index["registryStore"],
         "registrySha256": index["registrySha256"],
+        "indexStore": index["indexStore"],
         "sourceCount": index["sourceCount"],
         "entryCount": index["entryCount"],
     }
-    write_json(manifest_path(workspace), manifest)
+    write_index(workspace, index, manifest, entries)
     return index
 
 
-def write_json(path: Path, value: Any) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(value, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+def entry_values(entry: dict[str, Any]) -> tuple[Any, ...]:
+    return (
+        entry["source_id"],
+        entry["path"],
+        entry["relative_path"],
+        entry["source_path"],
+        entry["kind"],
+        entry["status"],
+        entry["reason"],
+        entry["size"],
+        entry["mtime"],
+    )
+
+
+def entry_from_row(row: sqlite3.Row) -> dict[str, Any]:
+    return {
+        "source_id": row["source_id"],
+        "source_path": row["source_path"],
+        "path": row["path"],
+        "relative_path": row["relative_path"],
+        "kind": row["kind"],
+        "status": row["status"],
+        "reason": row["reason"],
+        "size": row["size"],
+        "mtime": row["mtime"],
+    }
+
+
+def write_index(workspace: Path, index: dict[str, Any], manifest: dict[str, Any], entries: list[dict[str, Any]]) -> None:
+    connection = connect(workspace)
+    try:
+        connection.execute("BEGIN IMMEDIATE")
+        connection.execute("DELETE FROM source_inventory")
+        connection.executemany(
+            """
+            INSERT INTO source_inventory (
+              source_id, path, relative_path, source_path, kind, status, reason, size, mtime
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            [entry_values(entry) for entry in entries],
+        )
+        connection.execute(
+            """
+            INSERT INTO source_index
+            (id, index_json, manifest_json, generated_at, registry_sha256, source_count, entry_count)
+            VALUES ('default', ?, ?, ?, ?, ?, ?)
+            ON CONFLICT(id) DO UPDATE SET
+              index_json = excluded.index_json,
+              manifest_json = excluded.manifest_json,
+              generated_at = excluded.generated_at,
+              registry_sha256 = excluded.registry_sha256,
+              source_count = excluded.source_count,
+              entry_count = excluded.entry_count
+            """,
+            (
+                json.dumps(index, ensure_ascii=False, sort_keys=True),
+                json.dumps(manifest, ensure_ascii=False, sort_keys=True),
+                index["generatedAt"],
+                index["registrySha256"],
+                index["sourceCount"],
+                index["entryCount"],
+            ),
+        )
+        connection.commit()
+    except Exception:
+        connection.rollback()
+        raise
+    finally:
+        connection.close()
 
 
 def load_index(workspace: Path) -> dict[str, Any]:
-    if not index_path(workspace).exists():
+    connection = connect(workspace)
+    try:
+        row = connection.execute("SELECT index_json FROM source_index WHERE id = 'default'").fetchone()
+    finally:
+        connection.close()
+    if row is None:
         return build_index(workspace)
     try:
-        return json.loads(index_path(workspace).read_text(encoding="utf-8"))
+        value = json.loads(row["index_json"])
     except json.JSONDecodeError:
         return build_index(workspace)
+    return value if isinstance(value, dict) else build_index(workspace)
 
 
 def check_index(workspace: Path) -> tuple[dict[str, Any], list[dict[str, str]]]:
     index = load_index(workspace)
     issues: list[dict[str, str]] = []
-    registry_text = registry_path(workspace).read_text(encoding="utf-8") if registry_path(workspace).exists() else ""
-    if index.get("registrySha256") != sha256(registry_text):
+    if index.get("registrySha256") != registry_sha256(workspace):
         issues.append(issue("stale_index", "sources", "Source registry changed after index build."))
     errors, warnings = validate_registry(workspace)
     issues.extend(errors)

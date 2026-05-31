@@ -1,6 +1,6 @@
 # Wiki Page Shape
 
-`4dt-wiki` owns page frontmatter and stable sections.
+`4dt-wiki` owns page frontmatter, stable sections, and page tags. SQLite is the authoritative wiki store; Markdown page files are legacy import input or explicit export output, not the mutation surface for agents.
 
 Agents should not memorize or manually recreate page templates. Use `4dt-wiki page create`, `4dt-wiki page update`, `4dt-wiki page section-set`, `4dt-wiki page apply`, and `4dt-wiki validate`.
 
@@ -39,9 +39,32 @@ If `--content` is omitted, `4dt-wiki` reads the replacement content from stdin. 
 
 The `section-set` response returns page metadata and the section key only; it does not echo the replacement content. Use `4dt-wiki get <page-or-id> --section <section>` when the updated content must be read back.
 
-Do not run multiple wiki write commands in parallel for the same page. If one workflow needs to update more than one section on a page, combine those changes into one `page apply` payload or run the commands sequentially.
+SQLite transactions serialize concurrent wiki writes. If one workflow needs to update more than one section on a page, combine those changes into one `page apply` payload so the logical change is committed together.
 
 Each section replacement is limited to 32,000 UTF-8 bytes. If a section needs more room than that, split the material into separate managed wiki pages and connect them through the `related` section instead of making one oversized section.
+
+## Tags
+
+Use tags as controlled semantic labels for cross-page discovery:
+
+```bash
+4dt-wiki page create <path> --title <title> --type <kind> --tag <tag>
+4dt-wiki page apply <page-or-id> # with {"tags":["domain-tag","component-tag"]}
+4dt-wiki page tags add <page-or-id> <tag>...
+4dt-wiki page tags remove <page-or-id> <tag>...
+4dt-wiki page tags set <page-or-id> <tag>...
+4dt-wiki tags list
+```
+
+Tags are normalized by `4dt-wiki`, stored once in the SQLite tag table, linked to pages, and included in wiki search results. Prefer durable domain, component, workflow, source-area, and decision-topic tags instead of one-off wording.
+
+When creating, importing, syncing, or deepening wiki content, maintain tags as part of the wiki change:
+
+- infer 2-6 durable tags from the page purpose, source area, domain nouns, workflows, decisions, and user vocabulary;
+- reuse existing tags from `4dt-wiki tags list` when they fit;
+- add new tags only when the concept is durable enough to help future discovery;
+- remove tags when the page no longer covers that topic;
+- update tags in the same `page apply` payload when section content and tag meaning change together.
 
 ## Metadata And Multi-Section Writes
 

@@ -1,15 +1,5 @@
-CREATE TABLE IF NOT EXISTS workspaces (
-  id TEXT PRIMARY KEY,
-  display_label TEXT NOT NULL,
-  root_hash TEXT NOT NULL,
-  git_remote_hash TEXT,
-  created_at TEXT NOT NULL,
-  updated_at TEXT NOT NULL
-);
-
 CREATE TABLE IF NOT EXISTS memory_items (
   id TEXT PRIMARY KEY,
-  workspace_id TEXT NOT NULL REFERENCES workspaces(id),
 
   scope TEXT NOT NULL,
   type TEXT NOT NULL,
@@ -40,9 +30,8 @@ CREATE TABLE IF NOT EXISTS memory_evidence (
   created_at TEXT NOT NULL
 );
 
-CREATE TABLE IF NOT EXISTS agent_sessions (
+CREATE TABLE IF NOT EXISTS memory_agent_sessions (
   id TEXT PRIMARY KEY,
-  workspace_id TEXT NOT NULL REFERENCES workspaces(id),
   state_json TEXT NOT NULL DEFAULT '{}',
   created_at TEXT NOT NULL,
   updated_at TEXT NOT NULL
@@ -50,7 +39,6 @@ CREATE TABLE IF NOT EXISTS agent_sessions (
 
 CREATE TABLE IF NOT EXISTS memory_audit_log (
   id TEXT PRIMARY KEY,
-  workspace_id TEXT NOT NULL,
   action TEXT NOT NULL,
   memory_id TEXT,
   payload_json TEXT NOT NULL DEFAULT '{}',
@@ -58,29 +46,22 @@ CREATE TABLE IF NOT EXISTS memory_audit_log (
 );
 
 CREATE TABLE IF NOT EXISTS memory_contract_entries (
-  workspace_id TEXT NOT NULL REFERENCES workspaces(id),
   key TEXT NOT NULL,
   value_json TEXT NOT NULL,
   value_type TEXT NOT NULL,
   created_at TEXT NOT NULL,
   updated_at TEXT NOT NULL,
-  PRIMARY KEY (workspace_id, key)
+  PRIMARY KEY (key)
 );
 
-CREATE INDEX IF NOT EXISTS idx_memory_items_workspace_live
-  ON memory_items(workspace_id, deleted_at, ttl_at);
+CREATE INDEX IF NOT EXISTS idx_memory_items_live
+  ON memory_items(deleted_at, ttl_at);
 
 CREATE INDEX IF NOT EXISTS idx_memory_items_filters
-  ON memory_items(workspace_id, scope, type, role);
+  ON memory_items(scope, type, role);
 
 CREATE INDEX IF NOT EXISTS idx_memory_evidence_memory
   ON memory_evidence(memory_id);
 
-CREATE INDEX IF NOT EXISTS idx_agent_sessions_workspace
-  ON agent_sessions(workspace_id);
-
-CREATE INDEX IF NOT EXISTS idx_memory_audit_log_workspace_action
-  ON memory_audit_log(workspace_id, action);
-
-CREATE INDEX IF NOT EXISTS idx_memory_contract_entries_workspace
-  ON memory_contract_entries(workspace_id);
+CREATE INDEX IF NOT EXISTS idx_memory_audit_log_action
+  ON memory_audit_log(action);

@@ -26,7 +26,7 @@ task_refs: ["EPIC-0001-TASK-0008", "EPIC-0001-TASK-0010", "EPIC-0001-TASK-0011",
 
 Agents use `4dt-search query` before broad discovery across wiki, sources, board, or memory. The agent translates operator intent into concise English search terms while preserving exact technical identifiers such as task ids, command names, filenames, and package names.
 
-Supported domains are `wiki`, `sources`, `board`, and `memory`. Wiki, sources, and board are rebuildable indexed domains stored under `.4dt/search/`. Memory is live: it reads SQLite rows directly and ranks them through the shared 4dt-search runtime backend, so there is no separate persisted memory search index to rebuild.
+Supported domains are `wiki`, `sources`, `board`, and `memory`. Wiki, sources, and board are rebuildable indexed domains stored in `.4dt/db.sqlite3` tables `search_chunks` and `search_manifest`. Memory is live: it reads SQLite rows directly and ranks them through the shared 4dt-search runtime backend, so there is no separate persisted memory search index to rebuild.
 
 The CLI exposes `index build`, `index check`, `stats`, `search`, `query`, and `get`. `query` is the preferred agent-facing alias for search. The index mode can be `auto`, `readonly`, or `rebuild`; auto checks for a missing or stale index and builds it before answering. Advanced controls include domains, fields, match mode, search mode, threshold, location filters, include/exclude paths, result limits, and JSON query syntax.
 
@@ -40,7 +40,7 @@ Search results include domain, kind, authority, score, snippet, locator, freshne
 
 
 - `packages/search/src/fourdt_search/cli.py` defines CLI commands, query alias, domain selection, index mode, filters, JSON output, and get behavior.
-- `packages/search/src/fourdt_search/indexer.py` and `storage.py` define rebuildable search chunks and manifest storage under `.4dt/search/`.
+- `packages/search/src/fourdt_search/indexer.py` and `storage.py` define rebuildable search chunks and manifest storage in `.4dt/db.sqlite3`.
 - `packages/search/src/fourdt_search/domains/*.py` define domain collectors and authoritative get command metadata.
 - `packages/memory/src/fourdt_memory/search_backend.py` connects live SQLite memory rows to the shared search scoring backend.
 - EPIC-0001 accepted tasks provide implementation, integration, benchmark, advanced CLI, and memory-backend acceptance evidence.

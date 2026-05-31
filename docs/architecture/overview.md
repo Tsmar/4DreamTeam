@@ -32,7 +32,7 @@ The repository root contains repository-level development rules (`AGENTS.md`), p
 
 `4dreamteam/assets/templates/` contains artifact templates for workspace bootstrap, product epics, analytic tasks, wiki pages, marketing artifacts, release plans, DevOps server cards, and lead handoffs. Templates shape files, while references define mandatory behavior.
 
-`packages/` contains local command-line tools and their tests. `package.json` exposes npm scripts for board, memory, search, sources, 4dt-wiki, legacy wiki index, and workflow rules. These tools are the API for managed workspace artifacts; agents should use 4dt-search for discovery and domain tools for exact reads, writes, validation, and administration.
+`packages/` contains local command-line tools and their tests. `package.json` exposes npm scripts for board, memory, search, sources, 4dt-wiki, and workflow rules. These tools are the API for managed workspace artifacts; agents should use 4dt-search for discovery and domain tools for exact reads, writes, validation, and administration.
 
 `4dreamteam/agents/openai.yaml` defines the Codex UI surface: display name, short description, logo assets, brand color, and default prompt.
 

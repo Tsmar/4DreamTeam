@@ -310,7 +310,9 @@ Improve recall in this order:
 
 `4dt-memory export --format jsonl` exports live memory items only. JSONL export may include full accepted memory content and should be treated as local private data.
 
-`4dt-memory import <file> --format jsonl` is dry-run by default. It writes only with `--apply` and runs the same safety checks as `remember`.
+`4dt-memory export --format json` exports full memory tables, including contract entries, sessions, evidence, and audit log. Treat it as local private data.
+
+`4dt-memory import <file> --format jsonl` is dry-run by default. It writes only with `--apply` and runs the same safety checks as `remember`. `--format json` imports a full memory-table export and is also dry-run by default.
 
 Session state is local workspace state for continuation. It is below board timeline entries, wiki pages, approved sources, and the current request in authority. Session state must be JSON-object data, size-limited, and TTL-scoped.
 

@@ -3,6 +3,7 @@ from __future__ import annotations
 import contextlib
 import io
 import json
+import sqlite3
 import sys
 import tempfile
 import unittest
@@ -82,9 +83,10 @@ class SourcesCliTests(unittest.TestCase):
             self.assertEqual(exit_code, 0)
             self.assertEqual(payload["source"]["kind"], "file")
 
-            registry = (workspace / ".4dt" / "sources" / "registry.md").read_text(encoding="utf-8")
-            self.assertIn("maintained by `4dt-sources`", registry)
-            self.assertIn("Notes", registry)
+            self.assertFalse((workspace / ".4dt" / "sources" / "registry.md").exists())
+            with sqlite3.connect(workspace / ".4dt" / "db.sqlite3") as connection:
+                rows = connection.execute("SELECT id, label FROM source_registry ORDER BY id").fetchall()
+            self.assertIn(("notes", "Notes"), rows)
 
     def test_index_search_get_stats_and_range_safety(self) -> None:
         with tempfile.TemporaryDirectory() as raw_tmp:
@@ -99,6 +101,13 @@ class SourcesCliTests(unittest.TestCase):
             exit_code, payload, _stderr = run_cli(["--workspace", str(workspace), "--json", "index", "build"])
             self.assertEqual(exit_code, 0)
             self.assertGreaterEqual(payload["index"]["entryCount"], 3)
+            self.assertFalse((workspace / ".4dt" / "sources" / "index" / "index.json").exists())
+            self.assertFalse((workspace / ".4dt" / "sources" / "index" / "manifest.json").exists())
+            with sqlite3.connect(workspace / ".4dt" / "db.sqlite3") as connection:
+                inventory_count = connection.execute("SELECT COUNT(*) FROM source_inventory").fetchone()[0]
+                source_index_count = connection.execute("SELECT COUNT(*) FROM source_index").fetchone()[0]
+            self.assertGreaterEqual(inventory_count, 3)
+            self.assertEqual(source_index_count, 1)
 
             exit_code, payload, _stderr = run_cli(["--workspace", str(workspace), "--json", "search", "app.py"])
             self.assertEqual(exit_code, 0)

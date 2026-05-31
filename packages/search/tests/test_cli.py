@@ -72,6 +72,7 @@ class SearchCliTests(unittest.TestCase):
                     "Search workflow overview.",
                 ],
             )
+            run(wiki_main, ["--workspace", str(workspace), "--json", "page", "tags", "add", "overview", "search-topic"])
             run(board_main, ["--workspace", str(workspace), "--json", "create", "task", "--standalone", "Search CLI"])
             run(
                 board_main,
@@ -96,6 +97,9 @@ class SearchCliTests(unittest.TestCase):
             exit_code, payload = run(search_main, ["--workspace", str(workspace), "--json", "index", "build"])
             self.assertEqual(exit_code, 0)
             self.assertGreaterEqual(payload["index"]["chunkCount"], 3)
+            self.assertEqual(payload["index"]["chunksStore"], ".4dt/db.sqlite3:search_chunks")
+            self.assertTrue((workspace / ".4dt" / "db.sqlite3").exists())
+            self.assertFalse((workspace / ".4dt" / "search" / "chunks.jsonl").exists())
 
             exit_code, payload = run(search_main, ["--workspace", str(workspace), "--json", "stats"])
             self.assertEqual(exit_code, 0)
@@ -116,6 +120,16 @@ class SearchCliTests(unittest.TestCase):
             exit_code, payload = run(search_main, ["--workspace", str(workspace), "--json", "search", "workflow overview", "--domain", "wiki"])
             self.assertEqual(exit_code, 0)
             self.assertEqual(payload["matches"][0]["domain"], "wiki")
+
+            exit_code, payload = run(
+                search_main,
+                ["--workspace", str(workspace), "--json", "search", "search-topic", "--domain", "wiki", "--explain"],
+            )
+            self.assertEqual(exit_code, 0)
+            self.assertEqual(payload["matches"][0]["metadata"]["tags"], ["search-topic"])
+            self.assertTrue(payload["explain"]["wikiFts"]["available"])
+            self.assertTrue(payload["explain"]["wikiFts"]["used"])
+            self.assertGreaterEqual(payload["explain"]["wikiFts"]["hitCount"], 1)
 
             exit_code, payload = run(search_main, ["--workspace", str(workspace), "--json", "search", "implemented search contract", "--domain", "board"])
             self.assertEqual(exit_code, 0)

@@ -39,7 +39,7 @@ After confirmation:
 
 1. Every current descendant of `sources/` is an approved source boundary, subject to the ignore list and forbidden paths.
 2. If a descendant is a symlink, resolve it, record both the workspace alias and resolved target, and treat the resolved target as the boundary. Do not read parent or sibling paths.
-3. `sources/.gitignore` may be created or repaired before first-touch confirmation without listing or reading other `sources/` contents.
+3. Do not create or repair `sources/.gitignore` automatically. Project-provided `.gitignore` files are honored when present, but workspace bootstrap must not add one because it can block source study through `4dt-sources`.
 4. Archive extraction and deep archive inspection are out of scope unless a separate task explicitly defines them.
 
 ## Ignore List

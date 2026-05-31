@@ -56,44 +56,10 @@ class MemoryStore:
     def initialize(self) -> None:
         connection = self.connect()
         migrate(connection)
-        self.upsert_workspace()
         self.audit("init", payload={"schemaVersion": self.schema_version()})
 
     def schema_version(self) -> int:
         return schema_version(self.connect())
-
-    def upsert_workspace(self) -> None:
-        now = utc_now()
-        connection = self.connect()
-        connection.execute(
-            """
-            INSERT INTO workspaces (id, display_label, root_hash, git_remote_hash, created_at, updated_at)
-            VALUES (?, ?, ?, ?, ?, ?)
-            ON CONFLICT(id) DO UPDATE SET
-              display_label = excluded.display_label,
-              root_hash = excluded.root_hash,
-              git_remote_hash = excluded.git_remote_hash,
-              updated_at = excluded.updated_at
-            """,
-            (
-                self.identity.id,
-                self.identity.display_label,
-                self.identity.root_hash,
-                self.identity.git_remote_hash,
-                now,
-                now,
-            ),
-        )
-        connection.commit()
-
-    def workspace_row(self) -> dict[str, Any]:
-        row = self.connect().execute(
-            "SELECT * FROM workspaces WHERE id = ?",
-            (self.identity.id,),
-        ).fetchone()
-        if row is None:
-            raise KeyError(self.identity.id)
-        return dict(row)
 
     def audit(
         self,
@@ -104,12 +70,11 @@ class MemoryStore:
         audit_id = new_id("audit")
         self.connect().execute(
             """
-            INSERT INTO memory_audit_log (id, workspace_id, action, memory_id, payload_json, created_at)
-            VALUES (?, ?, ?, ?, ?, ?)
+            INSERT INTO memory_audit_log (id, action, memory_id, payload_json, created_at)
+            VALUES (?, ?, ?, ?, ?)
             """,
             (
                 audit_id,
-                self.identity.id,
                 action,
                 memory_id,
                 json.dumps(payload or {}, sort_keys=True),
@@ -139,15 +104,14 @@ class MemoryStore:
         self.connect().execute(
             """
             INSERT INTO memory_items (
-              id, workspace_id, scope, type, role, content, summary, metadata_json,
+              id, scope, type, role, content, summary, metadata_json,
               confidence, source_type, source_ref, evidence_hash, ttl_at,
               created_at, updated_at, deleted_at
             )
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL)
             """,
             (
                 memory_id,
-                self.identity.id,
                 scope,
                 type,
                 role,
@@ -168,8 +132,8 @@ class MemoryStore:
         return memory_id
 
     def get_memory_item(self, memory_id: str, include_deleted: bool = False) -> dict[str, Any] | None:
-        clauses = ["id = ?", "workspace_id = ?"]
-        params: list[Any] = [memory_id, self.identity.id]
+        clauses = ["id = ?"]
+        params: list[Any] = [memory_id]
         if not include_deleted:
             clauses.append("deleted_at IS NULL")
 
@@ -189,11 +153,10 @@ class MemoryStore:
     ) -> list[dict[str, Any]]:
         now_value = now or utc_now()
         clauses = [
-            "workspace_id = ?",
             "deleted_at IS NULL",
             "(ttl_at IS NULL OR ttl_at > ?)",
         ]
-        params: list[Any] = [self.identity.id, now_value]
+        params: list[Any] = [now_value]
         if scope is not None:
             clauses.append("scope = ?")
             params.append(scope)
@@ -219,9 +182,9 @@ class MemoryStore:
             """
             UPDATE memory_items
             SET deleted_at = ?, updated_at = ?
-            WHERE id = ? AND workspace_id = ? AND deleted_at IS NULL
+            WHERE id = ? AND deleted_at IS NULL
             """,
-            (now, now, memory_id, self.identity.id),
+            (now, now, memory_id),
         )
         self.connect().commit()
         if cursor.rowcount:
@@ -252,9 +215,9 @@ class MemoryStore:
         row = self.connect().execute(
             """
             SELECT * FROM memory_contract_entries
-            WHERE workspace_id = ? AND key = ?
+            WHERE key = ?
             """,
-            (self.identity.id, key),
+            (key,),
         ).fetchone()
         if row is None:
             return None
@@ -266,10 +229,8 @@ class MemoryStore:
         rows = self.connect().execute(
             """
             SELECT * FROM memory_contract_entries
-            WHERE workspace_id = ?
             ORDER BY key ASC
-            """,
-            (self.identity.id,),
+            """
         ).fetchall()
         entries = []
         for row in rows:
@@ -283,14 +244,14 @@ class MemoryStore:
         value_json = json.dumps(value, sort_keys=True, ensure_ascii=False)
         self.connect().execute(
             """
-            INSERT INTO memory_contract_entries (workspace_id, key, value_json, value_type, created_at, updated_at)
-            VALUES (?, ?, ?, ?, ?, ?)
-            ON CONFLICT(workspace_id, key) DO UPDATE SET
+            INSERT INTO memory_contract_entries (key, value_json, value_type, created_at, updated_at)
+            VALUES (?, ?, ?, ?, ?)
+            ON CONFLICT(key) DO UPDATE SET
               value_json = excluded.value_json,
               value_type = excluded.value_type,
               updated_at = excluded.updated_at
             """,
-            (self.identity.id, key, value_json, value_type, now, now),
+            (key, value_json, value_type, now, now),
         )
         self.connect().commit()
         self.audit("contract_set", payload={"key": key, "valueType": value_type})
@@ -303,9 +264,9 @@ class MemoryStore:
         cursor = self.connect().execute(
             """
             DELETE FROM memory_contract_entries
-            WHERE workspace_id = ? AND key = ?
+            WHERE key = ?
             """,
-            (self.identity.id, key),
+            (key,),
         )
         self.connect().commit()
         deleted = cursor.rowcount > 0
@@ -358,13 +319,13 @@ class MemoryStore:
         state_json = json.dumps(state, sort_keys=True)
         self.connect().execute(
             """
-            INSERT INTO agent_sessions (id, workspace_id, state_json, created_at, updated_at)
-            VALUES (?, ?, ?, ?, ?)
+            INSERT INTO memory_agent_sessions (id, state_json, created_at, updated_at)
+            VALUES (?, ?, ?, ?)
             ON CONFLICT(id) DO UPDATE SET
               state_json = excluded.state_json,
               updated_at = excluded.updated_at
             """,
-            (session_id, self.identity.id, state_json, now, now),
+            (session_id, state_json, now, now),
         )
         self.connect().commit()
         self.audit("session_set", payload={"sessionId": session_id})
@@ -376,8 +337,8 @@ class MemoryStore:
 
     def get_session_state(self, session_id: str) -> dict[str, Any] | None:
         row = self.connect().execute(
-            "SELECT state_json FROM agent_sessions WHERE id = ? AND workspace_id = ?",
-            (session_id, self.identity.id),
+            "SELECT state_json FROM memory_agent_sessions WHERE id = ?",
+            (session_id,),
         ).fetchone()
         if row is None:
             return None
@@ -401,13 +362,14 @@ class MemoryStore:
         return {"state": state, "expiresAt": expires_at, "expired": False}
 
     def audit_entries(self, action: str | None = None) -> list[dict[str, Any]]:
-        clauses = ["workspace_id = ?"]
-        params: list[Any] = [self.identity.id]
+        clauses: list[str] = []
+        params: list[Any] = []
         if action is not None:
             clauses.append("action = ?")
             params.append(action)
+        where = f"WHERE {' AND '.join(clauses)}" if clauses else ""
         rows = self.connect().execute(
-            f"SELECT * FROM memory_audit_log WHERE {' AND '.join(clauses)} ORDER BY created_at ASC",
+            f"SELECT * FROM memory_audit_log {where} ORDER BY created_at ASC",
             params,
         ).fetchall()
         return [dict(row) for row in rows]

@@ -40,6 +40,7 @@ python3 <installed-4dreamteam-skill>/scripts/4dt-search.py <args>
 python3 <installed-4dreamteam-skill>/scripts/4dt-board.py <args>
 python3 <installed-4dreamteam-skill>/scripts/4dt-sources.py <args>
 python3 <installed-4dreamteam-skill>/scripts/4dt-wiki.py <args>
+python3 <installed-4dreamteam-skill>/scripts/4dt-db.py <args>
 ```
 
 From the 4DreamTeam source checkout, prefer the matching npm scripts when intentionally working on the source repository. Treat console `4dt-*` commands as optional shortcuts only after they are known to work in the current shell. Use direct `PYTHONPATH=... python3 -m ...` module fallbacks only for diagnosis after wrappers and source scripts fail.

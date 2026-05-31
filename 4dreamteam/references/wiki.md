@@ -35,7 +35,7 @@ Main routes:
 - `check` - read-only check that wiki matches approved sources.
 - `blueprint` - design future wiki content without code-backed claims.
 - `deepening` - deepen existing wiki content based on current implementation.
-- local wiki discovery and indexing - use `4dt-search query --domain wiki` for discovery and `4dt-wiki index build/check/get` for wiki administration or exact reads.
+- local wiki discovery and indexing - use `4dt-search query --domain wiki` for discovery and `4dt-wiki index build/check` for wiki administration or exact reads.
 
 ## Wiki Mode Entry Conditions
 

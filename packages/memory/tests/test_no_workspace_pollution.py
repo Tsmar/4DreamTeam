@@ -39,6 +39,7 @@ class NoWorkspacePollutionTests(unittest.TestCase):
             sqlite_path = Path(str(payload["sqlitePath"]))
             self.assertIn(storage.resolve(), sqlite_path.parents)
             self.assertNotIn(workspace.resolve(), sqlite_path.parents)
+            self.assertEqual(sqlite_path, storage.resolve() / "db.sqlite3")
             self.assertFalse((workspace / "state.sqlite3").exists())
             self.assertEqual((sources / "do-not-read.txt").read_text(encoding="utf-8"), "sentinel")
 

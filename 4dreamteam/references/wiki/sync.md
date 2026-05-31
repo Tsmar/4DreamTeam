@@ -8,13 +8,15 @@ Use this mode when the workspace wiki must align with accepted changes, explicit
 2. Search current wiki content through `4dt-wiki`.
 3. Search approved source content through `4dt-sources` when source-backed verification is needed.
 4. Read only the needed wiki sections with `4dt-wiki get <page-or-id> --section <section>` when full-page context is not required.
-5. Update managed pages through the smallest safe command:
+5. Inspect current tags with `4dt-wiki tags list` when the change introduces, removes, or renames durable concepts.
+6. Update managed pages through the smallest safe command:
    - `4dt-wiki page section-set` for one section;
    - `4dt-wiki page update` for metadata-only changes;
-   - `4dt-wiki page apply` for metadata plus multiple section changes.
-6. Do not run multiple wiki writes in parallel for the same page; combine same-page section changes into one `page apply` payload or run them sequentially.
-7. Keep each section at or below 32,000 UTF-8 bytes. Split larger material into separate managed wiki pages and link them through `related`.
-8. Rebuild and check the wiki index with `4dt-wiki`.
-9. Append wiki evidence to the task through `4dt-board` when the sync belongs to a task.
+   - `4dt-wiki page apply` for metadata, tags, and multiple section changes.
+7. Keep page tags aligned with the updated content: reuse existing durable tags, add newly important domain/workflow/component tags, and remove tags that no longer describe the page.
+8. SQLite transactions serialize concurrent wiki writes; combine same-page section and tag changes into one `page apply` payload when they are one logical update.
+9. Keep each section at or below 32,000 UTF-8 bytes. Split larger material into separate managed wiki pages and link them through `related`.
+10. Rebuild and check the wiki index with `4dt-wiki`.
+11. Append wiki evidence to the task through `4dt-board` when the sync belongs to a task.
 
 Do not read or write wiki storage directly.

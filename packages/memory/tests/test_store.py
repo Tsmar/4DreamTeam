@@ -28,20 +28,29 @@ class StoreTests(unittest.TestCase):
                 self.assertIn(storage.resolve(), store.paths.sqlite_path.parents)
                 self.assertNotIn(workspace.resolve(), store.paths.sqlite_path.parents)
                 self.assertFalse((workspace / "state.sqlite3").exists())
+                self.assertEqual(store.paths.sqlite_path, storage.resolve() / "db.sqlite3")
             finally:
                 store.close()
 
-    def test_workspace_row_is_idempotent_and_avoids_raw_path(self) -> None:
+    def test_schema_does_not_create_workspace_namespace_tables(self) -> None:
         with tempfile.TemporaryDirectory() as raw_tmp:
-            store, workspace, _storage = make_store(Path(raw_tmp))
+            store, _workspace, _storage = make_store(Path(raw_tmp))
             try:
-                first = store.workspace_row()
-                store.upsert_workspace()
-                second = store.workspace_row()
+                table_names = {
+                    row["name"]
+                    for row in store.connect()
+                    .execute("SELECT name FROM sqlite_master WHERE type = 'table'")
+                    .fetchall()
+                }
+                columns = {
+                    row["name"]
+                    for row in store.connect()
+                    .execute("PRAGMA table_info(memory_items)")
+                    .fetchall()
+                }
 
-                self.assertEqual(first["id"], second["id"])
-                self.assertNotIn("root_path", first)
-                self.assertNotIn(str(workspace.resolve()), str(first))
+                self.assertNotIn("memory_workspaces", table_names)
+                self.assertNotIn("workspace_id", columns)
             finally:
                 store.close()
 
@@ -64,18 +73,8 @@ class StoreTests(unittest.TestCase):
             connection = store.connect()
             connection.executescript(
                 """
-                CREATE TABLE workspaces (
-                  id TEXT PRIMARY KEY,
-                  display_label TEXT NOT NULL,
-                  root_hash TEXT NOT NULL,
-                  git_remote_hash TEXT,
-                  created_at TEXT NOT NULL,
-                  updated_at TEXT NOT NULL
-                );
-
                 CREATE TABLE memory_audit_log (
                   id TEXT PRIMARY KEY,
-                  workspace_id TEXT NOT NULL REFERENCES workspaces(id),
                   action TEXT NOT NULL,
                   memory_id TEXT,
                   payload_json TEXT,

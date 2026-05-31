@@ -15,7 +15,9 @@ from fourdt_memory.migrations import schema_sql
 
 class MigrationResourceTests(unittest.TestCase):
     def test_schema_sql_loads_from_filesystem_package(self) -> None:
-        self.assertIn("CREATE TABLE IF NOT EXISTS workspaces", schema_sql())
+        text = schema_sql()
+        self.assertIn("CREATE TABLE IF NOT EXISTS memory_items", text)
+        self.assertNotIn("memory_workspaces", text)
 
     def test_schema_sql_loads_from_zipimport_package(self) -> None:
         package_dir = Path(__file__).resolve().parents[1] / "src" / "fourdt_memory"
@@ -29,7 +31,8 @@ class MigrationResourceTests(unittest.TestCase):
             script = (
                 "from fourdt_memory.migrations import schema_sql; "
                 "text = schema_sql(); "
-                "assert 'CREATE TABLE IF NOT EXISTS workspaces' in text; "
+                "assert 'CREATE TABLE IF NOT EXISTS memory_items' in text; "
+                "assert 'memory_workspaces' not in text; "
                 "print('ok')"
             )
             env = dict(os.environ)

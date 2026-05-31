@@ -3,6 +3,8 @@ from __future__ import annotations
 import contextlib
 import io
 import json
+import os
+import subprocess
 import sys
 import tempfile
 import unittest
@@ -58,7 +60,10 @@ class BoardCliTests(unittest.TestCase):
             epic_id = payload["item"]["id"]
             self.assertEqual(epic_id, "EPIC-0001")
             self.assertEqual(payload["item"]["path"], "backlog/EPIC-0001-workflow-rules.md")
-            self.assertTrue((workspace / ".4dt" / "board" / "tasks" / payload["item"]["path"]).exists())
+            self.assertTrue((workspace / ".4dt" / "db.sqlite3").exists())
+            self.assertFalse((workspace / ".4dt" / "board" / "board.sqlite3").exists())
+            self.assertFalse((workspace / ".4dt" / "board" / ".index.json").exists())
+            self.assertFalse((workspace / ".4dt" / "board" / "tasks" / payload["item"]["path"]).exists())
 
             exit_code, payload, _stderr = run_cli(
                 ["--workspace", str(workspace), "--json", "create", "task", "--epic", epic_id, "Board CLI"]
@@ -76,7 +81,8 @@ class BoardCliTests(unittest.TestCase):
             )
             self.assertEqual(exit_code, 0)
             self.assertEqual(payload["item"]["board_column"], "analytic")
-            self.assertTrue((workspace / ".4dt" / "board" / "tasks" / payload["item"]["path"]).exists())
+            self.assertEqual(payload["item"]["path"], "analytic/EPIC-0001-TASK-0001-board-cli.md")
+            self.assertFalse((workspace / ".4dt" / "board" / "tasks" / payload["item"]["path"]).exists())
 
             exit_code, payload, _stderr = run_cli(
                 ["--workspace", str(workspace), "--json", "section", "get", task_id, "product_baseline"]
@@ -113,7 +119,22 @@ class BoardCliTests(unittest.TestCase):
 
             exit_code, payload, _stderr = run_cli(["--workspace", str(workspace), "--json", "task", "summary", task_id])
             self.assertEqual(exit_code, 0)
-            self.assertEqual(payload["latest_comments"][0]["metadata"]["type"], "developer_implementation")
+            export_path = workspace / "board-export.json"
+            exit_code, payload, _stderr = run_cli(["--workspace", str(workspace), "--json", "export", "--output", str(export_path)])
+            self.assertEqual(exit_code, 0)
+            self.assertEqual(payload["export"]["itemCount"], 2)
+            self.assertEqual(payload["export"]["commentCount"], 1)
+
+            imported = workspace / "imported"
+            exit_code, payload, _stderr = run_cli(["--workspace", str(imported), "--json", "import", str(export_path)])
+            self.assertEqual(exit_code, 0)
+            self.assertEqual(payload["status"], "dry_run")
+            exit_code, payload, _stderr = run_cli(["--workspace", str(imported), "--json", "import", str(export_path), "--apply"])
+            self.assertEqual(exit_code, 0)
+            self.assertEqual(payload["import"]["written"], 2)
+            exit_code, payload, _stderr = run_cli(["--workspace", str(imported), "--json", "comments", "latest", task_id])
+            self.assertEqual(exit_code, 0)
+            self.assertEqual(payload["comments"][0]["metadata"]["type"], "developer_implementation")
 
     def test_validate_reports_deprecated_next_owner_and_board_state(self) -> None:
         with tempfile.TemporaryDirectory() as raw_tmp:
@@ -164,6 +185,70 @@ TBD
 
             self.assertEqual(exit_code, 1)
             self.assertEqual(payload["error"]["code"], "invalid_field")
+
+    def test_parallel_timeline_comments_preserve_both_entries(self) -> None:
+        with tempfile.TemporaryDirectory() as raw_tmp:
+            workspace = Path(raw_tmp)
+            run_cli(["--workspace", str(workspace), "--json", "create", "task", "--standalone", "Parallel Timeline"])
+
+            env = {
+                **os.environ,
+                "PYTHONPATH": str(Path(__file__).resolve().parents[1] / "src"),
+                "PYTHONPYCACHEPREFIX": "/tmp/4dt-pycache",
+            }
+            commands = [
+                [
+                    sys.executable,
+                    "-m",
+                    "fourdt_board.cli",
+                    "--workspace",
+                    str(workspace),
+                    "--json",
+                    "comment",
+                    "add",
+                    "TASK-0001",
+                    "--role",
+                    "developer",
+                    "--type",
+                    "developer_implementation",
+                    "--entry-id",
+                    "entry-parallel-dev",
+                    "--summary",
+                    "Developer update",
+                    "--body",
+                    "Developer body.",
+                ],
+                [
+                    sys.executable,
+                    "-m",
+                    "fourdt_board.cli",
+                    "--workspace",
+                    str(workspace),
+                    "--json",
+                    "comment",
+                    "add",
+                    "TASK-0001",
+                    "--role",
+                    "wiki",
+                    "--type",
+                    "wiki_update",
+                    "--entry-id",
+                    "entry-parallel-wiki",
+                    "--summary",
+                    "Wiki update",
+                    "--body",
+                    "Wiki body.",
+                ],
+            ]
+            processes = [subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, env=env) for command in commands]
+            for process in processes:
+                stdout, stderr = process.communicate(timeout=10)
+                self.assertEqual(process.returncode, 0, stderr + stdout)
+
+            exit_code, payload, _stderr = run_cli(["--workspace", str(workspace), "--json", "comments", "list", "TASK-0001"])
+            self.assertEqual(exit_code, 0)
+            entry_ids = {entry["metadata"]["entry_id"] for entry in payload["comments"]}
+            self.assertEqual(entry_ids, {"entry-parallel-dev", "entry-parallel-wiki"})
 
     def test_timeline_types_are_listed_and_validated(self) -> None:
         with tempfile.TemporaryDirectory() as raw_tmp:

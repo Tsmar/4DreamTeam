@@ -21,11 +21,11 @@ Templates define artifact shape for epics, tasks, reports, wiki pages, marketing
 
 
 
-`SKILL.md` lists the bundled templates under `assets/templates/`. The list covers analytic task specs, product epics, lead epic handoffs, marketing artifacts, release plans, wiki starter pages, DevOps server docs, workspace `AGENTS.md`, and `sources/.gitignore`.
+`SKILL.md` lists the bundled templates under `assets/templates/`. The list covers analytic task specs, product epics, lead epic handoffs, marketing artifacts, release plans, wiki starter pages, DevOps server docs, and workspace `AGENTS.md`.
 
 The instruction/template boundary is explicit. Role instructions define mandatory behavior. Templates define artifact shape. A required behavior must live in role instructions or shared lead rules; a template may add structure but cannot be the only place a required behavior exists. Instructions should point to templates they expect agents to use.
 
-Workspace bootstrap templates are special. In an empty workspace, after confirmation, 4DreamTeam may create only `AGENTS.md` from the workspace template, `sources/.gitignore` from the sources template, and tool-managed artifacts through board/wiki/sources/memory tools. It must not create a local installed-skill copy in a normal workspace; the installed package is `4dreamteam/`.
+Workspace bootstrap templates are special. In an empty workspace, after confirmation, 4DreamTeam may create only `AGENTS.md` from the workspace template and tool-managed artifacts through board/wiki/sources/memory tools. It must not create a local installed-skill copy in a normal workspace; the installed package is `4dreamteam/`. Bootstrap must not create `sources/.gitignore`; project-provided ignore files are honored only when they already exist.
 
 Marketing templates are selected by mode: value review, README positioning review, release narrative, GTM brief, and claim audit each have specific entry conditions. Wiki templates include project, product overview, architecture overview, and ADR. They follow the current managed wiki page contract: frontmatter plus the stable Summary, Content, Evidence, Decisions, Open Questions, and Related sections. Source registry and source inventory artifacts are managed through `4dt-sources`, not through a wiki `sources.md` template. DevOps templates include server index and server card.
 

@@ -29,8 +29,12 @@ class EndToEndTests(unittest.TestCase):
             import_workspace = tmp_path / "import-workspace"
             import_storage = tmp_path / "import-storage"
             export_path = tmp_path / "memory.jsonl"
+            full_export_path = tmp_path / "memory-full.json"
+            full_import_workspace = tmp_path / "full-import-workspace"
+            full_import_storage = tmp_path / "full-import-storage"
             workspace.mkdir()
             import_workspace.mkdir()
+            full_import_workspace.mkdir()
 
             exit_code, payload = run_cli(
                 ["init", "--workspace", str(workspace), "--storage-root", str(storage), "--json"]
@@ -138,6 +142,59 @@ class EndToEndTests(unittest.TestCase):
             )
             self.assertEqual(exit_code, 0)
             self.assertEqual(payload["written"], 1)
+
+            exit_code, payload = run_cli(
+                [
+                    "export",
+                    "--workspace",
+                    str(workspace),
+                    "--storage-root",
+                    str(storage),
+                    "--format",
+                    "json",
+                    "--output",
+                    str(full_export_path),
+                    "--json",
+                ]
+            )
+            self.assertEqual(exit_code, 0)
+            self.assertEqual(payload["format"], "json")
+            exit_code, payload = run_cli(
+                [
+                    "import",
+                    str(full_export_path),
+                    "--workspace",
+                    str(full_import_workspace),
+                    "--storage-root",
+                    str(full_import_storage),
+                    "--format",
+                    "json",
+                    "--json",
+                ]
+            )
+            self.assertEqual(exit_code, 0)
+            self.assertEqual(payload["status"], "dry_run")
+            exit_code, payload = run_cli(
+                [
+                    "import",
+                    str(full_export_path),
+                    "--workspace",
+                    str(full_import_workspace),
+                    "--storage-root",
+                    str(full_import_storage),
+                    "--format",
+                    "json",
+                    "--apply",
+                    "--json",
+                ]
+            )
+            self.assertEqual(exit_code, 0)
+            self.assertEqual(payload["status"], "imported")
+            exit_code, payload = run_cli(
+                ["defaults", "load", "--workspace", str(full_import_workspace), "--storage-root", str(full_import_storage), "--json"]
+            )
+            self.assertEqual(exit_code, 0)
+            self.assertIn("project.rules", {entry["key"] for entry in payload["keys"]})
 
             exit_code, payload = run_cli(
                 [

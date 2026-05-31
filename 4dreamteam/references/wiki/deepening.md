@@ -10,9 +10,10 @@ Use this mode when existing wiki content needs more implementation detail from c
 4. Update managed pages through the smallest safe `4dt-wiki` command:
    - `4dt-wiki page section-set` for one section;
    - `4dt-wiki page update` for metadata-only changes;
-   - `4dt-wiki page apply` for metadata plus multiple section changes.
-5. Do not run multiple wiki writes in parallel for the same page; combine same-page section changes into one `page apply` payload or run them sequentially.
-6. Keep each section at or below 32,000 UTF-8 bytes. Split larger material into separate managed wiki pages and link them through `related`.
-7. Validate with `4dt-wiki validate`.
+   - `4dt-wiki page apply` for metadata, tags, and multiple section changes.
+5. Reconcile tags when the deeper content changes what the page is about: reuse existing tags from `4dt-wiki tags list`, add durable domain/workflow/component tags, and remove stale tags.
+6. SQLite transactions serialize concurrent wiki writes; combine same-page section and tag changes into one `page apply` payload when they are one logical update.
+7. Keep each section at or below 32,000 UTF-8 bytes. Split larger material into separate managed wiki pages and link them through `related`.
+8. Validate with `4dt-wiki validate`.
 
 Do not read or write wiki storage directly.

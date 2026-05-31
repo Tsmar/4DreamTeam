@@ -1,0 +1,9 @@
+[project]
+name = "fourdt-db"
+version = "0.1.0"
+description = "4DreamTeam shared SQLite database maintenance tooling"
+requires-python = ">=3.10"
+dependencies = []
+
+[project.scripts]
+4dt-db = "fourdt_db.cli:main"

@@ -6,7 +6,6 @@ from dataclasses import dataclass
 @dataclass(frozen=True)
 class MemoryItem:
     id: str
-    workspace_id: str
     scope: str
     type: str
     role: str | None

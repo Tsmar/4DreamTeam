@@ -25,7 +25,7 @@ Source boundaries control what agents may read for project facts. Workspace `sou
 
 The skill treats approved source paths as hard read boundaries. It must not infer access to parent directories, sibling projects, secrets, dumps, or unrelated user files. The workspace `sources/` folder is readable by default, and external file or directory boundaries are added only through `4dt-sources registry add --operator-approved`.
 
-`4dt-sources` owns the registry, source inventory, search, get, and stats. The registry is the single source of truth for approved external source access. Agents should use `4dt-sources registry list`, `index build/check`, `search`, and `get` before broad source reading.
+`4dt-sources` owns the registry, source inventory, search, get, and stats. The registry is stored in shared SQLite and is the single source of truth for approved external source access. Agents should use `4dt-sources registry list`, `index build/check`, `search`, and `get` before broad source reading.
 
 The sources tool now applies one exclusion policy to both index traversal and safe file reads. It filters common ignored names such as dependency folders, build outputs, caches, and `.DS_Store`; treats secret-like names and suffixes as forbidden, including `.env`, `.env.*`, `.pem`, `.key`, `.p12`, and `.dump`; and honors project `.gitignore` rules for workspace and registered directory sources. Ignored or forbidden paths are omitted from the inventory, ignored directories are pruned before traversal, and `get` rejects excluded paths before reading file content.
 

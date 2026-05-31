@@ -7,7 +7,7 @@ from typing import Any
 from .domains import board, memory, sources, wiki
 from .records import SearchChunk, result_payload
 from .scoring import SearchOptions, filter_domains, rank_chunks
-from .storage import chunks_path, find_chunk, manifest_path, read_chunks, read_json, write_chunks, write_json
+from .storage import find_chunk, has_chunks, read_chunks, read_manifest, write_chunks, write_manifest
 
 INDEX_VERSION = 1
 PERSISTENT_DOMAINS = {"sources", "wiki", "board"}
@@ -61,25 +61,25 @@ def build_index(workspace: Path) -> dict[str, Any]:
         "chunkCount": len(chunks),
         "domainCounts": counts,
         "domains": sorted(PERSISTENT_DOMAINS),
-        "chunksPath": ".4dt/search/chunks.jsonl",
+        "chunksStore": ".4dt/db.sqlite3:search_chunks",
     }
-    write_json(manifest_path(workspace), manifest)
+    write_manifest(workspace, manifest)
     return manifest
 
 
 def check_index(workspace: Path) -> tuple[str, list[dict[str, str]], dict[str, Any]]:
     issues: list[dict[str, str]] = []
-    manifest = read_json(manifest_path(workspace))
+    manifest = read_manifest(workspace)
     if not manifest:
         issues.append({"code": "missing_manifest", "severity": "error", "message": "Search manifest is missing or unreadable."})
     elif manifest.get("schemaVersion") != INDEX_VERSION:
         issues.append({"code": "schema_mismatch", "severity": "error", "message": "Search manifest schema version is unsupported."})
-    if not chunks_path(workspace).exists():
-        issues.append({"code": "missing_chunks", "severity": "error", "message": "Search chunks file is missing."})
+    if not has_chunks(workspace):
+        issues.append({"code": "missing_chunks", "severity": "error", "message": "Search chunks are missing."})
     else:
         chunks = read_chunks(workspace)
         if manifest and manifest.get("chunkCount") != len(chunks):
-            issues.append({"code": "chunk_count_mismatch", "severity": "warning", "message": "Manifest chunk count differs from chunks file."})
+            issues.append({"code": "chunk_count_mismatch", "severity": "warning", "message": "Manifest chunk count differs from stored chunks."})
     return ("ready" if not any(issue["severity"] == "error" for issue in issues) else "issues", issues, manifest)
 
 
@@ -107,7 +107,7 @@ def freshness_issues(workspace: Path, domains: set[str]) -> list[dict[str, str]]
 
 def stats(workspace: Path) -> dict[str, Any]:
     status, issues, manifest = check_index(workspace)
-    chunks = read_chunks(workspace) if chunks_path(workspace).exists() else []
+    chunks = read_chunks(workspace) if has_chunks(workspace) else []
     domain_counts: dict[str, int] = {}
     for chunk in chunks:
         domain_counts[chunk.domain] = domain_counts.get(chunk.domain, 0) + 1
@@ -118,6 +118,39 @@ def stats(workspace: Path) -> dict[str, Any]:
         "generatedAt": manifest.get("generatedAt"),
         "issues": issues,
     }
+
+
+def apply_wiki_fts_candidates(
+    workspace: Path,
+    query: str | dict[str, Any],
+    chunks: list[SearchChunk],
+    domains: set[str],
+    options: SearchOptions | None,
+    limit: int,
+) -> tuple[list[SearchChunk], dict[str, Any]]:
+    opts = options or SearchOptions()
+    diagnostics: dict[str, Any] = {"available": False, "used": False, "hitCount": None}
+    if "wiki" not in domains or not isinstance(query, str) or opts.mode == "json":
+        return chunks, diagnostics
+
+    wiki_chunks = [chunk for chunk in chunks if chunk.domain == "wiki"]
+    if not wiki_chunks:
+        return chunks, diagnostics
+
+    candidate_limit = opts.max_candidates or max(limit * 12, 60)
+    keys = wiki.fts_candidate_keys(workspace, query, candidate_limit)
+    if keys is None:
+        return chunks, diagnostics
+
+    diagnostics = {"available": True, "used": bool(keys), "hitCount": len(keys)}
+    if not keys:
+        return chunks, diagnostics
+
+    filtered: list[SearchChunk] = []
+    for chunk in chunks:
+        if chunk.domain != "wiki" or (chunk.page_id, chunk.section) in keys:
+            filtered.append(chunk)
+    return filtered, diagnostics
 
 
 def search(
@@ -160,6 +193,7 @@ def search_with_explain(
     if "memory" in domains:
         chunks.extend(memory.collect(workspace))
     selected = filter_domains(chunks, domains)
+    selected, wiki_fts = apply_wiki_fts_candidates(workspace, query, selected, domains, options, limit)
     ranked, explain = rank_chunks(query, selected, limit=limit, options=options)
     snippet_query = query if isinstance(query, str) else ""
     explain["domains"] = sorted(domains)
@@ -170,6 +204,7 @@ def search_with_explain(
         "persistentDomains": sorted(domains & PERSISTENT_DOMAINS),
         "liveDomains": sorted(domains - PERSISTENT_DOMAINS),
     }
+    explain["wikiFts"] = wiki_fts
     return [result_payload(chunk, score=score, query=snippet_query) for score, chunk in ranked], explain
 
 
