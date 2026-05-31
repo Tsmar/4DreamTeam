@@ -205,6 +205,8 @@ Save to 4DT Memory only when the information is durable, accepted, and useful ac
 
 Use `4dt-memory remember "<text>" --workspace . --scope <scope> --type <type> --source-type <source-type> --source-ref <source-ref> --json` for durable workspace, project, or role memory. User preferences may omit `--source-ref` only when `--scope user --source-type user` is explicit.
 
+Memory write commands return compact confirmations instead of echoing saved prose or JSON values. Use explicit read commands such as `4dt-memory get`, `4dt-memory keys get`, or `4dt-memory defaults load` only when the saved content must be inspected.
+
 Do not save:
 
 1. Secrets, credentials, tokens, private keys, `.env` contents, local secret files, dumps, production data, or personal data.

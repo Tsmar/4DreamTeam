@@ -58,8 +58,13 @@ class ContractKeysTests(unittest.TestCase):
                 ["keys", "set", "project.rules", "--value", "Use short operator updates.", "--workspace", str(workspace), "--json"]
             )
             self.assertEqual(exit_code, 0)
-            self.assertEqual(payload["key"]["value"], "Use short operator updates.")
+            self.assertNotIn("value", payload["key"])
             self.assertEqual(payload["key"]["valueType"], "text")
+            self.assertEqual(payload["key"]["valueBytes"], len("Use short operator updates.".encode("utf-8")))
+
+            exit_code, payload = run_cli(["keys", "get", "project.rules", "--workspace", str(workspace), "--json"])
+            self.assertEqual(exit_code, 0)
+            self.assertEqual(payload["key"]["entry"]["value"], "Use short operator updates.")
 
             exit_code, payload = run_cli(["keys", "delete", "project.rules", "--workspace", str(workspace), "--json"])
             self.assertEqual(exit_code, 0)

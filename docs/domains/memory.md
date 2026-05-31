@@ -43,6 +43,8 @@ Operator memory intent may be expressed in any language. Durable memory content 
 
 Storage is workspace-local and tool-managed. SQLite stores memory items, evidence, workspace identity, session state, audit logs, and default contract keys. Search is live: 4dt-search query --domain memory reads SQLite rows and ranks them through the shared 4dt-search scoring backend.
 
+Write confirmations are intentionally compact. Commands that save memory items, session state, imports, or contract keys return ids, counts, metadata, timestamps, or byte sizes rather than echoing the saved prose or JSON value. Full content is available only through explicit read surfaces such as get, keys get, defaults load, or export.
+
 ## Evidence
 
 

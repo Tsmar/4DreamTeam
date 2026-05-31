@@ -4,6 +4,7 @@
 
 - Added a 32,000 UTF-8 byte limit for each managed wiki section and regression coverage for `4dt-wiki page section-set` and `page apply`.
 - Documented that agents must serialize same-page `4dt-wiki` writes and split oversized wiki material into related managed pages.
+- Stopped `4dt-wiki page section-set` and `4dt-memory keys set` write responses from echoing the saved section or contract value; explicit read commands remain available for read-back.
 - Converted bundled wiki templates to the current managed frontmatter plus stable section contract.
 - Removed legacy `sources.md` wiki template, the legacy `wiki_index.py` source-map script, and the `npm run wiki` alias.
 - Bumped the skill metadata and documented README version to `0.5.6`.

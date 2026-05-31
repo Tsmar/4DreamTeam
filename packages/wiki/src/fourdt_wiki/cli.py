@@ -375,7 +375,7 @@ def update_page_section(workspace: Path, page_or_id: str, section_key: str, cont
     write_page(page, dict(page.frontmatter), body)
     build_index(workspace)
     updated = read_page(workspace, page.path)
-    return {"page": item_from_page(updated), "section": section_key, "content": section_body(updated, section_key)}
+    return {"page": item_from_page(updated), "section": section_key}
 
 
 def page_payload_refs(value: Any, *, field: str) -> str | None:

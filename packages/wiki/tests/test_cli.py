@@ -117,7 +117,8 @@ class WikiCliTests(unittest.TestCase):
                 ]
             )
             self.assertEqual(exit_code, 0)
-            self.assertEqual(payload["content"], "Payments handles billing context.")
+            self.assertEqual(payload["section"], "summary")
+            self.assertNotIn("content", payload)
 
             exit_code, payload, _stderr = run_cli(["--workspace", str(workspace), "--json", "get", "domains-payments"])
             self.assertEqual(exit_code, 0)

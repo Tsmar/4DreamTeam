@@ -802,6 +802,18 @@ def contract_entry_payload(entry: dict[str, Any] | None) -> dict[str, Any] | Non
     }
 
 
+def contract_entry_write_payload(entry: dict[str, Any]) -> dict[str, Any]:
+    value = entry["value"]
+    raw_value = value if isinstance(value, str) else json.dumps(value, sort_keys=True, ensure_ascii=False)
+    return {
+        "key": entry["key"],
+        "valueType": entry["value_type"],
+        "valueBytes": len(raw_value.encode("utf-8")),
+        "createdAt": entry["created_at"],
+        "updatedAt": entry["updated_at"],
+    }
+
+
 def contract_key_state(store: MemoryStore, key: str, *, include_value: bool = True) -> dict[str, Any]:
     entry = store.get_contract_entry(key)
     state = {
@@ -1215,7 +1227,7 @@ def handle_keys_set(args: argparse.Namespace) -> tuple[int, dict[str, Any]]:
             ok=True,
             status="contract_saved",
             workspaceId=store.identity.id,
-            key=contract_entry_payload(entry),
+            key=contract_entry_write_payload(entry),
         )
     except sqlite3.Error:
         return EXIT_STORAGE, error_response("storage_error", "Unable to save contract key.")

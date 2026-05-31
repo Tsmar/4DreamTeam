@@ -37,6 +37,8 @@ Use section-scoped writes for single-section updates:
 
 If `--content` is omitted, `4dt-wiki` reads the replacement content from stdin. Section replacement preserves the page frontmatter and all other sections.
 
+The `section-set` response returns page metadata and the section key only; it does not echo the replacement content. Use `4dt-wiki get <page-or-id> --section <section>` when the updated content must be read back.
+
 Do not run multiple wiki write commands in parallel for the same page. If one workflow needs to update more than one section on a page, combine those changes into one `page apply` payload or run the commands sequentially.
 
 Each section replacement is limited to 32,000 UTF-8 bytes. If a section needs more room than that, split the material into separate managed wiki pages and connect them through the `related` section instead of making one oversized section.
