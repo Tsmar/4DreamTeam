@@ -41,4 +41,4 @@ A task can move to `developer` only when it has:
 5. documentation alignment decision;
 6. unresolved questions either answered or explicitly deferred by the operator.
 
-If any blocking question remains, keep the task in `analytic`, add an `analytic_blocked` timeline entry, and ask the operator or product owner for the missing decision.
+If any blocking question remains, keep the task in `analytic`, set task status to `needs_input` or `blocked`, add an `analytic_clarification` timeline entry with status `blocked`, and ask the operator or product owner for the missing decision.

@@ -7,7 +7,7 @@ import zipapp
 from pathlib import Path
 
 
-PACKAGE_NAMES = ("board", "wiki", "sources", "memory", "search", "db")
+PACKAGE_NAMES = ("board", "wiki", "web", "sources", "memory", "search", "db")
 
 MAIN = '''from __future__ import annotations
 
@@ -18,6 +18,7 @@ import sys
 COMMANDS = {
     "board": "fourdt_board.cli",
     "wiki": "fourdt_wiki.cli",
+    "web": "fourdt_web.cli",
     "sources": "fourdt_sources.cli",
     "memory": "fourdt_memory.cli",
     "search": "fourdt_search.cli",
@@ -29,7 +30,7 @@ COMMANDS = {
 def main(argv=None):
     args = list(sys.argv[1:] if argv is None else argv)
     if not args or args[0] in {"-h", "--help"}:
-        print("usage: 4dt-tools.pyz {board,wiki,sources,memory,search,search-validate,db} ...")
+        print("usage: 4dt-tools.pyz {board,wiki,web,sources,memory,search,search-validate,db} ...")
         return 0
     command = args.pop(0)
     module_name = COMMANDS.get(command)

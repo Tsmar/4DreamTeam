@@ -40,10 +40,29 @@ python3 <installed-4dreamteam-skill>/scripts/4dt-search.py <args>
 python3 <installed-4dreamteam-skill>/scripts/4dt-board.py <args>
 python3 <installed-4dreamteam-skill>/scripts/4dt-sources.py <args>
 python3 <installed-4dreamteam-skill>/scripts/4dt-wiki.py <args>
+python3 <installed-4dreamteam-skill>/scripts/4dt-web.py <args>
 python3 <installed-4dreamteam-skill>/scripts/4dt-db.py <args>
 ```
 
 From the 4DreamTeam source checkout, prefer the matching npm scripts when intentionally working on the source repository. Treat console `4dt-*` commands as optional shortcuts only after they are known to work in the current shell. Use direct `PYTHONPATH=... python3 -m ...` module fallbacks only for diagnosis after wrappers and source scripts fail.
+
+## Workspace View
+
+`4dt-web` runs the local read-only 4DreamTeam Workspace View. It is the browser panel for inspecting managed workspace state while agents work. The current surface shows the wiki; future surfaces may add board, memory, sources, release, or quality views without expanding domain tools.
+
+When the operator asks to open, watch, or keep a local workspace panel running, launch:
+
+```bash
+python3 <installed-4dreamteam-skill>/scripts/4dt-web.py --workspace . serve --host 127.0.0.1 --port 4174
+```
+
+From the 4DreamTeam source checkout, use:
+
+```bash
+npm run web -- --workspace <workspace> serve --host 127.0.0.1 --port 4174
+```
+
+Then open or refresh `http://localhost:4174/` in the browser. Keep this server read-only and localhost-bound unless the operator explicitly approves another binding.
 
 ## Framework-First Rule
 
@@ -55,7 +74,7 @@ Agents do not read or write managed board storage directly. Use `4dt-board` for 
 
 Agents do not read or write managed wiki storage directly. Use `4dt-wiki` for wiki pages and `4dt-sources` for source registry and approved-source inventory.
 
-Do not run multiple `4dt-wiki` writes in parallel for the same page. Combine same-page section changes into one `4dt-wiki page apply` payload or run them sequentially. Each wiki section is limited to 32,000 UTF-8 bytes; split larger material into separate managed wiki pages and link them through `related`.
+SQLite transactions serialize managed writes. Parallel reads and searches are allowed, and independent board comments or independent wiki page writes may run concurrently. For one logical update to the same wiki page, combine section, tag, status, and ref changes into one `4dt-wiki page apply` payload so readers see one coherent update. Avoid competing same-page/same-field writes unless the workflow explicitly owns conflict handling. Each wiki section is limited to 32,000 UTF-8 bytes; split larger material into separate managed wiki pages and link them through `related`.
 
 Storage layout is an implementation detail owned by the tools. The scripts are the only supported mutation and query interface for agents.
 
@@ -83,6 +102,12 @@ Supported columns:
 - `rejected`
 
 A task's current column determines which role owns the next action. `next_owner` is not used.
+
+Supported epic statuses are `shaping`, `ready_for_analytic`, `ready_for_developer`, `in_delivery`, `blocked`, `done`, and `rejected`.
+
+Supported task statuses are `proposed`, `ready`, `in_progress`, `blocked`, `needs_input`, `needs_rework`, `accepted`, `done`, and `rejected`.
+
+Use exact status values only. Do not invent aliases such as `working`, `in-delivery`, `ready-for-analytic`, or `ready-for-developer`. Quality acceptance and rejection are timeline evidence types (`quality_acceptance`, `quality_rejection`), not replacement task statuses.
 
 ## Timeline Model
 

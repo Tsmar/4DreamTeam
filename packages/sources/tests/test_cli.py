@@ -49,7 +49,7 @@ class SourcesCliTests(unittest.TestCase):
         self.assertEqual(exit_code, 0)
         self.assertIn("Recommended for focused agent reads.", output)
 
-    def test_registry_validate_initializes_tables_without_legacy_sources_directories(self) -> None:
+    def test_registry_validate_initializes_tables(self) -> None:
         with tempfile.TemporaryDirectory() as raw_tmp:
             workspace = Path(raw_tmp)
 
@@ -58,7 +58,6 @@ class SourcesCliTests(unittest.TestCase):
             self.assertEqual(exit_code, 2)
             self.assertEqual(payload["status"], "issues")
             self.assertTrue((workspace / ".4dt" / "db.sqlite3").exists())
-            self.assertFalse((workspace / ".4dt" / "sources").exists())
             with sqlite3.connect(workspace / ".4dt" / "db.sqlite3") as connection:
                 tables = {row[0] for row in connection.execute("SELECT name FROM sqlite_master WHERE type = 'table'")}
             self.assertIn("source_registry", tables)
@@ -99,7 +98,6 @@ class SourcesCliTests(unittest.TestCase):
             self.assertEqual(exit_code, 0)
             self.assertEqual(payload["source"]["kind"], "file")
 
-            self.assertFalse((workspace / ".4dt" / "sources" / "registry.md").exists())
             with sqlite3.connect(workspace / ".4dt" / "db.sqlite3") as connection:
                 rows = connection.execute("SELECT id, label FROM source_registry ORDER BY id").fetchall()
             self.assertIn(("notes", "Notes"), rows)
@@ -117,8 +115,6 @@ class SourcesCliTests(unittest.TestCase):
             exit_code, payload, _stderr = run_cli(["--workspace", str(workspace), "--json", "index", "build"])
             self.assertEqual(exit_code, 0)
             self.assertGreaterEqual(payload["index"]["entryCount"], 3)
-            self.assertFalse((workspace / ".4dt" / "sources" / "index" / "index.json").exists())
-            self.assertFalse((workspace / ".4dt" / "sources" / "index" / "manifest.json").exists())
             with sqlite3.connect(workspace / ".4dt" / "db.sqlite3") as connection:
                 inventory_count = connection.execute("SELECT COUNT(*) FROM source_inventory").fetchone()[0]
                 source_index_count = connection.execute("SELECT COUNT(*) FROM source_index").fetchone()[0]

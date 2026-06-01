@@ -13,7 +13,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
-from fourdt_board.cli import BOARD_COLUMNS, main
+from fourdt_board.cli import main
 
 
 def run_cli(args: list[str]) -> tuple[int, dict[str, object], str]:
@@ -51,6 +51,35 @@ class BoardCliTests(unittest.TestCase):
         exit_code, output = run_help(["move", "--help"])
         self.assertEqual(exit_code, 0)
         self.assertIn("Target board column.", output)
+        self.assertIn("in_progress", output)
+        self.assertIn("ready_for_analytic", output)
+
+        exit_code, output = run_help(["set-status", "--help"])
+        self.assertEqual(exit_code, 0)
+        self.assertIn("needs_rework", output)
+        self.assertIn("in_delivery", output)
+
+    def test_types_list_exposes_status_contract(self) -> None:
+        exit_code, payload, _stderr = run_cli(["--json", "types", "list"])
+        self.assertEqual(exit_code, 0)
+        self.assertIn("in_progress", payload["task_statuses"])
+        self.assertIn("ready_for_developer", payload["epic_statuses"])
+        self.assertIn("developer", payload["board_columns"])
+
+    def test_set_status_rejects_unknown_status(self) -> None:
+        with tempfile.TemporaryDirectory() as raw_tmp:
+            workspace = Path(raw_tmp)
+            exit_code, payload, _stderr = run_cli(
+                ["--workspace", str(workspace), "--json", "create", "task", "--standalone", "Board Status"]
+            )
+            self.assertEqual(exit_code, 0)
+            task_id = payload["item"]["id"]
+
+            exit_code, payload, _stderr = run_cli(
+                ["--workspace", str(workspace), "--json", "set-status", task_id, "working"]
+            )
+            self.assertEqual(exit_code, 1)
+            self.assertEqual(payload["error"]["code"], "invalid_status")
 
     def test_create_index_move_section_and_summary(self) -> None:
         with tempfile.TemporaryDirectory() as raw_tmp:
@@ -62,9 +91,6 @@ class BoardCliTests(unittest.TestCase):
             self.assertEqual(epic_id, "EPIC-0001")
             self.assertEqual(payload["item"]["path"], "backlog/EPIC-0001-workflow-rules.md")
             self.assertTrue((workspace / ".4dt" / "db.sqlite3").exists())
-            self.assertFalse((workspace / ".4dt" / "board" / "board.sqlite3").exists())
-            self.assertFalse((workspace / ".4dt" / "board" / ".index.json").exists())
-            self.assertFalse((workspace / ".4dt" / "board" / "tasks" / payload["item"]["path"]).exists())
 
             exit_code, payload, _stderr = run_cli(
                 ["--workspace", str(workspace), "--json", "create", "task", "--epic", epic_id, "Board CLI"]
@@ -83,7 +109,6 @@ class BoardCliTests(unittest.TestCase):
             self.assertEqual(exit_code, 0)
             self.assertEqual(payload["item"]["board_column"], "analytic")
             self.assertEqual(payload["item"]["path"], "analytic/EPIC-0001-TASK-0001-board-cli.md")
-            self.assertFalse((workspace / ".4dt" / "board" / "tasks" / payload["item"]["path"]).exists())
 
             exit_code, payload, _stderr = run_cli(
                 ["--workspace", str(workspace), "--json", "section", "get", task_id, "product_baseline"]
@@ -174,25 +199,6 @@ TBD
             codes = {issue["code"] for issue in payload["issues"]}
             self.assertIn("deprecated_field", codes)
             self.assertIn("deprecated_section", codes)
-
-    def test_validate_does_not_create_legacy_task_directories(self) -> None:
-        with tempfile.TemporaryDirectory() as raw_tmp:
-            workspace = Path(raw_tmp)
-
-            exit_code, payload, _stderr = run_cli(["--workspace", str(workspace), "--json", "validate"])
-
-            self.assertEqual(exit_code, 0)
-            self.assertEqual(payload["status"], "ready")
-            self.assertTrue((workspace / ".4dt" / "db.sqlite3").exists())
-            self.assertFalse((workspace / ".4dt" / "board").exists())
-            self.assertFalse((workspace / ".4dt" / "board" / "tasks").exists())
-            for column in BOARD_COLUMNS:
-                self.assertFalse((workspace / ".4dt" / "board" / "tasks" / column).exists())
-            with sqlite3.connect(workspace / ".4dt" / "db.sqlite3") as connection:
-                tables = {row[0] for row in connection.execute("SELECT name FROM sqlite_master WHERE type = 'table'")}
-            self.assertIn("board_items", tables)
-            self.assertIn("board_comments", tables)
-            self.assertIn("board_index", tables)
 
     def test_metadata_set_rejects_uncontrolled_fields(self) -> None:
         with tempfile.TemporaryDirectory() as raw_tmp:

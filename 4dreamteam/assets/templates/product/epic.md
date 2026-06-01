@@ -3,7 +3,7 @@
 ## Board State
 
 - Current column: backlog
-- Epic status: shaping / ready-for-analytic / ready-for-developer / in-delivery / blocked / done / rejected
+- Epic status: shaping / ready_for_analytic / ready_for_developer / in_delivery / blocked / done / rejected
 - Next owner: product / analytic / developer
 
 ## Source Request
@@ -36,7 +36,7 @@ Later:
 
 | Task | Title | Status | Next Owner | Notes |
 |---|---|---|---|---|
-| TASK-XXXX | <task title> | proposed / ready / in-delivery / done / rejected | analytic / developer / quality / wiki / release / done | <short note> |
+| TASK-XXXX | <task title> | proposed / ready / in_progress / blocked / needs_input / needs_rework / accepted / done / rejected | analytic / developer / quality / wiki / release / done | <short note> |
 
 ## Split / Grouping Notes
 

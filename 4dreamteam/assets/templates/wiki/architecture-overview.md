@@ -1,7 +1,7 @@
 ---
 id: architecture-overview
 kind: architecture
-title: Architecture Overview
+title: Overview
 status: draft
 created_at: <created-at>
 updated_at: <updated-at>
@@ -10,7 +10,7 @@ source_refs: []
 task_refs: []
 ---
 
-# Architecture Overview
+# Overview
 
 ## Summary
 
@@ -43,5 +43,5 @@ Suggested structure:
 
 ## Related
 
-- [Workspace Overview](../overview.md)
-- [Product Overview](../product/overview.md)
+- [Overview](../start/overview.md)
+- [Overview](../product/overview.md)

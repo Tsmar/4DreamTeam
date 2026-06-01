@@ -240,6 +240,7 @@ python3 <installed-4dreamteam-skill>/scripts/4dt-search.py <args>
 python3 <installed-4dreamteam-skill>/scripts/4dt-board.py <args>
 python3 <installed-4dreamteam-skill>/scripts/4dt-sources.py <args>
 python3 <installed-4dreamteam-skill>/scripts/4dt-wiki.py <args>
+python3 <installed-4dreamteam-skill>/scripts/4dt-web.py <args>
 ```
 
 Use project scripts when intentionally working inside the 4DreamTeam source checkout:
@@ -250,6 +251,7 @@ npm run search -- <args>
 npm run board -- <args>
 npm run sources -- <args>
 npm run 4dt-wiki -- <args>
+npm run web -- <args>
 ```
 
 Use console entrypoints only when they are already known to work in the current shell:
@@ -260,6 +262,7 @@ Use console entrypoints only when they are already known to work in the current 
 4dt-board <args>
 4dt-sources <args>
 4dt-wiki <args>
+4dt-web <args>
 ```
 
 Use direct module fallbacks only when installed wrappers, source scripts, and known-good console entrypoints are unavailable:
@@ -270,6 +273,7 @@ PYTHONPATH=packages/search/src:packages/sources/src:packages/wiki/src:packages/b
 PYTHONPATH=packages/board/src python3 -m fourdt_board.cli <args>
 PYTHONPATH=packages/sources/src python3 -m fourdt_sources.cli <args>
 PYTHONPATH=packages/wiki/src:packages/sources/src python3 -m fourdt_wiki.cli <args>
+PYTHONPATH=packages/web/src:packages/wiki/src python3 -m fourdt_web.cli <args>
 ```
 
 For Python compile/test commands in sandboxed environments, set:
@@ -279,6 +283,24 @@ PYTHONPYCACHEPREFIX=/tmp/4dt-pycache
 ```
 
 Resolve the launcher once per session and reuse it for startup checks, Wakeup Recall, validation, and exact reads. Do not spend the morning routine probing global `4dt-*` commands before using installed wrappers.
+
+## Workspace View
+
+`4dt-web` is the local read-only 4DreamTeam Workspace View. Use it when the operator wants a browser panel for the workspace while agents work. The current surface is wiki-first, and future surfaces may add board, memory, sources, release, or quality views.
+
+Installed workspace command:
+
+```txt
+python3 <installed-4dreamteam-skill>/scripts/4dt-web.py --workspace . serve --host 127.0.0.1 --port 4174
+```
+
+Source checkout command:
+
+```txt
+npm run web -- --workspace <workspace> serve --host 127.0.0.1 --port 4174
+```
+
+Open or refresh `http://localhost:4174/` after launch. Keep the Workspace View read-only and bound to localhost unless the operator explicitly approves another binding.
 
 ## Storage And Retrieval
 

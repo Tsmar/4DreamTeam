@@ -72,6 +72,12 @@ When renaming the skill, check metadata, documentation, references, templates, a
 
 Before creating a commit, update the skill version when the change affects skill behavior, metadata, templates, references, or user-facing documentation.
 
+## Changelog Policy
+
+For this repository, `CHANGELOG.md` is a historical index. Source-history entries live in dated files under `changelog/YYYY-MM-DD.md`, and all entries for the same calendar date belong in the same daily file.
+
+When release packaging applies, update the daily changelog file and the root index together. Detailed release rules belong in `4dreamteam/references/release.md`.
+
 ## Safety
 
 Do not run destructive commands without explicit user approval.

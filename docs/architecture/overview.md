@@ -1,35 +1,35 @@
 ---
 id: architecture-overview
 kind: architecture
-title: Architecture Overview
+title: Overview
 status: actual
 created_at: "2026-05-23T07:31:46Z"
-updated_at: "2026-06-01T00:00:00Z"
+updated_at: "2026-06-01T04:02:35Z"
 owner: wiki
 source_refs: ["sources/4DreamTeam/4dreamteam/SKILL.md", "sources/4DreamTeam/package.json", "sources/4DreamTeam/4dreamteam/agents/openai.yaml", "sources/4DreamTeam/4dreamteam/references/lead/self-maintenance.md", "sources/4DreamTeam/packages/search/src/fourdt_search/cli.py", "sources/4DreamTeam/packages/db/src/fourdt_db/cli.py"]
 task_refs: ["EPIC-0001-TASK-0008", "EPIC-0002-TASK-0014"]
 tags: ["architecture", "skill-package", "sqlite", "tooling"]
 ---
 
-# Architecture Overview
+# Overview
 
 ## Summary
 
-The installable skill is a compact `4dreamteam/` bundle with entrypoint instructions, references, templates, agent metadata, and helper scripts. Repository-level tool development lives separately under root `packages/`.
+Architecture knowledge owns the repository shape, installed skill package, runtime packaging, and tool package boundaries. It explains where code lives and why packages are separated, while product value stays in product pages and table-level details stay in schema pages.
 
 ## Content
 
-The repository root contains repository-level development rules (`AGENTS.md`), public documentation (`README.md`, `README.ru.md`, `docs/`), release history (`CHANGELOG.md`), root tool source (`packages/`), and the installable skill package (`4dreamteam/`). The package is the installed skill unit.
+The repository root contains repository-level development rules, public documentation, release history, root tool source, and the installable skill package. The package under 4dreamteam is the installed skill unit; root packages contain local command-line tools and tests.
 
-`4dreamteam/SKILL.md` is the top-level skill contract. It holds frontmatter metadata (`name`, `description`, license, version, repository), first-step instructions, role reference routing, template inventory, reference-loading guidance, and hard guarantees. It intentionally points deeper behavior into `references/` rather than carrying every workflow detail directly.
+Architectural boundaries:
 
-`4dreamteam/references/` is the operational brain of the framework. `lead.md` is compact and routes into detailed lead modules only when needed. Role references define product, analytic, developer, quality, wiki, marketing, devops, and release behavior. Wiki references further split into mode files such as bootstrap, audit, sync, check, blueprint, and deepening.
+- 4dreamteam/SKILL.md is the compact top-level skill contract and route map. It should stay small and point to references for detailed behavior.
+- 4dreamteam/references owns operational workflow rules for lead, product, analytic, developer, quality, wiki, marketing, devops, release, memory, safety, and lifecycle behavior.
+- 4dreamteam/assets/templates owns artifact shape for bootstrap, epics, tasks, wiki pages, marketing artifacts, release plans, DevOps docs, and handoffs. Templates do not replace role behavior rules.
+- packages owns tool source and tests. Domain tools manage state contracts; browser surfaces live in packages/web so domain CLIs stay focused.
+- 4dreamteam/scripts contains installed wrappers and the generated runtime archive used by installed skill commands.
 
-`4dreamteam/assets/templates/` contains artifact templates for workspace bootstrap, product epics, analytic tasks, wiki pages, marketing artifacts, release plans, DevOps server cards, and lead handoffs. Templates shape files, while references define mandatory behavior.
-
-`packages/` contains local command-line tools and their tests. `package.json` exposes npm scripts for board, memory, search, sources, 4dt-wiki, db, and workflow rules. These tools are the API for managed workspace artifacts; agents should use 4dt-search for discovery and domain tools for exact reads, writes, validation, and administration.
-
-`4dreamteam/agents/openai.yaml` defines the Codex UI surface: display name, short description, logo assets, brand color, and default prompt.
+Architecture pages should explain package boundaries, runtime entrypoints, dependency direction, and separation of concerns. They should link to domain pages for subsystem behavior and to schema pages for table-level storage authority.
 
 ## Evidence
 
@@ -43,9 +43,10 @@ The repository root contains repository-level development rules (`AGENTS.md`), p
 
 ## Decisions
 
-- Keep `SKILL.md` compact and route detailed behavior into reference files.
+- Keep SKILL.md compact and route detailed behavior into reference files.
 - Treat tools as the stable API for workspace state.
 - Keep tool source and tests outside the installable skill package.
+- Keep browser UI in 4dt-web instead of expanding domain management CLIs.
 - Treat templates as artifact shape, not the only source of mandatory behavior.
 
 ## Open Questions
@@ -55,9 +56,10 @@ The repository root contains repository-level development rules (`AGENTS.md`), p
 
 ## Related
 
+- [Overview](../start/overview.md)
 - [Runtime Entrypoint](runtime-entrypoint.md)
-- [Agent Instructions Contract](../contracts/agent-instructions.md)
 - [Workspace Tools Contract](../contracts/workspace-tools.md)
+- [Tool Storage Schema](../schemas/tool-storage.md)
 - [Search Domain](../domains/search.md)
 - [Templates Domain](../domains/templates.md)
 - [Documentation Domain](../domains/documentation.md)

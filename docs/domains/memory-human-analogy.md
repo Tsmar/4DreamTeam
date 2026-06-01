@@ -158,4 +158,4 @@ The framework should keep this boundary explicit so memory design stays testable
 - [Search Domain](search.md)
 - [Runtime Entrypoint](../architecture/runtime-entrypoint.md)
 - [Workspace Tools Contract](../contracts/workspace-tools.md)
-- [Task Lifecycle](../flows/task-lifecycle.md)
+- [Task Lifecycle](../workflows/task-lifecycle.md)

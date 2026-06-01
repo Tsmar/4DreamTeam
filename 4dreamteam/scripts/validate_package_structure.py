@@ -5,7 +5,7 @@ import sys
 from pathlib import Path
 
 
-EXPECTED_PACKAGES = ("board", "wiki", "sources", "memory", "search", "db")
+EXPECTED_PACKAGES = ("board", "wiki", "web", "sources", "memory", "search", "db")
 FORBIDDEN_PATTERNS = (
     "Lan" + "ceDB",
     "lan" + "cedb",

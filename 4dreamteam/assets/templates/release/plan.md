@@ -25,7 +25,8 @@ planned / approved / committed / pushed / tagged / published / blocked
 ## Changelog
 
 - Workspace target: `changelog.md` through `4dt-wiki` / not applicable
-- Source target: `<approved-source>/CHANGELOG.md` / not applicable
+- Source index: `<approved-source>/CHANGELOG.md` / not applicable
+- Source daily file: `<approved-source>/changelog/YYYY-MM-DD.md` / not applicable
 
 ```md
 <entry>

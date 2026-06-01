@@ -43,6 +43,8 @@ TASK_STATUSES = {
     "done",
     "rejected",
 }
+EPIC_STATUS_HELP = ", ".join(sorted(EPIC_STATUSES))
+TASK_STATUS_HELP = ", ".join(sorted(TASK_STATUSES))
 ROLES = {"product", "analytic", "developer", "quality", "wiki", "release", "lead"}
 TIMELINE_TYPES = {
     "product_decision": "Product decision or acceptance intent.",
@@ -567,6 +569,13 @@ def next_id(index: dict[str, Any], kind: str) -> str:
     raise UserError("invalid_kind", "next-id expects epic or task.")
 
 
+def validate_item_status(kind: str, status: str) -> None:
+    if kind == "epic" and status not in EPIC_STATUSES:
+        raise UserError("invalid_status", f"Invalid epic status: {status}. Supported statuses: {EPIC_STATUS_HELP}.")
+    if kind == "task" and status not in TASK_STATUSES:
+        raise UserError("invalid_status", f"Invalid task status: {status}. Supported statuses: {TASK_STATUS_HELP}.")
+
+
 def update_item_row(
     connection: sqlite3.Connection,
     item_id: str,
@@ -580,6 +589,7 @@ def update_item_row(
     current = frontmatter_from_row(row)
     if meta:
         current.update(meta)
+    validate_item_status(str(current.get("kind", "")), str(current.get("status", "")))
     updated_at = current.get("updated_at") or iso_now()
     current["updated_at"] = updated_at
     filename = row["filename"]
@@ -1003,7 +1013,14 @@ def command(args: argparse.Namespace) -> tuple[int, dict[str, Any]]:
     if action == "comment-add":
         return 0, payload(True, "ready", **add_comment(args, workspace))
     if action == "types-list":
-        return 0, payload(True, "ready", types=[{"type": key, "description": value} for key, value in sorted(TIMELINE_TYPES.items())])
+        return 0, payload(
+            True,
+            "ready",
+            board_columns=sorted(BOARD_COLUMNS),
+            epic_statuses=sorted(EPIC_STATUSES),
+            task_statuses=sorted(TASK_STATUSES),
+            types=[{"type": key, "description": value} for key, value in sorted(TIMELINE_TYPES.items())],
+        )
     if action in {"comments-list", "comments-latest"}:
         file = require_item(workspace, args.id)
         comments = parse_comments(file)
@@ -1052,7 +1069,7 @@ def build_parser() -> argparse.ArgumentParser:
     sub.add_parser("status", help="Show board readiness and issue summary.")
     sub.add_parser("validate", help="Validate board item shape, columns, and metadata.")
     sub.add_parser("repair-index", help="Repair the board index from managed storage.")
-    types = sub.add_parser("types", help="List board contract values such as timeline entry types.")
+    types = sub.add_parser("types", help="List board contract values such as statuses and timeline entry types.")
     types_sub = types.add_subparsers(dest="types_action", required=True)
     types_list = types_sub.add_parser("list")
     types_list.set_defaults(action="types-list")
@@ -1082,10 +1099,17 @@ def build_parser() -> argparse.ArgumentParser:
     move = sub.add_parser("move", help="Move an item to a board column and optionally update status.")
     move.add_argument("id", help="Task or epic id.")
     move.add_argument("column", choices=sorted(BOARD_COLUMNS), help="Target board column.")
-    move.add_argument("--status", dest="status_value", help="New status. Use task/epic statuses from source contract.")
+    move.add_argument(
+        "--status",
+        dest="status_value",
+        help=f"New status. Task statuses: {TASK_STATUS_HELP}. Epic statuses: {EPIC_STATUS_HELP}.",
+    )
     set_status = sub.add_parser("set-status", help="Update only the item status.")
     set_status.add_argument("id", help="Task or epic id.")
-    set_status.add_argument("status_value", help="New status, such as ready, in_progress, blocked, accepted, or done.")
+    set_status.add_argument(
+        "status_value",
+        help=f"New status. Task statuses: {TASK_STATUS_HELP}. Epic statuses: {EPIC_STATUS_HELP}.",
+    )
     metadata = sub.add_parser("metadata", help="Update controlled item metadata.")
     metadata_sub = metadata.add_subparsers(dest="metadata_action", required=True)
     metadata_set = metadata_sub.add_parser("set")

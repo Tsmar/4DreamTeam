@@ -29,8 +29,8 @@ If accepted evidence is missing, stop and explain which acceptance artifact is r
 2. Inspect the current git branch and working tree in the relevant repository.
 3. Separate included files from unrelated dirty files.
 4. Update or create the workspace wiki changelog through `4dt-wiki`.
-5. Update approved source `CHANGELOG.md` when it already exists and the accepted change belongs in source history.
-6. For `skill-development` projects, require approved source `CHANGELOG.md` updates when accepted changes affect skill behavior, metadata, templates, references, or user-facing documentation.
+5. Update the approved source changelog index and dated changelog file when they already exist and the accepted change belongs in source history.
+6. For `skill-development` projects, require approved source changelog updates when accepted changes affect skill behavior, metadata, templates, references, or user-facing documentation.
 7. Run `4dt-wiki export --target <source-docs-path>` before packaging when the release should include the managed wiki as source-shipped documentation.
 8. Move selected accepted tasks from `done` to `release` through `4dt-board` when release packaging begins.
 9. Append a `release_plan` timeline entry with branch, files, changelog entries, wiki export target when used, proposed commit message, tag/release plan, and excluded dirty files.
@@ -50,15 +50,18 @@ Source changelog:
 
 ```txt
 <approved-source>/CHANGELOG.md
+<approved-source>/changelog/YYYY-MM-DD.md
 ```
 
 Update the source changelog only when:
 
 1. the source path is explicitly approved and writable;
-2. the source changelog already exists, or the user explicitly approves creating it;
+2. the source changelog index already exists, or the user explicitly approves creating it;
 3. the accepted change belongs in the source repository history.
 
-Do not invent a source changelog convention when the project uses another release-note mechanism.
+For this project, `CHANGELOG.md` is an index. Source-history entries are grouped by release or acceptance date in `changelog/YYYY-MM-DD.md`, and all entries for the same calendar date go in that one daily file. Release packaging updates both the daily file and the root index when a new date is introduced. Use ISO dates from the operator's current workspace date unless the release evidence clearly belongs to a different calendar date.
+
+If an approved source still has a legacy monolithic `CHANGELOG.md`, preserve its history by migrating dated sections into daily files before adding new entries when the release scope allows. Do not invent a different source changelog convention when another project uses another release-note mechanism.
 
 ## Commit Plan Gate
 
@@ -71,7 +74,7 @@ Before staging, show a release plan that includes:
 5. included files;
 6. excluded dirty files;
 7. workspace changelog entry;
-8. source changelog entry when applicable;
+8. source changelog daily file and index entry when applicable;
 9. wiki export target and exported files when applicable;
 10. proposed commit message;
 11. tag and GitHub Release plan: none, tag only, draft GitHub Release, or published GitHub Release;
@@ -124,7 +127,7 @@ Write release evidence in English for agents. Keep it concise, evidence-oriented
 Allowed writes:
 
 - workspace changelog through `4dt-wiki`;
-- approved source `CHANGELOG.md` when allowed by the source changelog policy;
+- approved source `CHANGELOG.md` index and `changelog/YYYY-MM-DD.md` daily file when allowed by the source changelog policy;
 - board movement and release timeline entries through `4dt-board`.
 
 ## Forbidden

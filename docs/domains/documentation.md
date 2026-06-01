@@ -51,7 +51,7 @@ CHANGELOG.md records release history for the source repository. Managed wiki pag
 
 ## Related
 
-- [README Maintenance Flow](../flows/readme-maintenance.md)
+- [README Maintenance](../workflows/readme-maintenance.md)
 - [Agent Instructions Contract](../contracts/agent-instructions.md)
 - [Templates Domain](templates.md)
 - [Changelog](../changelog.md)

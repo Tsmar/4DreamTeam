@@ -18,6 +18,7 @@ python3 <installed-4dreamteam-skill>/scripts/4dt-search.py <args>
 python3 <installed-4dreamteam-skill>/scripts/4dt-board.py <args>
 python3 <installed-4dreamteam-skill>/scripts/4dt-sources.py <args>
 python3 <installed-4dreamteam-skill>/scripts/4dt-wiki.py <args>
+python3 <installed-4dreamteam-skill>/scripts/4dt-web.py <args>
 
 # Preferred only when intentionally working inside the 4DreamTeam source checkout:
 npm run memory -- <args>
@@ -25,6 +26,7 @@ npm run search -- <args>
 npm run board -- <args>
 npm run sources -- <args>
 npm run 4dt-wiki -- <args>
+npm run web -- <args>
 
 # Optional shortcut when console entrypoints are already known to work:
 4dt-memory <args>
@@ -32,6 +34,7 @@ npm run 4dt-wiki -- <args>
 4dt-board <args>
 4dt-sources <args>
 4dt-wiki <args>
+4dt-web <args>
 
 # Diagnostic fallback:
 PYTHONPATH=packages/memory/src:packages/search/src python3 -m fourdt_memory.cli <args>
@@ -39,9 +42,28 @@ PYTHONPATH=packages/search/src:packages/sources/src:packages/wiki/src:packages/b
 PYTHONPATH=packages/board/src python3 -m fourdt_board.cli <args>
 PYTHONPATH=packages/sources/src python3 -m fourdt_sources.cli <args>
 PYTHONPATH=packages/wiki/src:packages/sources/src python3 -m fourdt_wiki.cli <args>
+PYTHONPATH=packages/web/src:packages/wiki/src python3 -m fourdt_web.cli <args>
 ```
 
 Launcher order: installed skill wrapper first for normal Codex workspace startup; source-checkout npm scripts when intentionally developing the source repository; known-good console shortcuts only after the launcher is already established; direct `PYTHONPATH=... python3 -m ...` commands only for diagnosis. If the selected launcher fails, retry the next launcher before treating the tool as unavailable.
+
+## Workspace View
+
+Use `4dt-web` for the local read-only Workspace View when the operator wants to inspect the workspace in a browser while agents work. The current Workspace View surface is the wiki, with room for later board, memory, source, release, or quality panels.
+
+Installed workspace command:
+
+```bash
+python3 <installed-4dreamteam-skill>/scripts/4dt-web.py --workspace . serve --host 127.0.0.1 --port 4174
+```
+
+Source checkout command:
+
+```bash
+npm run web -- --workspace <workspace> serve --host 127.0.0.1 --port 4174
+```
+
+Open or refresh `http://localhost:4174/` after launch. Keep it read-only and localhost-bound by default.
 
 3. Run memory readiness:
 

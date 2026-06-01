@@ -1,0 +1,9 @@
+[project]
+name = "fourdt-web"
+version = "0.1.0"
+description = "4DreamTeam local read-only browser tooling"
+requires-python = ">=3.10"
+dependencies = []
+
+[project.scripts]
+4dt-web = "fourdt_web.cli:main"

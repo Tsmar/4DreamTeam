@@ -1,7 +1,7 @@
 ---
-id: flows-task-lifecycle
+id: workflows-task-lifecycle
 kind: flow
-title: Task Lifecycle Flow
+title: Task Lifecycle
 status: actual
 created_at: "2026-05-23T07:32:10Z"
 updated_at: "2026-06-01T00:00:00Z"
@@ -11,7 +11,7 @@ task_refs: []
 tags: ["board", "lifecycle", "roles"]
 ---
 
-# Task Lifecycle Flow
+# Task Lifecycle
 
 ## Summary
 
@@ -56,7 +56,7 @@ Before an epic is closed or the next epic becomes active implementation focus, l
 
 ## Related
 
-- [Product Overview](../product/overview.md)
-- [Wiki Workflow](wiki-workflow.md)
+- [Overview](../product/overview.md)
+- [Wiki](wiki.md)
 - [Agent Instructions Contract](../contracts/agent-instructions.md)
-- [README Maintenance Flow](readme-maintenance.md)
+- [README Maintenance](readme-maintenance.md)

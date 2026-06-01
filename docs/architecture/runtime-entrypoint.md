@@ -52,8 +52,8 @@ Startup validation commands are expected to bootstrap missing current tables in 
 
 ## Related
 
-- [Architecture Overview](overview.md)
-- [Task Lifecycle Flow](../flows/task-lifecycle.md)
-- [Wiki Workflow](../flows/wiki-workflow.md)
+- [Overview](overview.md)
+- [Task Lifecycle](../workflows/task-lifecycle.md)
+- [Wiki](../workflows/wiki.md)
 - [Memory Domain](../domains/memory.md)
 - [Source Boundaries Domain](../domains/source-boundaries.md)

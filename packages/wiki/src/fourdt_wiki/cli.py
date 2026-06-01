@@ -585,9 +585,9 @@ def init_wiki(workspace: Path) -> dict[str, Any]:
     connection = connect(workspace)
     migrate_legacy_pages(workspace, connection)
     pages = {
-        "overview.md": ("Workspace Overview", "overview"),
-        "product/overview.md": ("Product Overview", "product"),
-        "architecture/overview.md": ("Architecture Overview", "architecture"),
+        "start/overview.md": ("Overview", "overview"),
+        "product/overview.md": ("Overview", "product"),
+        "architecture/overview.md": ("Overview", "architecture"),
         "changelog.md": ("Changelog", "changelog"),
     }
     created: list[str] = []

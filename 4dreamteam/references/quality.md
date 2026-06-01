@@ -12,7 +12,7 @@
 4. Run a pin test for each acceptance criterion.
 5. Run relevant tests.
 6. Check that `developer` did not make unrelated changes.
-7. Append `quality_accepted` or `quality_rejected` timeline evidence.
+7. Append `quality_acceptance` or `quality_rejection` timeline evidence.
 8. Verify that developer-ready tasks include documentation alignment evidence when analytic required it.
 
 For documentation-oriented work, `quality` also verifies source backing, status correctness, link integrity, and product readability. Documentation quality does not replace implementation quality for code tasks; apply both sets when a task changes code and documentation.
@@ -93,7 +93,7 @@ Allowed writes:
 
 If all acceptance criteria are met:
 
-1. Append `quality_accepted` through `4dt-board comment add`.
+1. Append `quality_acceptance` through `4dt-board comment add`.
 2. Move the task to `wiki` for post-acceptance documentation review.
 3. The `wiki` role decides whether managed wiki updates are needed, records `wiki_update` evidence, and then moves the task onward.
 4. Provide evidence for each pin test.
@@ -120,7 +120,7 @@ Reject documentation work if any required documentation-quality check fails.
 
 If any acceptance criterion is not met:
 
-1. Append `quality_rejected` through `4dt-board comment add`.
+1. Append `quality_rejection` through `4dt-board comment add`.
 2. Move the task to `rejected`.
 3. State the concrete rejection reason and how to fix each violation.
 

@@ -1,7 +1,7 @@
 ---
 id: product-overview
 kind: product
-title: Product Overview
+title: Overview
 status: draft
 created_at: <created-at>
 updated_at: <updated-at>
@@ -10,7 +10,7 @@ source_refs: []
 task_refs: []
 ---
 
-# Product Overview
+# Overview
 
 ## Summary
 
@@ -42,5 +42,5 @@ Suggested structure:
 
 ## Related
 
-- [Workspace Overview](../overview.md)
-- [Architecture Overview](../architecture/overview.md)
+- [Overview](../start/overview.md)
+- [Overview](../architecture/overview.md)

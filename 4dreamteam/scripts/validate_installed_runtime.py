@@ -11,6 +11,7 @@ from pathlib import Path
 WRAPPERS = (
     "4dt-board.py",
     "4dt-wiki.py",
+    "4dt-web.py",
     "4dt-sources.py",
     "4dt-memory.py",
     "4dt-search.py",

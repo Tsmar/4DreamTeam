@@ -164,10 +164,10 @@ $4DreamTeam prepare this accepted work for release
 
 Документация доступна в [docs/](docs/) на английском языке:
 
-- [Обзор рабочей папки](docs/overview.md)
+- [Обзор рабочей папки](docs/start/overview.md)
 - [Обзор продукта](docs/product/overview.md)
-- [Как задачи проходят путь от идеи до результата](docs/flows/task-lifecycle.md)
-- [Как обновляется проектная документация](docs/flows/wiki-workflow.md)
+- [Как задачи проходят путь от идеи до результата](docs/workflows/task-lifecycle.md)
+- [Как обновляется проектная документация](docs/workflows/wiki.md)
 - [Как 4DreamTeam работает с проектной папкой](docs/contracts/workspace-tools.md)
 - [Как устроена память](docs/domains/memory.md)
 - [Память 4DreamTeam и память человека](docs/domains/memory-human-analogy.md)

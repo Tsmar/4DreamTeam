@@ -14,7 +14,7 @@ Use this mode when the workspace wiki must align with accepted changes, explicit
    - `4dt-wiki page update` for metadata-only changes;
    - `4dt-wiki page apply` for metadata, tags, and multiple section changes.
 7. Keep page tags aligned with the updated content: reuse existing durable tags, add newly important domain/workflow/component tags, and remove tags that no longer describe the page.
-8. SQLite transactions serialize concurrent wiki writes; combine same-page section and tag changes into one `page apply` payload when they are one logical update.
+8. SQLite transactions serialize managed writes. Parallel reads/searches and independent page writes are allowed; combine same-page section, tag, status, and ref changes into one `page apply` payload when they are one logical update. Avoid competing same-page/same-field writes unless the workflow explicitly owns conflict handling.
 9. Keep each section at or below 32,000 UTF-8 bytes. Split larger material into separate managed wiki pages and link them through `related`.
 10. Rebuild and check the wiki index with `4dt-wiki`.
 11. Append wiki evidence to the task through `4dt-board` when the sync belongs to a task.

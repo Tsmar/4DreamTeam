@@ -56,6 +56,6 @@ Workspace bootstrap must not create `sources/.gitignore`. `4dt-sources` honors p
 ## Related
 
 - [Workspace Tools Contract](../contracts/workspace-tools.md)
-- [Wiki Workflow](../flows/wiki-workflow.md)
+- [Wiki](../workflows/wiki.md)
 - [Memory Domain](memory.md)
 - [Tool Storage Schema](../schemas/tool-storage.md)

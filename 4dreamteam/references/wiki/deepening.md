@@ -12,7 +12,7 @@ Use this mode when existing wiki content needs more implementation detail from c
    - `4dt-wiki page update` for metadata-only changes;
    - `4dt-wiki page apply` for metadata, tags, and multiple section changes.
 5. Reconcile tags when the deeper content changes what the page is about: reuse existing tags from `4dt-wiki tags list`, add durable domain/workflow/component tags, and remove stale tags.
-6. SQLite transactions serialize concurrent wiki writes; combine same-page section and tag changes into one `page apply` payload when they are one logical update.
+6. SQLite transactions serialize managed writes. Parallel reads/searches and independent page writes are allowed; combine same-page section, tag, status, and ref changes into one `page apply` payload when they are one logical update. Avoid competing same-page/same-field writes unless the workflow explicitly owns conflict handling.
 7. Keep each section at or below 32,000 UTF-8 bytes. Split larger material into separate managed wiki pages and link them through `related`.
 8. Validate with `4dt-wiki validate`.
 

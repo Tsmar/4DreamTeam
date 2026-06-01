@@ -1,7 +1,7 @@
 ---
-id: overview
+id: start-overview
 kind: overview
-title: Workspace Overview
+title: Overview
 status: draft
 created_at: <created-at>
 updated_at: <updated-at>
@@ -10,7 +10,7 @@ source_refs: []
 task_refs: []
 ---
 
-# Workspace Overview
+# Overview
 
 ## Summary
 
@@ -22,13 +22,14 @@ Describe the project purpose, primary audiences, main areas, and recommended rea
 
 Suggested reading path:
 
-1. `product/overview.md`
-2. `architecture/overview.md`
-3. `domains/`
-4. `flows/`
-5. `contracts/`
-6. `schemas/`
-7. `decisions/`
+1. `start/overview.md`
+2. `product/overview.md`
+3. `architecture/overview.md`
+4. `domains/`
+5. `workflows/`
+6. `contracts/`
+7. `schemas/`
+8. `decisions/`
 
 ## Evidence
 
@@ -44,5 +45,5 @@ Suggested reading path:
 
 ## Related
 
-- [Product Overview](product/overview.md)
-- [Architecture Overview](architecture/overview.md)
+- [Overview](product/overview.md)
+- [Overview](architecture/overview.md)

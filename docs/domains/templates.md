@@ -56,4 +56,4 @@ When changing a template that affects behavior, treat it as a framework behavior
 - [Agent Instructions Contract](../contracts/agent-instructions.md)
 - [Documentation Domain](documentation.md)
 - [Runtime Entrypoint](../architecture/runtime-entrypoint.md)
-- [Task Lifecycle Flow](../flows/task-lifecycle.md)
+- [Task Lifecycle](../workflows/task-lifecycle.md)

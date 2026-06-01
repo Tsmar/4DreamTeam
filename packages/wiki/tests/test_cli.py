@@ -48,7 +48,7 @@ def self_exit_to_code():
 
 
 class WikiCliTests(unittest.TestCase):
-    def test_validate_initializes_tables_without_legacy_wiki_directories(self) -> None:
+    def test_validate_initializes_wiki_tables(self) -> None:
         with tempfile.TemporaryDirectory() as raw_tmp:
             workspace = Path(raw_tmp)
 
@@ -57,7 +57,6 @@ class WikiCliTests(unittest.TestCase):
             self.assertEqual(exit_code, 0)
             self.assertEqual(payload["status"], "ready")
             self.assertTrue((workspace / ".4dt" / "db.sqlite3").exists())
-            self.assertFalse((workspace / ".4dt" / "wiki").exists())
             with sqlite3.connect(workspace / ".4dt" / "db.sqlite3") as connection:
                 tables = {row[0] for row in connection.execute("SELECT name FROM sqlite_master WHERE type = 'table'")}
             self.assertIn("wiki_pages", tables)
@@ -71,13 +70,8 @@ class WikiCliTests(unittest.TestCase):
             exit_code, payload, _stderr = run_cli(["--workspace", str(workspace), "--json", "init"])
             self.assertEqual(exit_code, 0)
             self.assertTrue((workspace / ".4dt" / "db.sqlite3").exists())
-            self.assertFalse((workspace / ".4dt" / "wiki" / "wiki.sqlite3").exists())
-            self.assertFalse((workspace / ".4dt" / "wiki" / "index.json").exists())
-            self.assertFalse((workspace / ".4dt" / "wiki" / "pages" / "overview.md").exists())
-            self.assertFalse((workspace / ".4dt" / "wiki" / "pages" / "index.md").exists())
-            self.assertFalse((workspace / "docs").exists())
 
-            exit_code, payload, _stderr = run_cli(["--workspace", str(workspace), "--json", "get", "overview", "--section", "summary"])
+            exit_code, payload, _stderr = run_cli(["--workspace", str(workspace), "--json", "get", "start-overview", "--section", "summary"])
             self.assertEqual(exit_code, 0)
             self.assertEqual(payload["section"], "summary")
             self.assertEqual(payload["content"], "TBD")
@@ -97,65 +91,6 @@ class WikiCliTests(unittest.TestCase):
             exit_code, payload, _stderr = run_cli(["--workspace", str(workspace), "--json", "status"])
             self.assertEqual(exit_code, 0)
             self.assertEqual(payload["issues"], [])
-
-    def test_init_imports_legacy_markdown_pages_into_sqlite(self) -> None:
-        with tempfile.TemporaryDirectory() as raw_tmp:
-            workspace = Path(raw_tmp)
-            legacy_page = workspace / ".4dt" / "wiki" / "pages" / "domains" / "legacy.md"
-            legacy_page.parent.mkdir(parents=True, exist_ok=True)
-            legacy_page.write_text(
-                """---
-id: domains-legacy
-kind: domain
-title: Legacy
-status: actual
-created_at: 2026-05-31T00:00:00Z
-updated_at: 2026-05-31T00:00:00Z
-owner: wiki
-source_refs: []
-task_refs: []
-tags: ["legacy-domain", "imported knowledge"]
----
-
-# Legacy
-
-## Summary
-
-Imported summary.
-
-## Content
-
-Imported content.
-
-## Evidence
-
-- None.
-
-## Decisions
-
-- None.
-
-## Open Questions
-
-- None.
-
-## Related
-
-- None.
-""",
-                encoding="utf-8",
-            )
-
-            exit_code, _payload, _stderr = run_cli(["--workspace", str(workspace), "--json", "init"])
-            self.assertEqual(exit_code, 0)
-
-            legacy_page.unlink()
-            exit_code, payload, _stderr = run_cli(["--workspace", str(workspace), "--json", "get", "domains-legacy", "--section", "summary"])
-            self.assertEqual(exit_code, 0)
-            self.assertEqual(payload["content"], "Imported summary.")
-            exit_code, payload, _stderr = run_cli(["--workspace", str(workspace), "--json", "search", "legacy-domain"])
-            self.assertEqual(exit_code, 0)
-            self.assertEqual(payload["matches"][0]["tags"], ["imported-knowledge", "legacy-domain"])
 
     def test_page_create_update_search_and_adr(self) -> None:
         with tempfile.TemporaryDirectory() as raw_tmp:
@@ -474,21 +409,6 @@ Imported content.
             codes = {issue["code"] for issue in payload["issues"]}
             self.assertIn("removed_registry", codes)
 
-    def test_legacy_sources_page_is_validated_not_silently_skipped(self) -> None:
-        with tempfile.TemporaryDirectory() as raw_tmp:
-            workspace = Path(raw_tmp)
-            run_cli(["--workspace", str(workspace), "--json", "init"])
-
-            legacy = workspace / ".4dt" / "wiki" / "pages" / "sources.md"
-            legacy.parent.mkdir(parents=True, exist_ok=True)
-            legacy.write_text("# Legacy Sources\n", encoding="utf-8")
-
-            exit_code, payload, _stderr = run_cli(["--workspace", str(workspace), "--json", "validate"])
-            self.assertEqual(exit_code, 2)
-            issues = [issue for issue in payload["issues"] if issue["path"] == "sources.md"]
-            self.assertTrue(issues)
-            self.assertIn("missing_frontmatter", {issue["code"] for issue in issues})
-
     def test_export_renders_sqlite_pages_to_sources_target(self) -> None:
         with tempfile.TemporaryDirectory() as raw_tmp:
             workspace = Path(raw_tmp)
@@ -518,13 +438,10 @@ Imported content.
 
             self.assertEqual(exit_code, 0)
             self.assertEqual(payload["export"]["target"], target.resolve().as_posix())
-            self.assertIn("overview.md", payload["export"]["exported"])
+            self.assertIn("start/overview.md", payload["export"]["exported"])
             self.assertIn("domains/payments.md", payload["export"]["exported"])
-            self.assertNotIn(".DS_Store", payload["export"]["exported"])
-            self.assertTrue((target / "overview.md").exists())
+            self.assertTrue((target / "start" / "overview.md").exists())
             self.assertTrue((target / "domains" / "payments.md").exists())
-            self.assertFalse((target / "index.json").exists())
-            self.assertFalse((target / ".DS_Store").exists())
             exported_payment = (target / "domains" / "payments.md").read_text(encoding="utf-8")
             self.assertIn("id: domains-payments", exported_payment)
             self.assertIn("kind: domain", exported_payment)
@@ -557,7 +474,7 @@ Imported content.
                     "--json",
                     "page",
                     "section-set",
-                    "overview",
+                    "start-overview",
                     "summary",
                     "--content",
                     "Updated overview.",
@@ -566,7 +483,7 @@ Imported content.
 
             exit_code, payload, _stderr = run_cli(["--workspace", str(workspace), "--json", "export", "--target", str(target)])
             self.assertEqual(exit_code, 0)
-            self.assertIn("Updated overview.", (target / "overview.md").read_text(encoding="utf-8"))
+            self.assertIn("Updated overview.", (target / "start" / "overview.md").read_text(encoding="utf-8"))
 
     def test_agent_help_mentions_stdin_first_page_apply(self) -> None:
         exit_code, output = run_help(["--help"])

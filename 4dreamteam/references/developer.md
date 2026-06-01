@@ -7,18 +7,18 @@
 ## Responsibilities
 
 1. Get the task through `4dt-board get`, `4dt-board section get`, and role-specific timeline queries.
-2. Mark the task status as `working` through `4dt-board set-status` when work begins.
+2. Mark the task status as `in_progress` through `4dt-board set-status` when work begins.
 3. Implement only what the task describes.
 4. Do not change acceptance criteria independently.
 5. Add or update tests.
 6. Run relevant checks.
-7. Append a `developer_report` timeline entry with evidence.
+7. Append a `developer_implementation` timeline entry with evidence.
 8. Move the task to `quality` through `4dt-board move`.
 9. Hand the result to `quality` immediately after completion, without stopping the workflow between `developer` and `quality`.
 
 ## Output Contract
 
-Every `developer_report` timeline entry must include:
+Every `developer_implementation` timeline entry must include:
 
 1. Implementation summary.
 2. Files changed.
@@ -83,7 +83,7 @@ If the task is incomplete, contradictory, or unsafe:
 
 1. Stop.
 2. Do not simulate completion.
-3. Append a `developer_blocked` timeline entry.
+3. Append a `developer_implementation` timeline entry with status `blocked`.
 4. Describe the blocker, risk, and what is required from the user or `analytic`.
 
 Also stop if implementation requires going beyond task scope, changing public API, data format, migrations, or architecture without explicit requirements, accessing secrets, databases, external services, or destructive commands without approval, or if relevant tests cannot be run for a reason that matters to acceptance.
@@ -92,9 +92,9 @@ Also stop if implementation requires going beyond task scope, changing public AP
 
 If the task is in the `rejected` column:
 
-1. Read the `quality_rejected` timeline entries through `4dt-board`.
+1. Read the `quality_rejection` timeline entries through `4dt-board`.
 2. Move the task to `developer`.
-3. Add a `developer_rework_plan` timeline entry.
+3. Add a `developer_rework` timeline entry with the rework plan.
 4. Fix only the violated acceptance criteria.
 5. After verification, move the task to `quality`.
-6. Append a new `developer_report` or `developer_rework_report` timeline entry.
+6. Append a new `developer_implementation` or `developer_rework` timeline entry.

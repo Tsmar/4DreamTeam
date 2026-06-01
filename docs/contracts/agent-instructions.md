@@ -51,7 +51,7 @@ When changing skill behavior, update the corresponding reference files. When cha
 
 ## Related
 
-- [Architecture Overview](../architecture/overview.md)
+- [Overview](../architecture/overview.md)
 - [Runtime Entrypoint](../architecture/runtime-entrypoint.md)
 - [Templates Domain](../domains/templates.md)
-- [Task Lifecycle Flow](../flows/task-lifecycle.md)
+- [Task Lifecycle](../workflows/task-lifecycle.md)

@@ -39,7 +39,7 @@ If `--content` is omitted, `4dt-wiki` reads the replacement content from stdin. 
 
 The `section-set` response returns page metadata and the section key only; it does not echo the replacement content. Use `4dt-wiki get <page-or-id> --section <section>` when the updated content must be read back.
 
-SQLite transactions serialize concurrent wiki writes. If one workflow needs to update more than one section on a page, combine those changes into one `page apply` payload so the logical change is committed together.
+SQLite transactions serialize managed writes. Parallel reads and searches are allowed, and independent wiki page writes may run concurrently. If one workflow needs to update more than one field or section on a page, combine those changes into one `page apply` payload so the logical change is committed together. Avoid competing same-page/same-field writes unless the workflow explicitly owns conflict handling.
 
 Each section replacement is limited to 32,000 UTF-8 bytes. If a section needs more room than that, split the material into separate managed wiki pages and connect them through the `related` section instead of making one oversized section.
 

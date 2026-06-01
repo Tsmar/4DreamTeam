@@ -77,7 +77,7 @@ QUALITY_CASES = [
     },
     {
         "name": "json_task_lifecycle_decision",
-        "query": {"$and": [{"title": "Task Lifecycle Flow"}, {"body": "Role transitions"}]},
+        "query": {"$and": [{"title": "Task Lifecycle"}, {"body": "Role transitions"}]},
         "domains": "wiki",
         "mode": "json",
         "fields": "title,body,path",

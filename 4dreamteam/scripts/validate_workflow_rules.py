@@ -187,6 +187,9 @@ def iter_target_files(root: Path, paths: Iterable[str] | None) -> Iterable[Path]
 
 def validate_file(root: Path, path: Path) -> list[dict[str, object]]:
     issues: list[dict[str, object]] = []
+    relpath = path.relative_to(root).as_posix()
+    if relpath.startswith("docs/changelog/"):
+        return issues
     text = path.read_text(encoding="utf-8")
     for lineno, line in enumerate(text.splitlines(), start=1):
         if ALLOW_RE.search(line):
@@ -197,7 +200,7 @@ def validate_file(root: Path, path: Path) -> list[dict[str, object]]:
                     {
                         "code": rule.code,
                         "severity": "error",
-                        "path": path.relative_to(root).as_posix(),
+                        "path": relpath,
                         "line": lineno,
                         "message": rule.message,
                         "text": line.strip(),

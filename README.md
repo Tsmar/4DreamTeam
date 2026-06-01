@@ -164,10 +164,10 @@ Status checks are safe by default. Commits, pushes, tags, releases, server chang
 
 Documentation is available in [docs/](docs/) in English:
 
-- [Workspace Overview](docs/overview.md)
-- [Product Overview](docs/product/overview.md)
-- [Task Lifecycle Flow](docs/flows/task-lifecycle.md)
-- [Wiki Workflow](docs/flows/wiki-workflow.md)
+- [Overview](docs/start/overview.md)
+- [Overview](docs/product/overview.md)
+- [Task Lifecycle](docs/workflows/task-lifecycle.md)
+- [Wiki](docs/workflows/wiki.md)
 - [Workspace Tools Contract](docs/contracts/workspace-tools.md)
 - [Memory Domain](docs/domains/memory.md)
 - [Memory Human Analogy](docs/domains/memory-human-analogy.md)

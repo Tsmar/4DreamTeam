@@ -51,7 +51,7 @@ class SearchCliTests(unittest.TestCase):
         self.assertIn("readonly", output)
         self.assertIn("reports stale indexes", output)
 
-    def test_stats_initializes_tables_without_legacy_search_directories(self) -> None:
+    def test_stats_initializes_tables(self) -> None:
         with tempfile.TemporaryDirectory() as raw_tmp:
             workspace = Path(raw_tmp)
 
@@ -60,7 +60,6 @@ class SearchCliTests(unittest.TestCase):
             self.assertEqual(exit_code, 0)
             self.assertEqual(payload["status"], "ready")
             self.assertTrue((workspace / ".4dt" / "db.sqlite3").exists())
-            self.assertFalse((workspace / ".4dt" / "search").exists())
             with sqlite3.connect(workspace / ".4dt" / "db.sqlite3") as connection:
                 tables = {row[0] for row in connection.execute("SELECT name FROM sqlite_master WHERE type = 'table'")}
             self.assertIn("search_chunks", tables)
@@ -82,13 +81,13 @@ class SearchCliTests(unittest.TestCase):
                     "--json",
                     "page",
                     "section-set",
-                    "overview",
+                    "start-overview",
                     "summary",
                     "--content",
                     "Search workflow overview.",
                 ],
             )
-            run(wiki_main, ["--workspace", str(workspace), "--json", "page", "tags", "add", "overview", "search-topic"])
+            run(wiki_main, ["--workspace", str(workspace), "--json", "page", "tags", "add", "start-overview", "search-topic"])
             run(board_main, ["--workspace", str(workspace), "--json", "create", "task", "--standalone", "Search CLI"])
             run(
                 board_main,
@@ -115,7 +114,6 @@ class SearchCliTests(unittest.TestCase):
             self.assertGreaterEqual(payload["index"]["chunkCount"], 3)
             self.assertEqual(payload["index"]["chunksStore"], ".4dt/db.sqlite3:search_chunks")
             self.assertTrue((workspace / ".4dt" / "db.sqlite3").exists())
-            self.assertFalse((workspace / ".4dt" / "search" / "chunks.jsonl").exists())
 
             exit_code, payload = run(search_main, ["--workspace", str(workspace), "--json", "stats"])
             self.assertEqual(exit_code, 0)

@@ -20,6 +20,16 @@ Supported columns: `backlog`, `analytic`, `developer`, `quality`, `wiki`, `relea
 
 The current column determines the next owner role. Do not use `next_owner`.
 
+## Board Status Contract
+
+Board columns are the role ownership contract. Status is a narrower lifecycle note and must use the exact values accepted by `4dt-board validate`.
+
+Supported epic statuses: `shaping`, `ready_for_analytic`, `ready_for_developer`, `in_delivery`, `blocked`, `done`, and `rejected`.
+
+Supported task statuses: `proposed`, `ready`, `in_progress`, `blocked`, `needs_input`, `needs_rework`, `accepted`, `done`, and `rejected`.
+
+Do not invent aliases such as `working`, `in-delivery`, `ready-for-analytic`, `ready-for-developer`, `quality_accepted`, or `quality_rejected` as item statuses. `quality_acceptance` and `quality_rejection` are timeline entry types, not task statuses.
+
 ## Movement Rules
 
 1. `product` creates and shapes epics and task candidates with `4dt-board`.
@@ -27,8 +37,8 @@ The current column determines the next owner role. Do not use `next_owner`.
 3. `product` may keep an epic in `backlog`, hand its tasks to `analytic`, or hand clear delivery tasks directly to `developer`.
 4. `analytic` moves implementation-ready task specs to `developer` only after required documentation alignment is complete or explicitly not required.
 5. When analytic decisions require pre-development documentation alignment, `wiki sync` updates managed docs with `proposed` status before developer handoff.
-6. `developer` appends a `developer_report` timeline entry and moves completed implementation work to `quality`.
-7. `quality` appends `quality_accepted` or `quality_rejected`.
+6. `developer` appends a `developer_implementation` timeline entry and moves completed implementation work to `quality`.
+7. `quality` appends `quality_acceptance` or `quality_rejection`.
 8. Accepted work moves to `wiki` for post-acceptance documentation review before it can move to `done` or `release`.
 9. Rejected work moves to `rejected`.
 10. Rework moves from `rejected` to `developer`, then back to `quality`.
@@ -47,12 +57,12 @@ Use `4dt-board` metadata and current column as the state source of truth. Use th
 | `analytic-ready` | analytic | Technical impact can be analyzed from approved docs/sources. | `docs-alignment`, `developer-ready`, `blocked`, `needs-product` |
 | `docs-alignment` | analytic / wiki | Managed docs are aligned as `proposed`, or alignment is explicitly not required/deferred. | `developer-ready`, `blocked` |
 | `developer-ready` | developer | Affected areas, acceptance criteria, validation plan, and documentation alignment evidence are visible. | `developer-in-progress`, `blocked` |
-| `developer-in-progress` | developer | Task status marked `working`, implementation plan exists, and operator plan approval or scoped auto implementation is recorded. | `developer-done`, `blocked` |
-| `developer-done` | developer | `developer_report` timeline entry includes checks and acceptance coverage. | `quality-review` |
+| `developer-in-progress` | developer | Task status marked `in_progress`, implementation plan exists, and operator plan approval or scoped auto implementation is recorded. | `developer-done`, `blocked` |
+| `developer-done` | developer | `developer_implementation` timeline entry includes checks and acceptance coverage. | `quality-review` |
 | `quality-review` | quality | Quality can compare implementation to every acceptance criterion. | `accepted`, `rejected` |
-| `rejected` | quality / developer | `quality_rejected` timeline entry gives actionable fixes. | `fixed`, `blocked`, `done` if abandoned |
+| `rejected` | quality / developer | `quality_rejection` timeline entry gives actionable fixes. | `fixed`, `blocked`, `done` if abandoned |
 | `fixed` | developer | Developer revision entry explains the fix. | `quality-review` |
-| `accepted` | quality | `quality_accepted` timeline entry marks every criterion `pass`. | `wiki-update` |
+| `accepted` | quality | `quality_acceptance` timeline entry marks every criterion `pass`. | `wiki-update` |
 | `wiki-update` | wiki | Docs update is source-backed or explicitly not needed. | `release-ready`, `done` |
 | `release-ready` | release | Accepted quality or product acceptance exists. | `release-planned` |
 | `release-planned` | release | Release plan timeline entry lists included/excluded files and approval requirements. | `released`, `blocked` |
